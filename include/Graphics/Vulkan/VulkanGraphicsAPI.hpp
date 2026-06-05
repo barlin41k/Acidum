@@ -9,6 +9,7 @@
 #include "Graphics/Interfaces/IGraphicsAPI.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
+#include "Graphics/Vulkan/VulkanBuffer.hpp"
 
 class Window; // forward-declaration
 
@@ -36,10 +37,8 @@ private:
     std::vector<VkSemaphore> m_imageAvailableSemaphores;
     std::vector<VkSemaphore> m_renderFinishedSemaphores;
     std::vector<VkFence> m_inFlightFences;
-    VkBuffer m_vertexBuffer = VK_NULL_HANDLE;
-    VkDeviceMemory m_vertexBufferMemory = VK_NULL_HANDLE;
-    VkBuffer m_indexBuffer = VK_NULL_HANDLE;
-    VkDeviceMemory m_indexBufferMemory = VK_NULL_HANDLE;
+    std::unique_ptr<VulkanBuffer> m_vertexBuffer;
+    std::unique_ptr<VulkanBuffer> m_indexBuffer;
 
 #ifdef NDEBUG
     const bool m_enableValidationLayers = false;
@@ -70,8 +69,6 @@ private:
     bool checkValidationLayerSupport();
     std::vector<const char*> getRequiredExtensions();
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-
-    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     
     static std::vector<char> readFile(const std::string& filename);
     VkShaderModule createShaderModule(const std::vector<char>& code);

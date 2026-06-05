@@ -17,11 +17,8 @@ VulkanGraphicsAPI::VulkanGraphicsAPI(Window* window)
     : m_window(window) {}
 
 VulkanGraphicsAPI::~VulkanGraphicsAPI() {
-    vkDestroyBuffer(m_device->getLogicalDevice(), m_indexBuffer, nullptr);
-    vkFreeMemory(m_device->getLogicalDevice(), m_indexBufferMemory, nullptr);
-
-    vkDestroyBuffer(m_device->getLogicalDevice(), m_vertexBuffer, nullptr);
-    vkFreeMemory(m_device->getLogicalDevice(), m_vertexBufferMemory, nullptr);
+    m_vertexBuffer.reset();
+    m_indexBuffer.reset();
 
     vkDestroyPipeline(m_device->getLogicalDevice(), m_graphicsPipeline, nullptr);
 
@@ -246,17 +243,6 @@ void VulkanGraphicsAPI::setupDebugMessenger() {
 void VulkanGraphicsAPI::createSurface() {
     if (glfwCreateWindowSurface(m_instance, m_window->getWindow(), nullptr, &m_surface) != VK_SUCCESS)
         throw std::runtime_error("Failed to create window surface!");
-}
-
-uint32_t VulkanGraphicsAPI::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(m_device->getPhysicalDevice(), &memProperties);
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-            return i;
-    }
-
-    throw std::runtime_error("Failed to find suitable memory type!");
 }
 
 void VulkanGraphicsAPI::createRenderPass() {
@@ -521,11 +507,11 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     scissor.extent = m_swapChain->getExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    VkBuffer vertexBuffers[] = {m_vertexBuffer};
+    VkBuffer vertexBuffers[] = {m_vertexBuffer->getBuffer()};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-    vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT16);
 
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(Consts::INDICES.size()), 1, 0, 0, 0);
 
@@ -562,100 +548,34 @@ void VulkanGraphicsAPI::createSyncObjects() {
     }
 }
 
-void VulkanGraphicsAPI::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    if (vkCreateBuffer(m_device->getLogicalDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create buffer!");
-
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(m_device->getLogicalDevice(), buffer, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
-
-    if (vkAllocateMemory(m_device->getLogicalDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate buffer memory!");
-
-    vkBindBufferMemory(m_device->getLogicalDevice(), buffer, bufferMemory, 0);
-}
-
-void VulkanGraphicsAPI::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = m_commandPool;
-    allocInfo.commandBufferCount = 1;
-
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(m_device->getLogicalDevice(), &allocInfo, &commandBuffer);
-
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-    VkBufferCopy copyRegion{};
-    copyRegion.srcOffset = 0;
-    copyRegion.dstOffset = 0;
-    copyRegion.size = size;
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-    vkEndCommandBuffer(commandBuffer);
-
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    vkQueueSubmit(m_device->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(m_device->getGraphicsQueue());
-
-    vkFreeCommandBuffers(m_device->getLogicalDevice(), m_commandPool, 1, &commandBuffer);
-}
-
 void VulkanGraphicsAPI::createVertexBuffer() {
     VkDeviceSize bufferSize = sizeof(Consts::VERTICES[0]) * Consts::VERTICES.size();
 
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    VulkanBuffer stagingBuffer(*m_device, bufferSize, 
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    void* data;
-    vkMapMemory(m_device->getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, Consts::VERTICES.data(), (size_t) bufferSize);
-    vkUnmapMemory(m_device->getLogicalDevice(), stagingBufferMemory);
+    stagingBuffer.copyTo((void*)Consts::VERTICES.data(), bufferSize);
 
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertexBuffer, m_vertexBufferMemory);
-    copyBuffer(stagingBuffer, m_vertexBuffer, bufferSize);
+    m_vertexBuffer = std::make_unique<VulkanBuffer>(*m_device, bufferSize, 
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    vkDestroyBuffer(m_device->getLogicalDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(m_device->getLogicalDevice(), stagingBufferMemory, nullptr);
+    VulkanBuffer::copyBuffer(*m_device, m_commandPool, stagingBuffer.getBuffer(), m_vertexBuffer->getBuffer(), bufferSize);
 }
 
 void VulkanGraphicsAPI::createIndexBuffer() {
     VkDeviceSize bufferSize = sizeof(Consts::INDICES[0]) * Consts::INDICES.size();
 
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    VulkanBuffer stagingBuffer(*m_device, bufferSize, 
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    void* data;
-    vkMapMemory(m_device->getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, Consts::INDICES.data(), (size_t) bufferSize);
-    vkUnmapMemory(m_device->getLogicalDevice(), stagingBufferMemory);
+    stagingBuffer.copyTo((void*)Consts::INDICES.data(), bufferSize);
 
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indexBuffer, m_indexBufferMemory);
+    m_indexBuffer = std::make_unique<VulkanBuffer>(*m_device, bufferSize, 
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    copyBuffer(stagingBuffer, m_indexBuffer, bufferSize);
-
-    vkDestroyBuffer(m_device->getLogicalDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(m_device->getLogicalDevice(), stagingBufferMemory, nullptr);
+    VulkanBuffer::copyBuffer(*m_device, m_commandPool, stagingBuffer.getBuffer(), m_indexBuffer->getBuffer(), bufferSize);
 }
