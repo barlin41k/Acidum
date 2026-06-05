@@ -1,3 +1,6 @@
-.cache
-build
+.cache/
+build/
+
+.notes/
+
 *.spv
