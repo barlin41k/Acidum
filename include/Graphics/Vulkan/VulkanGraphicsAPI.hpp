@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #include <memory>
 #include <string>
@@ -9,6 +8,7 @@
 
 #include "Graphics/Interfaces/IGraphicsAPI.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanSwapChain.hpp"
 
 class Window; // forward-declaration
 
@@ -27,12 +27,7 @@ private:
     VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
     VkSurfaceKHR m_surface = VK_NULL_HANDLE;
     std::unique_ptr<VulkanDevice> m_device;
-    VkSwapchainKHR m_swapChain = VK_NULL_HANDLE;
-    std::vector<VkImage> m_swapChainImages;
-    VkFormat m_swapChainImageFormat;
-    VkExtent2D m_swapChainExtent;
-    std::vector<VkImageView> m_swapChainImageViews;
-    std::vector<VkFramebuffer> m_swapChainFramebuffers;
+    std::unique_ptr<VulkanSwapChain> m_swapChain;
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
     VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
     VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
@@ -61,12 +56,11 @@ private:
     void createInstance();
     void setupDebugMessenger();
     void createSurface();
-    
-    void createSwapChain();
-    void createImageViews();
+    // create device
+    // create swapchain
     void createRenderPass();
     void createGraphicsPipeline();
-    void createFramebuffers();
+    //create framebuffers
     void createCommandPool();
     void createVertexBuffer();
     void createIndexBuffer();
@@ -76,12 +70,6 @@ private:
     bool checkValidationLayerSupport();
     std::vector<const char*> getRequiredExtensions();
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-
-    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-    VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-    void cleanupSwapChain();
-    void recreateSwapChain();
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     
