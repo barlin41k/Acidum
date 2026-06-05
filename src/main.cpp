@@ -1,3 +1,4 @@
+#include <memory>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
@@ -11,12 +12,15 @@
 #include <optional>
 #include <fstream>
 #include <cstdlib>
-#include <cstdint>
 #include <cstring>
 #include <vector>
 #include <limits>
 #include <array>
 #include <set>
+
+#include "Types.hpp"
+#include "Consts.hpp"
+#include "Window.hpp"
 
 struct Vertex {
     glm::vec2 pos;
@@ -61,8 +65,6 @@ struct QueueFamilyIndices {
     }
 };
 
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
 const int MAX_FRAMES_IN_FLIGHT = 2;
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
@@ -104,15 +106,18 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 
 class Application {
 public:
+    Application(APIType apiType)
+        : m_apiType(apiType) {}
+
     void run() {
         initWindow();
         initVulkan();
         mainLoop();
         cleanup();
     }
-
 private:
-    GLFWwindow* window;
+    std::unique_ptr<Window> m_window;
+    APIType m_apiType;
 
     VkInstance instance;
     VkDebugUtilsMessengerEXT debugMessenger;
@@ -144,14 +149,16 @@ private:
     bool framebufferResized = false;
 
     void initWindow() {
-        glfwInit();
+        WindowConfig config {};
+        config.width = Consts::WINDOW_WIDTH;
+        config.height = Consts::WINDOW_HEIGHT;
+        config.title = Consts::WINDOW_TITLE;
+        config.apiType = m_apiType;
 
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
-        glfwSetWindowUserPointer(window, this);
-        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+        m_window = std::make_unique<Window>(config);
+        m_window->setResizeCallback([this](int width, int height) {
+            this->framebufferResized = true;
+        });
     }
 
     void initVulkan() {
@@ -173,8 +180,8 @@ private:
     }
 
     void mainLoop() {
-        while (!glfwWindowShouldClose(window)) {
-            glfwPollEvents();
+        while (!m_window->shouldClose()) {
+            m_window->pollEvents();
             drawFrame();
         }
 
@@ -211,9 +218,6 @@ private:
         vkDestroySurfaceKHR(instance, surface, nullptr);
 
         vkDestroyInstance(instance, nullptr);
-
-        glfwDestroyWindow(window);
-        glfwTerminate();
     }
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -441,7 +445,7 @@ private:
     }
 
     void createSurface() {
-        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+        if (glfwCreateWindowSurface(instance, m_window->getWindow(), nullptr, &surface) != VK_SUCCESS)
             throw std::runtime_error("Failed to create window surface!");
 
     }
@@ -495,7 +499,7 @@ private:
             return capabilities.currentExtent;
         } else {
             int width, height;
-            glfwGetFramebufferSize(window, &width, &height);
+            m_window->getFramebufferSize(&width, &height);
 
             VkExtent2D actualExtent = {
                 static_cast<uint32_t>(width),
@@ -973,10 +977,10 @@ private:
 
     void recreateSwapChain() {
         int width = 0, height = 0;
-        glfwGetFramebufferSize(window, &width, &height);
+        m_window->getFramebufferSize(&width, &height);
         while (width == 0 || height == 0) {
-            glfwGetFramebufferSize(window, &width, &height);
-            glfwWaitEvents();
+            m_window->getFramebufferSize(&width, &height);
+            m_window->waitEvents();
         }
 
         vkDeviceWaitIdle(device);
@@ -986,11 +990,6 @@ private:
         createSwapChain();
         createImageViews();
         createFramebuffers();
-    }
-
-    static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-        auto app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
-        app->framebufferResized = true;
     }
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
@@ -1104,7 +1103,7 @@ private:
 };
 
 int main() {
-    Application app;
+    Application app (Consts::DEFAULT_API);
 
     try {
         app.run();
