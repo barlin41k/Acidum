@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-#include "Types.hpp"
+#include "Core/Types.hpp"
 
 struct GLFWwindow; // forward-declaration
 

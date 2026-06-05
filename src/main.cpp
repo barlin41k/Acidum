@@ -19,9 +19,9 @@
 #include <array>
 #include <set>
 
-#include "Types.hpp"
-#include "Consts.hpp"
-#include "core/Window.hpp"
+#include "Core/Types.hpp"
+#include "Core/Consts.hpp"
+#include "Core/Window.hpp"
 
 struct Vertex {
     glm::vec2 pos;

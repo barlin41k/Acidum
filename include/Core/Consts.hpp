@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-#include "Types.hpp"
+#include "Core/Types.hpp"
 
 namespace Consts {
     inline constexpr uint32_t WINDOW_WIDTH = 800;
