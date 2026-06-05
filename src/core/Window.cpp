@@ -1,4 +1,4 @@
-#include "Window.hpp"
+#include "core/Window.hpp"
 
 #include <GLFW/glfw3.h>
 #include <stdexcept>

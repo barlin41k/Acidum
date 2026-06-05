@@ -1,6 +1,7 @@
-#include <memory>
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+
+#include <memory>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 #include <glm/glm.hpp>
@@ -20,7 +21,7 @@
 
 #include "Types.hpp"
 #include "Consts.hpp"
-#include "Window.hpp"
+#include "core/Window.hpp"
 
 struct Vertex {
     glm::vec2 pos;
