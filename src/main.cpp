@@ -155,7 +155,7 @@ private:
     }
 
     void initVulkan() {
-        createInstanse();
+        createInstance();
         setupDebugMessenger();
         createSurface();
         pickPhysicalDevice();
@@ -287,8 +287,7 @@ private:
         return extensions;
     }
 
-
-    void createInstanse() {
+    void createInstance() {
         if (enableValidationLayers && !checkValidationLayerSupport())
             throw std::runtime_error("Validation layers requested, but not available!");
 
