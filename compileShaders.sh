@@ -1,8 +1,11 @@
 #!/bin/bash
 
+OUTPUT_DIR=${1:-"shaders"}
+
 echo "======================================="
 echo "       VULKAN SHADERS TO SPIR-V        "
 echo "======================================="
+echo "Output directory: $OUTPUT_DIR"
 
 if ! command -v glslc &> /dev/null
 then
@@ -10,14 +13,23 @@ then
     exit 1
 fi
 
-for file in *.vert *.frag; do
+mkdir -p "$OUTPUT_DIR"
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SHADERS_DIR="$SCRIPT_DIR/shaders"
+
+for file in "$SHADERS_DIR"/*.vert "$SHADERS_DIR"/*.frag; do
     [ -f "$file" ] || continue
     
-    echo "Compiling: $file -> ${file%.*}.spv"
-    glslc "$file" -o "${file%.*}.spv"
+    filename=$(basename "$file")
+    name_no_ext="${filename%.*}"
+    outfile="$OUTPUT_DIR/${name_no_ext}.spv"
+    
+    echo "Compiling: $filename -> $outfile"
+    glslc "$file" -o "$outfile"
     
     if [ $? -ne 0 ]; then
-        echo "Ошибка компиляции в файле $file"
+        echo "Ошибка компиляции в файле $filename"
         exit 1
     fi
 done
