@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vulkan/vulkan.h>
 
 #include <vector>
@@ -21,9 +22,13 @@ public:
 
     void bind(VkCommandBuffer commandBuffer) const;
     void draw(VkCommandBuffer commandBuffer) const;
+
+    uint32_t getVertexCount() const override { return m_vertexCount; };
+    uint32_t getIndexCount() const override { return m_indexCount; };
 private:
     std::unique_ptr<VulkanBuffer> m_vertexBuffer;
     std::unique_ptr<VulkanBuffer> m_indexBuffer;
+    uint32_t m_vertexCount = 0;
     uint32_t m_indexCount = 0;
 
     template<typename VertexType>
@@ -34,7 +39,7 @@ private:
 // templates
 template<typename VertexType>
 VulkanMesh::VulkanMesh(VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices) 
-    : m_indexCount(static_cast<uint32_t>(indices.size())) {
+    : m_vertexCount(static_cast<uint32_t>(vertices.size())), m_indexCount(static_cast<uint32_t>(indices.size())) {
     createVertexBuffer(device, commandPool, vertices);
     createIndexBuffer(device, commandPool, indices);
 }
