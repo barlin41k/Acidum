@@ -304,14 +304,21 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     VkDescriptorSet currentDescriptorSet = m_descriptorManager->getDescriptorSet(m_currentFrame);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getLayout(), 0, 1, &currentDescriptorSet, 0, nullptr);
 
+    UniformBufferObject ubo {};
+    ubo.view = m_viewMatrix;
+    ubo.proj = m_projectionMatrix;
+    updateUniformBuffer(m_currentFrame, ubo);
+
     for (const auto& command : m_renderQueue) {
         if (command.mesh != nullptr) {
-            UniformBufferObject ubo{};
-            ubo.model = command.modelMatrix;
-            ubo.view = m_viewMatrix;
-            ubo.proj = m_projectionMatrix;
-
-            updateUniformBuffer(m_currentFrame, ubo);
+            vkCmdPushConstants(
+                commandBuffer, 
+                m_pipeline->getLayout(), 
+                VK_SHADER_STAGE_VERTEX_BIT, 
+                0, 
+                sizeof(glm::mat4), 
+                &command.modelMatrix
+            );
 
             command.mesh->bind(commandBuffer);
             command.mesh->draw(commandBuffer);
