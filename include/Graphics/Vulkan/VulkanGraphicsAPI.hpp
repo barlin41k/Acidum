@@ -11,6 +11,7 @@
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
 #include "Graphics/Vulkan/VulkanPipeline.hpp"
+#include "Graphics/Vulkan/VulkanMesh.hpp"
 
 class Window; // forward-declaration
 
@@ -36,8 +37,7 @@ private:
     std::vector<VkSemaphore> m_imageAvailableSemaphores;
     std::vector<VkSemaphore> m_renderFinishedSemaphores;
     std::vector<VkFence> m_inFlightFences;
-    std::unique_ptr<VulkanBuffer> m_vertexBuffer;
-    std::unique_ptr<VulkanBuffer> m_indexBuffer;
+    std::unique_ptr<VulkanMesh> m_triangleMesh;
 
 #ifdef NDEBUG
     const bool m_enableValidationLayers = false;
@@ -59,8 +59,7 @@ private:
     // create pipeline
     //create framebuffers
     void createCommandPool();
-    void createVertexBuffer();
-    void createIndexBuffer();
+    // create buffers vertex and index
     void createCommandBuffer();
     void createSyncObjects();
 

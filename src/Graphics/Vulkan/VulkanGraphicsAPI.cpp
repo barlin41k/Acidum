@@ -15,8 +15,7 @@ VulkanGraphicsAPI::VulkanGraphicsAPI(Window* window)
     : m_window(window) {}
 
 VulkanGraphicsAPI::~VulkanGraphicsAPI() {
-    m_vertexBuffer.reset();
-    m_indexBuffer.reset();
+    m_triangleMesh.reset();
 
     m_pipeline.reset();
 
@@ -52,10 +51,9 @@ void VulkanGraphicsAPI::initialize() {
     m_pipeline = std::make_unique<VulkanPipeline>(*m_device, m_swapChain->getFormat(), m_swapChain->getExtent());
     m_swapChain->createFramebuffers(m_pipeline->getRenderPass());
     createCommandPool();
-    createVertexBuffer();
-    createIndexBuffer();
     createCommandBuffer();
     createSyncObjects();
+    m_triangleMesh = std::make_unique<VulkanMesh>(*m_device, m_commandPool, Consts::VERTICES, Consts::INDICES);
 }
 
 void VulkanGraphicsAPI::waitIdle() const {
@@ -301,11 +299,8 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     scissor.extent = m_swapChain->getExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    VkBuffer vertexBuffers[] = {m_vertexBuffer->getBuffer()};
-    VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-    vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT16);
+    m_triangleMesh->bind(commandBuffer);
+    m_triangleMesh->draw(commandBuffer);
 
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(Consts::INDICES.size()), 1, 0, 0, 0);
 
@@ -340,36 +335,4 @@ void VulkanGraphicsAPI::createSyncObjects() {
         if (vkCreateSemaphore(m_device->getLogicalDevice(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) != VK_SUCCESS)
             throw std::runtime_error("Failed to create render finished semaphore!");
     }
-}
-
-void VulkanGraphicsAPI::createVertexBuffer() {
-    VkDeviceSize bufferSize = sizeof(Consts::VERTICES[0]) * Consts::VERTICES.size();
-
-    VulkanBuffer stagingBuffer(*m_device, bufferSize, 
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    stagingBuffer.copyTo((void*)Consts::VERTICES.data(), bufferSize);
-
-    m_vertexBuffer = std::make_unique<VulkanBuffer>(*m_device, bufferSize, 
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    VulkanBuffer::copyBuffer(*m_device, m_commandPool, stagingBuffer.getBuffer(), m_vertexBuffer->getBuffer(), bufferSize);
-}
-
-void VulkanGraphicsAPI::createIndexBuffer() {
-    VkDeviceSize bufferSize = sizeof(Consts::INDICES[0]) * Consts::INDICES.size();
-
-    VulkanBuffer stagingBuffer(*m_device, bufferSize, 
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    stagingBuffer.copyTo((void*)Consts::INDICES.data(), bufferSize);
-
-    m_indexBuffer = std::make_unique<VulkanBuffer>(*m_device, bufferSize, 
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    VulkanBuffer::copyBuffer(*m_device, m_commandPool, stagingBuffer.getBuffer(), m_indexBuffer->getBuffer(), bufferSize);
 }
