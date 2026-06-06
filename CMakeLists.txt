@@ -11,6 +11,7 @@ find_package(glm REQUIRED)
 
 add_executable(${PROJECT_NAME}
 src/main.cpp
+src/Core/Application.cpp
 src/Core/Window.cpp
 src/Graphics/Vulkan/VulkanGraphicsAPI.cpp
 src/Graphics/Vulkan/VulkanDevice.cpp
