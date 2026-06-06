@@ -42,8 +42,7 @@ private:
     }
 
     void initGraphicsAPI() {
-        if (m_apiType == APIType::Vulkan)
-            m_graphicsAPI = IGraphicsFactory::createAPI(m_apiType, m_window.get());
+        m_graphicsAPI = IGraphicsFactory::createAPI(m_apiType, m_window.get());
         m_graphicsAPI->initialize();
     }
 
