@@ -3,11 +3,13 @@
 
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <sys/types.h>
 #include <iostream>
 #include <cstdlib>
 #include <memory>
+#include <chrono>
 
 #include "Core/Types.hpp"
 #include "Core/Consts.hpp"
@@ -28,7 +30,7 @@ public:
 private:
     std::unique_ptr<Window> m_window;
     std::unique_ptr<IGraphicsAPI> m_graphicsAPI;
-    
+
     std::unique_ptr<IMesh> m_triangleMesh;
 
     APIType m_apiType;
@@ -50,12 +52,26 @@ private:
         m_triangleMesh = m_graphicsAPI->createMesh(Consts::VERTICES, Consts::INDICES);
     }
 
-    void mainLoop() {
+    void mainLoop() {  
+        auto startTime = std::chrono::high_resolution_clock::now();
+
         while (!m_window->shouldClose()) {
             m_window->pollEvents();
 
+            glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            glm::mat4 proj = glm::perspective(glm::radians(45.0f), Consts::WINDOW_WIDTH / (float)Consts::WINDOW_HEIGHT, 0.1f, 10.0f);
+            proj[1][1] *= -1; // GLM y-axis from OpenGL bug fix
+
+            m_graphicsAPI->setViewMatrix(view);
+            m_graphicsAPI->setProjectionMatrix(proj);
+
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+            glm::mat4 modelMatrix = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
             if (m_triangleMesh)
-                m_graphicsAPI->drawMesh(m_triangleMesh.get());
+                m_graphicsAPI->drawMesh(m_triangleMesh.get(), modelMatrix);
 
             m_graphicsAPI->renderFrame();
         }

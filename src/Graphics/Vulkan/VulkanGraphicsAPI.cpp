@@ -2,6 +2,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 #include <stdexcept>
@@ -34,8 +35,9 @@ void VulkanGraphicsAPI::initialize() {
     m_commandBufferManager = std::make_unique<VulkanCommandBufferManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT);
 
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
-
     m_syncManager = std::make_unique<VulkanSyncManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
+
+    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
 }
 
 void VulkanGraphicsAPI::waitIdle() const {
@@ -46,11 +48,13 @@ std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& 
     return std::make_unique<VulkanMesh>(*m_device, m_commandBufferManager->getCommandPool(), vertices, indices);
 }
 
-void VulkanGraphicsAPI::drawMesh(IMesh* mesh) {
+void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
     if (mesh == nullptr) return;
 
-    if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh)) m_renderQueue.push_back(vulkanMesh);
-    else std::cerr << "Warning: Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI!" << std::endl;
+    if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
+        m_renderQueue.push_back({vulkanMesh, modelMatrix});
+    else
+        std::cerr << "Warning: Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI!" << std::endl;
 }
 
 void VulkanGraphicsAPI::renderFrame() {
@@ -271,10 +275,20 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     scissor.extent = m_swapChain->getExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    for (VulkanMesh* mesh : m_renderQueue) {
-        if (mesh != nullptr) {
-            mesh->bind(commandBuffer);
-            mesh->draw(commandBuffer);
+    VkDescriptorSet currentDescriptorSet = m_descriptorManager->getDescriptorSet(m_currentFrame);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getLayout(), 0, 1, &currentDescriptorSet, 0, nullptr);
+
+    for (const auto& command : m_renderQueue) {
+        if (command.mesh != nullptr) {
+            UniformBufferObject ubo{};
+            ubo.model = command.modelMatrix;
+            ubo.view = m_viewMatrix;
+            ubo.proj = m_projectionMatrix;
+
+            updateUniformBuffer(m_currentFrame, ubo);
+
+            command.mesh->bind(commandBuffer);
+            command.mesh->draw(commandBuffer);
         }
     }
 
@@ -282,4 +296,8 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
         throw std::runtime_error("Failed to record command buffer!");
+}
+
+void VulkanGraphicsAPI::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
+    m_descriptorManager->updateUniformBuffer(currentFrame, ubo);
 }
