@@ -262,8 +262,6 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     m_triangleMesh->bind(commandBuffer);
     m_triangleMesh->draw(commandBuffer);
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(Consts::INDICES.size()), 1, 0, 0, 0);
-
     vkCmdEndRenderPass(commandBuffer);
 
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
