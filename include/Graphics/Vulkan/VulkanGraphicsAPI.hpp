@@ -68,6 +68,7 @@ private:
     uint32_t m_currentFrame = 0;
     bool m_framebufferResized = false;
 
+    void recreateSwapChain();
     void createInstance();
     void setupDebugMessenger();
     void createSurface();

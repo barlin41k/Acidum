@@ -90,7 +90,7 @@ void VulkanGraphicsAPI::renderFrame() {
     VkResult result = vkAcquireNextImageKHR(m_device->getLogicalDevice(), m_swapChain->getSwapChain(), UINT64_MAX, m_syncManager->getAvailableSemaphore(m_currentFrame), VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        m_swapChain->recreate(m_pipeline->getRenderPass());
+        recreateSwapChain();
         return;
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
         throw std::runtime_error("Failed to acquire swap chain image!");
@@ -139,9 +139,9 @@ void VulkanGraphicsAPI::renderFrame() {
     presentInfo.pResults = nullptr;
 
     result = vkQueuePresentKHR(m_device->getPresentQueue(), &presentInfo);
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_framebufferResized) {
         m_framebufferResized = false;
-        m_swapChain->recreate(m_pipeline->getRenderPass());
+        recreateSwapChain();
     }
     else if (result != VK_SUCCESS)
         throw std::runtime_error("Failed to present swap chain image!");
@@ -149,6 +149,31 @@ void VulkanGraphicsAPI::renderFrame() {
     m_currentFrame = (m_currentFrame + 1) % Consts::MAX_FRAMES_IN_FLIGHT;
     
     m_renderQueue.clear();
+}
+
+void VulkanGraphicsAPI::recreateSwapChain() {
+    int width = 0, height = 0;
+    m_window->getFramebufferSize(&width, &height);
+    while (width == 0 || height == 0) {
+        m_window->getFramebufferSize(&width, &height);
+        m_window->waitEvents();
+    }
+
+    vkDeviceWaitIdle(m_device->getLogicalDevice());
+
+    m_swapChain->recreate();
+    
+    m_pipeline.reset();
+    m_pipeline = std::make_unique<VulkanPipeline>(*m_device, m_swapChain->getFormat(), m_swapChain->getExtent());
+    
+    m_swapChain->createFramebuffers(m_pipeline->getRenderPass());
+    
+    uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
+    m_syncManager.reset();
+    m_syncManager = std::make_unique<VulkanSyncManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
+    
+    m_descriptorManager.reset();
+    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
 }
 
 VkBool32 VulkanGraphicsAPI::debugCallback(

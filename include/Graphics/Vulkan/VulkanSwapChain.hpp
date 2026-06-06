@@ -25,7 +25,7 @@ public:
 
     void createFramebuffers(VkRenderPass renderPass); 
     
-    void recreate(VkRenderPass renderPass);
+    void recreate();
 private:
     VulkanDevice& m_device;
     VkSurfaceKHR m_surface;

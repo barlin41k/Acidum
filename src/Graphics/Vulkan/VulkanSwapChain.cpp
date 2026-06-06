@@ -114,21 +114,10 @@ void VulkanSwapChain::cleanup() {
     vkDestroySwapchainKHR(m_device.getLogicalDevice(), m_swapChain, nullptr);
 }
 
-void VulkanSwapChain::recreate(VkRenderPass renderPass) {
-    int width = 0, height = 0;
-    m_window->getFramebufferSize(&width, &height);
-    while (width == 0 || height == 0) {
-        m_window->getFramebufferSize(&width, &height);
-        m_window->waitEvents();
-    }
-
-    vkDeviceWaitIdle(m_device.getLogicalDevice());
-
+void VulkanSwapChain::recreate() {
     cleanup();
-
     createSwapChain();
     createImageViews();
-    createFramebuffers(renderPass);
 }
 
 void VulkanSwapChain::createImageViews() {
