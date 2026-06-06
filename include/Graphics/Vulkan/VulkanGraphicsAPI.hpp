@@ -10,6 +10,7 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
+#include "Graphics/Vulkan/VulkanPipeline.hpp"
 
 class Window; // forward-declaration
 
@@ -29,9 +30,7 @@ private:
     VkSurfaceKHR m_surface = VK_NULL_HANDLE;
     std::unique_ptr<VulkanDevice> m_device;
     std::unique_ptr<VulkanSwapChain> m_swapChain;
-    VkRenderPass m_renderPass = VK_NULL_HANDLE;
-    VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-    VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
+    std::unique_ptr<VulkanPipeline> m_pipeline;
     VkCommandPool m_commandPool = VK_NULL_HANDLE;
     std::vector<VkCommandBuffer> m_commandBuffers;
     std::vector<VkSemaphore> m_imageAvailableSemaphores;
@@ -57,8 +56,7 @@ private:
     void createSurface();
     // create device
     // create swapchain
-    void createRenderPass();
-    void createGraphicsPipeline();
+    // create pipeline
     //create framebuffers
     void createCommandPool();
     void createVertexBuffer();

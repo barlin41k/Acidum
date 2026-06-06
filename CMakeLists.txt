@@ -16,6 +16,7 @@ src/Graphics/Vulkan/VulkanGraphicsAPI.cpp
 src/Graphics/Vulkan/VulkanDevice.cpp
 src/Graphics/Vulkan/VulkanSwapChain.cpp
 src/Graphics/Vulkan/VulkanBuffer.cpp
+src/Graphics/Vulkan/VulkanPipeline.cpp
 src/Graphics/Vulkan/VulkanUtils.cpp
 src/Graphics/GraphicsFactory.cpp
 )
