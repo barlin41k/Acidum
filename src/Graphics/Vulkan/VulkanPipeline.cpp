@@ -97,8 +97,8 @@ void VulkanPipeline::createRenderPass(VkFormat swapChainFormat) {
 }
 
 void VulkanPipeline::createGraphicsPipeline(VkExtent2D swapChainExtent) {
-    auto vertShaderCode = readFile("shaders/shader_vert.spv");
-    auto fragShaderCode = readFile("shaders/shader_frag.spv");
+    auto vertShaderCode = readFile("shaders/spirv/shader_vert.spv");
+    auto fragShaderCode = readFile("shaders/spirv/shader_frag.spv");
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
