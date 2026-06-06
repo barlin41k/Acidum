@@ -15,7 +15,7 @@
 #include "Core/Consts.hpp"
 #include "Core/Window.hpp"
 #include "Graphics/Interfaces/IGraphicsAPI.hpp"
-#include "Graphics/Interfaces/IGraphicsFactory.hpp"
+#include "Graphics/GraphicsFactory.hpp"
 
 class Application {
 public:
@@ -46,7 +46,7 @@ private:
     }
 
     void initGraphicsAPI() {
-        m_graphicsAPI = IGraphicsFactory::createAPI(m_apiType, m_window.get());
+        m_graphicsAPI = GraphicsFactory::createAPI(m_apiType, m_window.get());
         m_graphicsAPI->initialize();
 
         m_triangleMesh = m_graphicsAPI->createMesh(Consts::VERTICES, Consts::INDICES);
