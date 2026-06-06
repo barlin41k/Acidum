@@ -95,6 +95,13 @@ void VulkanGraphicsAPI::renderFrame() {
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
         throw std::runtime_error("Failed to acquire swap chain image!");
 
+    if (m_syncManager->getImageInFlightFence(imageIndex) != VK_NULL_HANDLE) {
+        VkFence fence = m_syncManager->getImageInFlightFence(imageIndex);
+        vkWaitForFences(m_device->getLogicalDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
+    }
+    
+    m_syncManager->setImageInFlightFence(imageIndex, m_syncManager->getInFlightFence(m_currentFrame));
+
     vkResetFences(m_device->getLogicalDevice(), 1, m_syncManager->getInFlightFencePtr(m_currentFrame));
 
     vkResetCommandBuffer(m_commandBufferManager->getCommandBuffer(m_currentFrame), 0);

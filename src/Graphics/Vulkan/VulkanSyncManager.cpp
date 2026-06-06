@@ -9,6 +9,7 @@ VulkanSyncManager::VulkanSyncManager(VulkanDevice& device, uint32_t maxFramesInF
     m_imageAvailableSemaphores.resize(maxFramesInFlight);
     m_renderFinishedSemaphores.resize(imageCount);
     m_inFlightFences.resize(maxFramesInFlight);
+    m_imagesInFlight.resize(imageCount, VK_NULL_HANDLE);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
