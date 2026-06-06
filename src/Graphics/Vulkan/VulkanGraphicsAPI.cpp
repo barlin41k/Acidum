@@ -15,27 +15,11 @@ VulkanGraphicsAPI::VulkanGraphicsAPI(Window* window)
     : m_window(window) {}
 
 VulkanGraphicsAPI::~VulkanGraphicsAPI() {
-    m_triangleMesh.reset();
-
-    m_pipeline.reset();
-
     for (size_t i = 0; i < m_renderFinishedSemaphores.size(); i++) vkDestroySemaphore(m_device->getLogicalDevice(), m_renderFinishedSemaphores[i], nullptr);
     for (size_t i = 0; i < Consts::MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(m_device->getLogicalDevice(), m_imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(m_device->getLogicalDevice(), m_inFlightFences[i], nullptr);
     }
-
-    vkDestroyCommandPool(m_device->getLogicalDevice(), m_commandPool, nullptr);
-
-    m_swapChain.reset();
-
-    m_device.reset();
-
-    if (m_enableValidationLayers) DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
-
-    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
-
-    vkDestroyInstance(m_instance, nullptr);
 }
 
 void VulkanGraphicsAPI::initialize() {
@@ -50,10 +34,9 @@ void VulkanGraphicsAPI::initialize() {
     m_swapChain = std::make_unique<VulkanSwapChain>(*m_device, m_surface, m_window);
     m_pipeline = std::make_unique<VulkanPipeline>(*m_device, m_swapChain->getFormat(), m_swapChain->getExtent());
     m_swapChain->createFramebuffers(m_pipeline->getRenderPass());
-    createCommandPool();
-    createCommandBuffer();
+    m_commandBufferManager = std::make_unique<VulkanCommandBufferManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT);
     createSyncObjects();
-    m_triangleMesh = std::make_unique<VulkanMesh>(*m_device, m_commandPool, Consts::VERTICES, Consts::INDICES);
+    m_triangleMesh = std::make_unique<VulkanMesh>(*m_device, m_commandBufferManager->getCommandPool(), Consts::VERTICES, Consts::INDICES);
 }
 
 void VulkanGraphicsAPI::waitIdle() const {
@@ -74,8 +57,8 @@ void VulkanGraphicsAPI::renderFrame() {
 
     vkResetFences(m_device->getLogicalDevice(), 1, &m_inFlightFences[m_currentFrame]);
 
-    vkResetCommandBuffer(m_commandBuffers[m_currentFrame], 0);
-    recordCommandBuffer(m_commandBuffers[m_currentFrame], imageIndex);
+    vkResetCommandBuffer(m_commandBufferManager->getCommandBuffer(m_currentFrame), 0);
+    recordCommandBuffer(m_commandBufferManager->getCommandBuffer(m_currentFrame), imageIndex);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -86,7 +69,9 @@ void VulkanGraphicsAPI::renderFrame() {
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &m_commandBuffers[m_currentFrame];
+    
+    VkCommandBuffer cmdBuffer = m_commandBufferManager->getCommandBuffer(m_currentFrame);
+    submitInfo.pCommandBuffers = &cmdBuffer;
 
     VkSemaphore signalSemaphores[] = {m_renderFinishedSemaphores[imageIndex]};
     submitInfo.signalSemaphoreCount = 1;
@@ -234,31 +219,6 @@ void VulkanGraphicsAPI::setupDebugMessenger() {
 void VulkanGraphicsAPI::createSurface() {
     if (glfwCreateWindowSurface(m_instance, m_window->getWindow(), nullptr, &m_surface) != VK_SUCCESS)
         throw std::runtime_error("Failed to create window surface!");
-}
-
-void VulkanGraphicsAPI::createCommandPool() {
-    QueueFamilyIndices queueFamilyIndices = m_device->getQueueFamilies();
-
-    VkCommandPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-
-    if (vkCreateCommandPool(m_device->getLogicalDevice(), &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create command pool!");
-}
-
-void VulkanGraphicsAPI::createCommandBuffer() {
-    m_commandBuffers.resize(Consts::MAX_FRAMES_IN_FLIGHT);
-
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = m_commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = (uint32_t) m_commandBuffers.size();
-
-    if (vkAllocateCommandBuffers(m_device->getLogicalDevice(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate command buffers!");
 }
 
 void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {

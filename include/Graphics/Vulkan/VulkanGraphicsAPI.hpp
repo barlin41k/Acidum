@@ -11,6 +11,7 @@
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
 #include "Graphics/Vulkan/VulkanPipeline.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
+#include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
 
 class Window; // forward-declaration
 
@@ -29,14 +30,13 @@ private:
     VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
     VkSurfaceKHR m_surface = VK_NULL_HANDLE;
     std::unique_ptr<VulkanDevice> m_device;
-    std::unique_ptr<VulkanSwapChain> m_swapChain;
     std::unique_ptr<VulkanPipeline> m_pipeline;
-    VkCommandPool m_commandPool = VK_NULL_HANDLE;
-    std::vector<VkCommandBuffer> m_commandBuffers;
+    std::unique_ptr<VulkanSwapChain> m_swapChain;
+    std::unique_ptr<VulkanCommandBufferManager> m_commandBufferManager;
+    std::unique_ptr<VulkanMesh> m_triangleMesh;
     std::vector<VkSemaphore> m_imageAvailableSemaphores;
     std::vector<VkSemaphore> m_renderFinishedSemaphores;
     std::vector<VkFence> m_inFlightFences;
-    std::unique_ptr<VulkanMesh> m_triangleMesh;
 
 #ifdef NDEBUG
     const bool m_enableValidationLayers = false;

@@ -18,6 +18,7 @@ src/Graphics/Vulkan/VulkanSwapChain.cpp
 src/Graphics/Vulkan/VulkanBuffer.cpp
 src/Graphics/Vulkan/VulkanPipeline.cpp
 src/Graphics/Vulkan/VulkanMesh.cpp
+src/Graphics/Vulkan/VulkanCommandBufferManager.cpp
 src/Graphics/Vulkan/VulkanUtils.cpp
 src/Graphics/GraphicsFactory.cpp
 )
