@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include "Graphics/Interfaces/IGraphicsAPI.hpp"
@@ -66,13 +65,8 @@ private:
     bool checkValidationLayerSupport();
     std::vector<const char*> getRequiredExtensions();
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-    
-    static std::vector<char> readFile(const std::string& filename);
-    VkShaderModule createShaderModule(const std::vector<char>& code);
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-    void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
