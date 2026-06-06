@@ -27,9 +27,11 @@ public:
     }
 private:
     std::unique_ptr<Window> m_window;
-    APIType m_apiType;
-
     std::unique_ptr<IGraphicsAPI> m_graphicsAPI;
+    
+    std::unique_ptr<IMesh> m_triangleMesh;
+
+    APIType m_apiType;
 
     void initWindow() {
         WindowConfig config {};
@@ -44,11 +46,17 @@ private:
     void initGraphicsAPI() {
         m_graphicsAPI = IGraphicsFactory::createAPI(m_apiType, m_window.get());
         m_graphicsAPI->initialize();
+
+        m_triangleMesh = m_graphicsAPI->createMesh(Consts::VERTICES, Consts::INDICES);
     }
 
     void mainLoop() {
         while (!m_window->shouldClose()) {
             m_window->pollEvents();
+
+            if (m_triangleMesh)
+                m_graphicsAPI->drawMesh(m_triangleMesh.get());
+
             m_graphicsAPI->renderFrame();
         }
 

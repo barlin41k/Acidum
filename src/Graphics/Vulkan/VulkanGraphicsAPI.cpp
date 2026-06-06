@@ -36,12 +36,21 @@ void VulkanGraphicsAPI::initialize() {
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
 
     m_syncManager = std::make_unique<VulkanSyncManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
-    
-    m_triangleMesh = std::make_unique<VulkanMesh>(*m_device, m_commandBufferManager->getCommandPool(), Consts::VERTICES, Consts::INDICES);
 }
 
 void VulkanGraphicsAPI::waitIdle() const {
     if (m_device != VK_NULL_HANDLE) vkDeviceWaitIdle(m_device->getLogicalDevice());
+}
+
+std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
+    return std::make_unique<VulkanMesh>(*m_device, m_commandBufferManager->getCommandPool(), vertices, indices);
+}
+
+void VulkanGraphicsAPI::drawMesh(IMesh* mesh) {
+    if (mesh == nullptr) return;
+
+    if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh)) m_renderQueue.push_back(vulkanMesh);
+    else std::cerr << "Warning: Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI!" << std::endl;
 }
 
 void VulkanGraphicsAPI::renderFrame() {
@@ -101,6 +110,8 @@ void VulkanGraphicsAPI::renderFrame() {
         throw std::runtime_error("Failed to present swap chain image!");
 
     m_currentFrame = (m_currentFrame + 1) % Consts::MAX_FRAMES_IN_FLIGHT;
+    
+    m_renderQueue.clear();
 }
 
 VkBool32 VulkanGraphicsAPI::debugCallback(
@@ -260,8 +271,12 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     scissor.extent = m_swapChain->getExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    m_triangleMesh->bind(commandBuffer);
-    m_triangleMesh->draw(commandBuffer);
+    for (VulkanMesh* mesh : m_renderQueue) {
+        if (mesh != nullptr) {
+            mesh->bind(commandBuffer);
+            mesh->draw(commandBuffer);
+        }
+    }
 
     vkCmdEndRenderPass(commandBuffer);
 

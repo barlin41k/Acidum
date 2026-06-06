@@ -5,11 +5,12 @@
 #include <vector>
 #include <memory>
 
+#include "Graphics/Interfaces/IMesh.hpp"
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
 
 class VulkanDevice; // forward-declaration
 
-class VulkanMesh {
+class VulkanMesh : public IMesh {
 public:
     template<typename VertexType>
     VulkanMesh(VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices);

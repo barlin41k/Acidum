@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "Core/Types.hpp"
 #include "Graphics/Interfaces/IGraphicsAPI.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
@@ -22,7 +23,11 @@ public:
     ~VulkanGraphicsAPI() override = default;
 
     void initialize() override;
+
+    std::unique_ptr<IMesh> createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) override;
+    void drawMesh(IMesh* mesh) override;
     void renderFrame() override;
+
     void waitIdle() const override;
 private:
     Window* m_window = nullptr;
@@ -35,7 +40,7 @@ private:
     std::unique_ptr<VulkanSwapChain> m_swapChain;
     std::unique_ptr<VulkanCommandBufferManager> m_commandBufferManager;
     std::unique_ptr<VulkanSyncManager> m_syncManager;
-    std::unique_ptr<VulkanMesh> m_triangleMesh;
+    std::vector<VulkanMesh*> m_renderQueue;
 
 #ifdef NDEBUG
     const bool m_enableValidationLayers = false;
