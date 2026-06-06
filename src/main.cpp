@@ -60,7 +60,7 @@ private:
 
             glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
             glm::mat4 proj = glm::perspective(glm::radians(45.0f), Consts::WINDOW_WIDTH / (float)Consts::WINDOW_HEIGHT, 0.1f, 10.0f);
-            proj[1][1] *= -1; // GLM y-axis from OpenGL bug fix
+            //proj[1][1] *= -1; // GLM y-axis from OpenGL bug fix
 
             m_graphicsAPI->setViewMatrix(view);
             m_graphicsAPI->setProjectionMatrix(proj);
