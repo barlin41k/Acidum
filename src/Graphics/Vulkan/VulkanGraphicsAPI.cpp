@@ -15,6 +15,21 @@
 VulkanGraphicsAPI::VulkanGraphicsAPI(Window* window) 
     : m_window(window) {}
 
+VulkanGraphicsAPI::~VulkanGraphicsAPI() {
+    waitIdle();
+
+    m_descriptorManager.reset();
+    m_syncManager.reset();
+    m_commandBufferManager.reset();
+    m_swapChain.reset();
+    m_pipeline.reset();
+    m_device.reset();
+
+    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+    DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
+    vkDestroyInstance(m_instance, nullptr);
+}
+
 void VulkanGraphicsAPI::initialize() {
     m_window->setResizeCallback([this](int width, int height) {
         this->m_framebufferResized = true;

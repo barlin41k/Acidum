@@ -21,7 +21,7 @@ class Window; // forward-declaration
 class VulkanGraphicsAPI : public IGraphicsAPI {
 public:
     VulkanGraphicsAPI(Window* window);
-    ~VulkanGraphicsAPI() override = default;
+    ~VulkanGraphicsAPI() override;
 
     void initialize() override;
 
