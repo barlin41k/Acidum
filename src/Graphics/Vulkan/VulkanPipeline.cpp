@@ -2,9 +2,10 @@
 
 #include <stdexcept>
 #include <fstream>
+#include <array>
 
-#include "Graphics/Vulkan/VulkanUtils.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanMesh.hpp"
 
 VulkanPipeline::VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat, VkExtent2D swapChainExtent)
     : m_device(device) {
@@ -124,8 +125,8 @@ void VulkanPipeline::createGraphicsPipeline(VkExtent2D swapChainExtent) {
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
 
-    auto bindingDescription = VulkanUtils::getBindingDescription();
-    auto attributeDescriptions = VulkanUtils::getAttributeDescriptions();
+    auto bindingDescription = VulkanMesh::getBindingDescription();
+    auto attributeDescriptions = VulkanMesh::getAttributeDescriptions();
     
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

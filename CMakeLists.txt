@@ -21,7 +21,6 @@ src/Graphics/Vulkan/VulkanPipeline.cpp
 src/Graphics/Vulkan/VulkanMesh.cpp
 src/Graphics/Vulkan/VulkanCommandBufferManager.cpp
 src/Graphics/Vulkan/VulkanSyncManager.cpp
-src/Graphics/Vulkan/VulkanUtils.cpp
 src/Graphics/Vulkan/VulkanDescriptorManager.cpp
 src/Graphics/GraphicsFactory.cpp
 )

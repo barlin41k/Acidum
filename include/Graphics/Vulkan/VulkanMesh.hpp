@@ -20,11 +20,14 @@ public:
     VulkanMesh(const VulkanMesh&) = delete;
     VulkanMesh& operator=(const VulkanMesh&) = delete;
 
+    uint32_t getVertexCount() const override { return m_vertexCount; };
+    uint32_t getIndexCount() const override { return m_indexCount; };
+
     void bind(VkCommandBuffer commandBuffer) const;
     void draw(VkCommandBuffer commandBuffer) const;
 
-    uint32_t getVertexCount() const override { return m_vertexCount; };
-    uint32_t getIndexCount() const override { return m_indexCount; };
+    static VkVertexInputBindingDescription getBindingDescription();
+    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions();
 private:
     std::unique_ptr<VulkanBuffer> m_vertexBuffer;
     std::unique_ptr<VulkanBuffer> m_indexBuffer;
