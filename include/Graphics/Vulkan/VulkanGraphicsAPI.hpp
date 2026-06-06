@@ -12,13 +12,14 @@
 #include "Graphics/Vulkan/VulkanPipeline.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 #include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
+#include "Graphics/Vulkan/VulkanSyncManager.hpp"
 
 class Window; // forward-declaration
 
 class VulkanGraphicsAPI : public IGraphicsAPI {
 public:
     VulkanGraphicsAPI(Window* window);
-    ~VulkanGraphicsAPI() override;
+    ~VulkanGraphicsAPI() override = default;
 
     void initialize() override;
     void renderFrame() override;
@@ -33,10 +34,8 @@ private:
     std::unique_ptr<VulkanPipeline> m_pipeline;
     std::unique_ptr<VulkanSwapChain> m_swapChain;
     std::unique_ptr<VulkanCommandBufferManager> m_commandBufferManager;
+    std::unique_ptr<VulkanSyncManager> m_syncManager;
     std::unique_ptr<VulkanMesh> m_triangleMesh;
-    std::vector<VkSemaphore> m_imageAvailableSemaphores;
-    std::vector<VkSemaphore> m_renderFinishedSemaphores;
-    std::vector<VkFence> m_inFlightFences;
 
 #ifdef NDEBUG
     const bool m_enableValidationLayers = false;
@@ -56,11 +55,11 @@ private:
     // create device
     // create swapchain
     // create pipeline
-    //create framebuffers
-    void createCommandPool();
+    // create framebuffers
+    // create command pool
     // create buffers vertex and index
-    void createCommandBuffer();
-    void createSyncObjects();
+    // create command buffer
+    // create sync objects
 
     bool checkValidationLayerSupport();
     std::vector<const char*> getRequiredExtensions();
