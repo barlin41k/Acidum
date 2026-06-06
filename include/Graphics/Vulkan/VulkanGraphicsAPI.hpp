@@ -29,7 +29,7 @@ public:
     void drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) override;
 
     void setViewMatrix(const glm::mat4& view) override { m_viewMatrix = view; }
-    void setProjectionMatrix(const glm::mat4& proj) override { m_projectionMatrix = proj; }
+    void setProjectionMatrix(const glm::mat4& proj) override;
 
     void renderFrame() override;
 

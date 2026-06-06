@@ -44,6 +44,17 @@ void VulkanGraphicsAPI::waitIdle() const {
     if (m_device != VK_NULL_HANDLE) vkDeviceWaitIdle(m_device->getLogicalDevice());
 }
 
+void VulkanGraphicsAPI::setProjectionMatrix(const glm::mat4& proj) {
+    static const glm::mat4 clipCorrection(
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.5f, 0.0f,
+        0.0f, 0.0f, 0.5f, 1.0f
+    );
+
+    m_projectionMatrix = clipCorrection * proj; 
+}
+
 std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
     return std::make_unique<VulkanMesh>(*m_device, m_commandBufferManager->getCommandPool(), vertices, indices);
 }
@@ -263,9 +274,9 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 
     VkViewport viewport{};
     viewport.x = 0.0f;
-    viewport.y = static_cast<float>(m_swapChain->getExtent().height);
+    viewport.y = static_cast<float>(m_swapChain->getExtent().height); // starting from bottom
     viewport.width = static_cast<float>(m_swapChain->getExtent().width);
-    viewport.height = -static_cast<float>(m_swapChain->getExtent().height);
+    viewport.height = -static_cast<float>(m_swapChain->getExtent().height); // GLM y-axis from OpenGL bug fix
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
