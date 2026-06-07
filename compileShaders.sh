@@ -3,9 +3,11 @@
 OUTPUT_DIR=${1:-"shaders"}
 
 echo "======================================="
-echo "       VULKAN SHADERS TO SPIR-V        "
+echo "=          SHADERS TO SPIR-V          ="
 echo "======================================="
+echo ""
 echo "Output directory: $OUTPUT_DIR"
+echo ""
 
 if ! command -v glslc &> /dev/null
 then
@@ -23,7 +25,7 @@ for file in "$SHADERS_DIR"/*.vert "$SHADERS_DIR"/*.frag; do
     
     filename=$(basename "$file")
     name_no_ext="${filename%.*}"
-    outfile="$OUTPUT_DIR/${name_no_ext}.spv"
+    outfile="${OUTPUT_DIR%/}/${name_no_ext}.spv"
     
     echo "Compiling: $filename -> $outfile"
     glslc "$file" -o "$outfile"
@@ -34,6 +36,7 @@ for file in "$SHADERS_DIR"/*.vert "$SHADERS_DIR"/*.frag; do
     fi
 done
 
+echo ""
 echo "======================================="
-echo "               SUCCESS!                "
+echo "=              SUCCESS!               ="
 echo "======================================="
