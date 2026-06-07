@@ -1,5 +1,6 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
+#include <cstdint>
 #include <stdexcept>
 #include <set>
 
@@ -22,8 +23,7 @@ QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) cons
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
-    int i = 0;
-    for (const auto &queueFamily : queueFamilies) {
+    for (uint32_t i = 0; const auto &queueFamily : queueFamilies) {
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
             indices.graphicsFamily = i;
         
