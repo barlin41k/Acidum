@@ -37,4 +37,5 @@ private:
 
     void initWindow();
     static void internalResizeCallback(GLFWwindow* glfwWindow, int width, int height);
+    static void GLFWErrorCallback(int error, const char* description);
 };

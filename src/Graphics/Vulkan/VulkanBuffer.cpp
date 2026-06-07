@@ -1,8 +1,8 @@
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
 
-#include <stdexcept>
 #include <cstring>
 
+#include "Core/Logger.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 VulkanBuffer::VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
@@ -12,9 +12,8 @@ VulkanBuffer::VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VkBufferUsag
     bufferInfo.size = size;
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    if (vkCreateBuffer(m_device.getLogicalDevice(), &bufferInfo, nullptr, &m_buffer) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create buffer!");
+    
+    ENGINE_VERIFY(vkCreateBuffer(m_device.getLogicalDevice(), &bufferInfo, nullptr, &m_buffer) == VK_SUCCESS, "Failed to create buffer!");
 
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(m_device.getLogicalDevice(), m_buffer, &memRequirements);
@@ -24,8 +23,7 @@ VulkanBuffer::VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VkBufferUsag
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(m_device.getLogicalDevice(), &allocInfo, nullptr, &m_memory) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate buffer memory!");
+    ENGINE_VERIFY(vkAllocateMemory(m_device.getLogicalDevice(), &allocInfo, nullptr, &m_memory) == VK_SUCCESS, "Failed to allocate buffer memory!");
 
     vkBindBufferMemory(m_device.getLogicalDevice(), m_buffer, m_memory, 0);
 }
@@ -80,7 +78,8 @@ uint32_t VulkanBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags
             return i;
     }
 
-    throw std::runtime_error("Failed to find suitable memory type!");
+    ENGINE_VERIFY(false, "Failed to find suitable memory type!");
+    return 0;
 }
 
 void VulkanBuffer::map(void** ppData) {

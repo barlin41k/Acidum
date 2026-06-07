@@ -1,8 +1,9 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 #include <cstdint>
-#include <stdexcept>
 #include <set>
+
+#include "Core/Logger.hpp"
 
 VulkanDevice::VulkanDevice(VkInstance instance, VkSurfaceKHR surface)
     : m_instance(instance), m_surface(surface) {
@@ -97,8 +98,7 @@ void VulkanDevice::pickPhysicalDevice() {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
 
-    if (deviceCount == 0)
-        throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+    ENGINE_VERIFY(deviceCount > 0, "Failed to find GPUs with Vulkan support!");
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
@@ -110,8 +110,7 @@ void VulkanDevice::pickPhysicalDevice() {
         }
     }
 
-    if (m_physicalDevice == VK_NULL_HANDLE)
-        throw std::runtime_error("Failed to find a suitable GPU!");
+    ENGINE_VERIFY(m_physicalDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
 }
 
 void VulkanDevice::createLogicalDevice() {
@@ -147,8 +146,7 @@ void VulkanDevice::createLogicalDevice() {
     createInfo.enabledLayerCount = 0;
     createInfo.ppEnabledLayerNames = nullptr;
 
-    if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create logical device!");
+    ENGINE_VERIFY(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) == VK_SUCCESS, "Failed to create logical device!");
 
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);

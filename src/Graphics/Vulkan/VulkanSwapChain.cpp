@@ -1,8 +1,8 @@
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
 
 #include <algorithm>
-#include <stdexcept>
 
+#include "Core/Logger.hpp"
 #include "Core/Window.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
@@ -94,8 +94,7 @@ void VulkanSwapChain::createSwapChain() {
     createInfo.clipped = VK_TRUE;
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if (vkCreateSwapchainKHR(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChain) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create swap chain!");
+    ENGINE_VERIFY(vkCreateSwapchainKHR(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChain) == VK_SUCCESS, "Failed to create swap chain!");
     
     vkGetSwapchainImagesKHR(m_device.getLogicalDevice(), m_swapChain, &imageCount, nullptr);
     m_swapChainImages.resize(imageCount);
@@ -138,8 +137,7 @@ void VulkanSwapChain::createImageViews() {
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) != VK_SUCCESS)
-            throw std::runtime_error("Failed to create image views!");
+        ENGINE_VERIFY(vkCreateImageView(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) == VK_SUCCESS, "Failed to create image views!");
     }
 }
 
@@ -160,7 +158,6 @@ void VulkanSwapChain::createFramebuffers(VkRenderPass renderPass) {
         framebufferInfo.height = m_swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(m_device.getLogicalDevice(), &framebufferInfo, nullptr, &m_swapChainFramebuffers[i]) != VK_SUCCESS)
-            throw std::runtime_error("Failed to create framebuffer!");
+        ENGINE_VERIFY(vkCreateFramebuffer(m_device.getLogicalDevice(), &framebufferInfo, nullptr, &m_swapChainFramebuffers[i]) == VK_SUCCESS, "Failed to create framebuffer!");
     }
 }

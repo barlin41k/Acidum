@@ -1,5 +1,6 @@
 #include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 
+#include "Core/Logger.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 VulkanDescriptorManager::VulkanDescriptorManager(VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout layout)
@@ -27,8 +28,7 @@ void VulkanDescriptorManager::createUniformBuffers() {
 }
 
 void VulkanDescriptorManager::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
-    if (currentFrame >= m_maxFramesInFlight)
-        throw std::runtime_error("DescriptorManager: currentFrame out of range!");
+    ENGINE_VERIFY(currentFrame < m_maxFramesInFlight, "currentFrame({}) is out of bounds! Max frames in flight is {}.", currentFrame, m_maxFramesInFlight);
     m_uniformBuffers[currentFrame]->copyTo(const_cast<UniformBufferObject*>(&ubo), sizeof(ubo));
 }
 
@@ -43,8 +43,7 @@ void VulkanDescriptorManager::createDescriptorPool() {
     poolInfo.pPoolSizes = &poolSize;
     poolInfo.maxSets = static_cast<uint32_t>(m_maxFramesInFlight);
 
-    if (vkCreateDescriptorPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create descriptor pool!");
+    ENGINE_VERIFY(vkCreateDescriptorPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_descriptorPool) == VK_SUCCESS, "Failed to create descriptor pool!");
 }
 
 void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout layout) {
@@ -57,8 +56,7 @@ void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout layout)
     allocInfo.pSetLayouts = layouts.data();
 
     m_descriptorSets.resize(m_maxFramesInFlight);
-    if (vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, m_descriptorSets.data()) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate descriptor sets!");
+    ENGINE_VERIFY(vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, m_descriptorSets.data()) == VK_SUCCESS, "Failed to allocate descriptor sets!");
 
     for (size_t i = 0; i < m_maxFramesInFlight; i++) {
         VkDescriptorBufferInfo bufferInfo{};

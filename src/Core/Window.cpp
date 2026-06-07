@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include <stdexcept>
+#include "Core/Logger.hpp"
 
 Window::Window(const WindowConfig& config)
     : m_config(config) {
@@ -15,12 +15,12 @@ Window::~Window() {
 }
 
 void Window::initWindow() {
-    if (!glfwInit())
-        throw std::runtime_error("Failed to initialize GLFW!");
+    glfwSetErrorCallback(GLFWErrorCallback);
 
-    if (m_config.apiType == APIType::Vulkan) {
+    ENGINE_VERIFY(glfwInit(), "Failed to initialize GLFW!");
+
+    if (m_config.apiType == APIType::Vulkan)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    }
 
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
@@ -30,8 +30,7 @@ void Window::initWindow() {
         nullptr, nullptr
     );
 
-    if (!m_window)
-        throw std::runtime_error("Failed to create GLFW window!");
+    ENGINE_VERIFY(m_window, "Failed to create GLFW window!");
 
     glfwSetWindowUserPointer(m_window, this);
     glfwSetFramebufferSizeCallback(m_window, internalResizeCallback);
@@ -45,6 +44,10 @@ void Window::internalResizeCallback(GLFWwindow* glfwWindow, int width, int heigh
     auto windowInstance = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     if (windowInstance && windowInstance->m_resizeCallback)
         windowInstance->m_resizeCallback(width, height);
+}
+
+void Window::GLFWErrorCallback(int error, const char* description) {
+    ENGINE_ERROR("GLFW Error ({}): {}", error, description);
 }
 
 bool Window::shouldClose() const noexcept {

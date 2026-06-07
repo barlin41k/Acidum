@@ -1,14 +1,14 @@
 #include "Graphics/Vulkan/VulkanGraphicsAPI.hpp"
+#include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <iostream>
-#include <stdexcept>
 #include <cstring>
 #include <vector>
 
+#include "Core/Logger.hpp"
 #include "Core/Consts.hpp"
 #include "Core/Window.hpp"
 
@@ -80,7 +80,7 @@ void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
     if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
         m_renderQueue.push_back({vulkanMesh, modelMatrix});
     else
-        std::cerr << "Warning: Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI!" << std::endl;
+        ENGINE_WARN("Warning: Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI!");
 }
 
 void VulkanGraphicsAPI::renderFrame() {
@@ -92,8 +92,9 @@ void VulkanGraphicsAPI::renderFrame() {
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         recreateSwapChain();
         return;
-    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-        throw std::runtime_error("Failed to acquire swap chain image!");
+    } else {
+        ENGINE_VERIFY(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swap chain image!");
+    }
 
     if (m_syncManager->getImageInFlightFence(imageIndex) != VK_NULL_HANDLE) {
         VkFence fence = m_syncManager->getImageInFlightFence(imageIndex);
@@ -124,8 +125,7 @@ void VulkanGraphicsAPI::renderFrame() {
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(m_device->getGraphicsQueue(), 1, &submitInfo, m_syncManager->getInFlightFence(m_currentFrame)) != VK_SUCCESS)
-        throw std::runtime_error("Failed to submit draw command buffer!");
+    ENGINE_VERIFY(vkQueueSubmit(m_device->getGraphicsQueue(), 1, &submitInfo, m_syncManager->getInFlightFence(m_currentFrame)) == VK_SUCCESS, "Failed to submit draw command buffer!");
 
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -143,8 +143,9 @@ void VulkanGraphicsAPI::renderFrame() {
         m_framebufferResized = false;
         recreateSwapChain();
     }
-    else if (result != VK_SUCCESS)
-        throw std::runtime_error("Failed to present swap chain image!");
+    else {
+        ENGINE_VERIFY(result == VK_SUCCESS, "Failed to present swap chain image!");
+    }
 
     m_currentFrame = (m_currentFrame + 1) % Consts::MAX_FRAMES_IN_FLIGHT;
     
@@ -177,11 +178,20 @@ void VulkanGraphicsAPI::recreateSwapChain() {
 }
 
 VkBool32 VulkanGraphicsAPI::debugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
     void* /*pUserData*/) {
-    std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
+
+    if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+        ENGINE_ERROR("Vulkan Validation: {}", pCallbackData->pMessage);
+    else if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+        ENGINE_WARN("Vulkan Validation: {}", pCallbackData->pMessage);
+    else if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+        ENGINE_DEBUG("Vulkan Validation: {}", pCallbackData->pMessage);
+    else
+        ENGINE_TRACE("Vulkan Validation: {}", pCallbackData->pMessage); 
+
     return VK_FALSE;
 }
 
@@ -227,7 +237,7 @@ bool VulkanGraphicsAPI::checkValidationLayerSupport() {
 void VulkanGraphicsAPI::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     createInfo.pfnUserCallback = debugCallback;
 }
@@ -245,8 +255,7 @@ std::vector<const char*> VulkanGraphicsAPI::getRequiredExtensions() {
 }
 
 void VulkanGraphicsAPI::createInstance() {
-    if (m_enableValidationLayers && !checkValidationLayerSupport())
-        throw std::runtime_error("Validation layers requested, but not available!");
+    ENGINE_VERIFY(!m_enableValidationLayers || checkValidationLayerSupport(), "Validation layers requested, but not available!");
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -276,8 +285,7 @@ void VulkanGraphicsAPI::createInstance() {
         createInfo.pNext = nullptr;
     }
 
-    if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create instance!");
+    ENGINE_VERIFY(vkCreateInstance(&createInfo, nullptr, &m_instance) == VK_SUCCESS, "Failed to create instance!");
 }
 
 void VulkanGraphicsAPI::setupDebugMessenger() {
@@ -286,13 +294,11 @@ void VulkanGraphicsAPI::setupDebugMessenger() {
     VkDebugUtilsMessengerCreateInfoEXT createInfo;
     populateDebugMessengerCreateInfo(createInfo);
 
-    if (CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
-        throw std::runtime_error("Failed to set up debug messenger!");
+    ENGINE_VERIFY(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) == VK_SUCCESS, "Failed to set up debug messenger!");
 }
 
 void VulkanGraphicsAPI::createSurface() {
-    if (glfwCreateWindowSurface(m_instance, m_window->getWindow(), nullptr, &m_surface) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create window surface!");
+    ENGINE_VERIFY(glfwCreateWindowSurface(m_instance, m_window->getWindow(), nullptr, &m_surface) == VK_SUCCESS, "Failed to create window surface!");
 }
 
 void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
@@ -301,8 +307,7 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
     beginInfo.flags = 0;
     beginInfo.pInheritanceInfo = nullptr;
 
-    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-        throw std::runtime_error("Failed to begin recording command buffer!");
+    ENGINE_VERIFY(vkBeginCommandBuffer(commandBuffer, &beginInfo) == VK_SUCCESS, "Failed to begin recording command buffer!");
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -359,8 +364,7 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 
     vkCmdEndRenderPass(commandBuffer);
 
-    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-        throw std::runtime_error("Failed to record command buffer!");
+    ENGINE_VERIFY(vkEndCommandBuffer(commandBuffer) == VK_SUCCESS, "Failed to record command buffer!");
 }
 
 void VulkanGraphicsAPI::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {

@@ -1,7 +1,6 @@
 #include "Graphics/Vulkan/VulkanSyncManager.hpp"
 
-#include <stdexcept>
-
+#include "Core/Logger.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 VulkanSyncManager::VulkanSyncManager(VulkanDevice& device, uint32_t maxFramesInFlight, uint32_t imageCount) 
@@ -19,15 +18,12 @@ VulkanSyncManager::VulkanSyncManager(VulkanDevice& device, uint32_t maxFramesInF
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     for (size_t i = 0; i < maxFramesInFlight; i++) {
-        if (vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(m_device.getLogicalDevice(), &fenceInfo, nullptr, &m_inFlightFences[i]) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create frame sync objects!");
-        }
+        ENGINE_VERIFY(vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]) == VK_SUCCESS &&
+            vkCreateFence(m_device.getLogicalDevice(), &fenceInfo, nullptr, &m_inFlightFences[i]) == VK_SUCCESS, "Failed to create frame sync objects!");
     }
 
     for (size_t i = 0; i < imageCount; i++) {
-        if (vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) != VK_SUCCESS)
-            throw std::runtime_error("Failed to create render finished semaphores!");
+        ENGINE_VERIFY(vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) == VK_SUCCESS, "Failed to create render finished semaphores!");
     }
 }
 

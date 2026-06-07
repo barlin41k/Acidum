@@ -3,10 +3,10 @@
 #include <glm/glm.hpp>
 
 #include <ios>
-#include <stdexcept>
 #include <fstream>
 #include <array>
 
+#include "Core/Logger.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 
@@ -30,8 +30,7 @@ VulkanPipeline::~VulkanPipeline() {
 std::vector<char> VulkanPipeline::readFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
-    if (!file.is_open())
-        throw std::runtime_error("Failed to open file!");
+    ENGINE_VERIFY(file.is_open(), "Failed to open file!");
     
     size_t fileSize = (size_t) file.tellg();
     std::vector<char> buffer(fileSize);
@@ -50,8 +49,7 @@ VkShaderModule VulkanPipeline::createShaderModule(const std::vector<char>& code)
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(m_device.getLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create shader module!");
+    ENGINE_VERIFY(vkCreateShaderModule(m_device.getLogicalDevice(), &createInfo, nullptr, &shaderModule) == VK_SUCCESS, "Failed to create shader module!");
 
     return shaderModule;
 }
@@ -93,8 +91,7 @@ void VulkanPipeline::createRenderPass(VkFormat swapChainFormat) {
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(m_device.getLogicalDevice(), &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create render pass!");
+    ENGINE_VERIFY(vkCreateRenderPass(m_device.getLogicalDevice(), &renderPassInfo, nullptr, &m_renderPass) == VK_SUCCESS, "Failed to create render pass!");
 }
 
 void VulkanPipeline::createGraphicsPipeline() {
@@ -204,8 +201,7 @@ void VulkanPipeline::createGraphicsPipeline() {
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-    if (vkCreatePipelineLayout(m_device.getLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create pipeline layout!");
+    ENGINE_VERIFY(vkCreatePipelineLayout(m_device.getLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) == VK_SUCCESS, "Failed to create pipeline layout!");
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -225,8 +221,7 @@ void VulkanPipeline::createGraphicsPipeline() {
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;
 
-    if (vkCreateGraphicsPipelines(m_device.getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create graphics pipeline!");
+    ENGINE_VERIFY(vkCreateGraphicsPipelines(m_device.getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) == VK_SUCCESS, "Failed to create graphics pipeline!");
 
     vkDestroyShaderModule(m_device.getLogicalDevice(), fragShaderModule, nullptr);
     vkDestroyShaderModule(m_device.getLogicalDevice(), vertShaderModule, nullptr);
@@ -245,6 +240,5 @@ void VulkanPipeline::createDescriptorSetLayout() {
     layoutInfo.bindingCount = 1;
     layoutInfo.pBindings = &uboLayoutBinding;
 
-    if (vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create descriptor set layout!");
+    ENGINE_VERIFY(vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) == VK_SUCCESS, "Failed to create descriptor set layout!");
 }

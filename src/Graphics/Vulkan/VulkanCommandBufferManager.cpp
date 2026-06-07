@@ -1,7 +1,6 @@
 #include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
 
-#include <stdexcept>
-
+#include "Core/Logger.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 VulkanCommandBufferManager::VulkanCommandBufferManager(VulkanDevice& device, uint32_t bufferCount)
@@ -13,8 +12,7 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(VulkanDevice& device, uin
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if (vkCreateCommandPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create command pool!");
+    ENGINE_VERIFY(vkCreateCommandPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_commandPool) == VK_SUCCESS, "Failed to create command pool!");
 
     m_commandBuffers.resize(bufferCount);
 
@@ -24,8 +22,7 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(VulkanDevice& device, uin
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = (uint32_t) m_commandBuffers.size();
 
-    if (vkAllocateCommandBuffers(m_device.getLogicalDevice(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate command buffers!");
+    ENGINE_VERIFY(vkAllocateCommandBuffers(m_device.getLogicalDevice(), &allocInfo, m_commandBuffers.data()) == VK_SUCCESS, "Failed to allocate command buffers!");
 }
 
 VulkanCommandBufferManager::~VulkanCommandBufferManager() {
