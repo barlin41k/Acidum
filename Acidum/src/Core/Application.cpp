@@ -1,0 +1,51 @@
+#include "Acidum/Core/Application.hpp"
+
+#include <chrono>
+
+#include "Acidum/Graphics/GraphicsFactory.hpp"
+
+Application::Application(const AppConfig& config)
+    : m_config(config), m_apiType(config.apiType) {}
+
+void Application::run() {
+    initWindow();
+    initGraphicsAPI();
+    mainLoop();
+}
+
+void Application::initWindow() {
+    WindowConfig config {};
+    config.width = m_config.width;
+    config.height = m_config.height;
+    config.title = m_config.title;
+    config.apiType = m_apiType;
+    config.version = m_config.version;
+
+    m_window = std::make_unique<Window>(config);
+}
+
+void Application::initGraphicsAPI() {
+    m_graphicsAPI = GraphicsFactory::createAPI(m_apiType, m_window.get());
+    m_graphicsAPI->initialize();
+}
+
+void Application::mainLoop() {  
+    OnInit();
+
+    auto lastTime = std::chrono::high_resolution_clock::now();
+
+    while (!m_window->shouldClose()) {
+        m_window->pollEvents();
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+        lastTime = currentTime;
+
+        OnUpdate(deltaTime);
+        OnRender();
+
+        m_graphicsAPI->renderFrame();
+    }
+
+    m_graphicsAPI->waitIdle();
+}
