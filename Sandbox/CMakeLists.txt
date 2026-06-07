@@ -1,5 +1,4 @@
 add_executable(Sandbox
-    src/main.cpp
     src/SandboxApp.cpp
 )
 

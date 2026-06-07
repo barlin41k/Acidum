@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Graphics/GraphicsFactory.hpp"
 
 namespace Acidum {
@@ -9,6 +10,8 @@ Application::Application(const AppConfig& config)
     : m_config(config), m_apiType(config.apiType) {}
 
 void Application::run() {
+    ENGINE_INFO("Acidum Engine have been started!");
+
     initWindow();
     initGraphicsAPI();
     mainLoop();

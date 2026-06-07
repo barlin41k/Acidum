@@ -5,6 +5,12 @@
 
 #include "Acidum/Core/Application.hpp"
 
+namespace Acidum {
+    Application* CreateApplication() {
+        return new ::SandboxApp(Consts::ENGINE_DEFAULT_API);
+    }
+}
+
 static const std::vector<Acidum::Vertex> VERTICES = {
     {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},

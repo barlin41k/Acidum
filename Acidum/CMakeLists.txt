@@ -1,4 +1,5 @@
 add_library(AcidumCore
+    src/Core/EntryPoint.cpp
     src/Core/Base/Logger.cpp
     src/Core/Application.cpp
     src/Core/Platform/Window.cpp
