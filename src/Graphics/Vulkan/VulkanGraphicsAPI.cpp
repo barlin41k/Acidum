@@ -31,7 +31,7 @@ VulkanGraphicsAPI::~VulkanGraphicsAPI() {
 }
 
 void VulkanGraphicsAPI::initialize() {
-    m_window->setResizeCallback([this](int width, int height) {
+    m_window->setResizeCallback([this](int /*width*/, int /*height*/) {
         this->m_framebufferResized = true;
     });
 
@@ -43,7 +43,7 @@ void VulkanGraphicsAPI::initialize() {
 
     m_swapChain = std::make_unique<VulkanSwapChain>(*m_device, m_surface, m_window);
 
-    m_pipeline = std::make_unique<VulkanPipeline>(*m_device, m_swapChain->getFormat(), m_swapChain->getExtent());
+    m_pipeline = std::make_unique<VulkanPipeline>(*m_device, m_swapChain->getFormat());
 
     m_swapChain->createFramebuffers(m_pipeline->getRenderPass());
 
@@ -164,7 +164,7 @@ void VulkanGraphicsAPI::recreateSwapChain() {
     m_swapChain->recreate();
     
     m_pipeline.reset();
-    m_pipeline = std::make_unique<VulkanPipeline>(*m_device, m_swapChain->getFormat(), m_swapChain->getExtent());
+    m_pipeline = std::make_unique<VulkanPipeline>(*m_device, m_swapChain->getFormat());
     
     m_swapChain->createFramebuffers(m_pipeline->getRenderPass());
     
@@ -177,10 +177,10 @@ void VulkanGraphicsAPI::recreateSwapChain() {
 }
 
 VkBool32 VulkanGraphicsAPI::debugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
+    VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-    void* pUserData) {
+    void* /*pUserData*/) {
     std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
     return VK_FALSE;
 }

@@ -9,11 +9,11 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 
-VulkanPipeline::VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat, VkExtent2D swapChainExtent)
+VulkanPipeline::VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat)
     : m_device(device) {
     createRenderPass(swapChainFormat);
     createDescriptorSetLayout();
-    createGraphicsPipeline(swapChainExtent);
+    createGraphicsPipeline();
 }
 
 VulkanPipeline::~VulkanPipeline() {
@@ -96,7 +96,7 @@ void VulkanPipeline::createRenderPass(VkFormat swapChainFormat) {
         throw std::runtime_error("Failed to create render pass!");
 }
 
-void VulkanPipeline::createGraphicsPipeline(VkExtent2D swapChainExtent) {
+void VulkanPipeline::createGraphicsPipeline() {
     auto vertShaderCode = readFile("shaders/spirv/shader_vert.spv");
     auto fragShaderCode = readFile("shaders/spirv/shader_frag.spv");
 

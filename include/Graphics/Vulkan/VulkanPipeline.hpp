@@ -9,7 +9,7 @@ class VulkanDevice; // forward-declaration
 
 class VulkanPipeline {
 public:
-    VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat, VkExtent2D swapChainExtent);
+    VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat);
     ~VulkanPipeline();
 
     VulkanPipeline(const VulkanPipeline&) = delete;
@@ -27,7 +27,7 @@ private:
     VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
 
     void createRenderPass(VkFormat swapChainFormat);
-    void createGraphicsPipeline(VkExtent2D swapChainExtent);
+    void createGraphicsPipeline();
     void createDescriptorSetLayout();
 
     std::vector<char> readFile(const std::string& filename);
