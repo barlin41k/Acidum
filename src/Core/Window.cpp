@@ -25,7 +25,7 @@ void Window::initWindow() {
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     m_window = glfwCreateWindow(
-        m_config.width, m_config.height,
+        static_cast<int>(m_config.width), static_cast<int>(m_config.height),
         m_config.title.c_str(),
         nullptr, nullptr
     );
