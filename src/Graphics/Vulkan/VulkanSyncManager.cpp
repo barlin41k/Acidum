@@ -17,21 +17,32 @@ VulkanSyncManager::VulkanSyncManager(VulkanDevice& device, uint32_t maxFramesInF
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    for (size_t i = 0; i < maxFramesInFlight; i++) {
-        ENGINE_VERIFY(vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]) == VK_SUCCESS &&
-            vkCreateFence(m_device.getLogicalDevice(), &fenceInfo, nullptr, &m_inFlightFences[i]) == VK_SUCCESS, "Failed to create frame sync objects!");
-    }
+    for (size_t i = 0; i < maxFramesInFlight; i++)
+        ENGINE_VERIFY(
+            vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]) == VK_SUCCESS, 
+            "Failed to create ImageAvailable semaphore for frame {}!", i
+        );
 
-    for (size_t i = 0; i < imageCount; i++) {
-        ENGINE_VERIFY(vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) == VK_SUCCESS, "Failed to create render finished semaphores!");
-    }
+    for (size_t i = 0; i < maxFramesInFlight; i++)
+        ENGINE_VERIFY(
+            vkCreateFence(m_device.getLogicalDevice(), &fenceInfo, nullptr, &m_inFlightFences[i]) == VK_SUCCESS, 
+            "Failed to create InFlight fence for frame {}!", i
+        );
+
+    for (size_t i = 0; i < imageCount; i++)
+        ENGINE_VERIFY(
+            vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) == VK_SUCCESS, 
+            "Failed to create RenderFinished semaphore for image {}!", i
+        );
 }
 
 VulkanSyncManager::~VulkanSyncManager() {
     for (auto semaphore : m_renderFinishedSemaphores)
         vkDestroySemaphore(m_device.getLogicalDevice(), semaphore, nullptr);
-    for (size_t i = 0; i < m_imageAvailableSemaphores.size(); i++) {
-        vkDestroySemaphore(m_device.getLogicalDevice(), m_imageAvailableSemaphores[i], nullptr);
-        vkDestroyFence(m_device.getLogicalDevice(), m_inFlightFences[i], nullptr);
-    }
+
+    for (auto semaphore : m_imageAvailableSemaphores)
+        vkDestroySemaphore(m_device.getLogicalDevice(), semaphore, nullptr);
+
+    for (auto fence : m_inFlightFences)
+        vkDestroyFence(m_device.getLogicalDevice(), fence, nullptr);
 }

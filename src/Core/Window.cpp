@@ -18,6 +18,7 @@ void Window::initWindow() {
     glfwSetErrorCallback(GLFWErrorCallback);
 
     ENGINE_VERIFY(glfwInit(), "Failed to initialize GLFW!");
+    ENGINE_DEBUG("GLFW initialized!");
 
     if (m_config.apiType == APIType::Vulkan)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -31,7 +32,8 @@ void Window::initWindow() {
     );
 
     ENGINE_VERIFY(m_window, "Failed to create GLFW window!");
-
+    ENGINE_INFO("GLFW Window created!");
+    
     glfwSetWindowUserPointer(m_window, this);
     glfwSetFramebufferSizeCallback(m_window, internalResizeCallback);
 }

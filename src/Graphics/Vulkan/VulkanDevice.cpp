@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <set>
+#include <vulkan/vulkan_core.h>
 
 #include "Core/Logger.hpp"
 
@@ -109,8 +110,12 @@ void VulkanDevice::pickPhysicalDevice() {
             break;
         }
     }
-
+    
     ENGINE_VERIFY(m_physicalDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
+
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(m_physicalDevice, &deviceProperties);
+    ENGINE_INFO("Selected GPU: {}", deviceProperties.deviceName);
 }
 
 void VulkanDevice::createLogicalDevice() {
@@ -147,6 +152,7 @@ void VulkanDevice::createLogicalDevice() {
     createInfo.ppEnabledLayerNames = nullptr;
 
     ENGINE_VERIFY(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) == VK_SUCCESS, "Failed to create logical device!");
+    ENGINE_DEBUG("Vulkan Logical Device created!");
 
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);

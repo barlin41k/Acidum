@@ -1,9 +1,9 @@
 #include "Graphics/Vulkan/VulkanGraphicsAPI.hpp"
-#include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vulkan/vulkan.h>
 
 #include <cstring>
 #include <vector>
@@ -31,6 +31,8 @@ VulkanGraphicsAPI::~VulkanGraphicsAPI() {
 }
 
 void VulkanGraphicsAPI::initialize() {
+    ENGINE_INFO("Initializing Vulkan...");
+
     m_window->setResizeCallback([this](int /*width*/, int /*height*/) {
         this->m_framebufferResized = true;
     });
@@ -53,6 +55,8 @@ void VulkanGraphicsAPI::initialize() {
     m_syncManager = std::make_unique<VulkanSyncManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
 
     m_descriptorManager = std::make_unique<VulkanDescriptorManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
+
+    ENGINE_INFO("Vulkan initialized!");
 }
 
 void VulkanGraphicsAPI::waitIdle() const {
@@ -80,7 +84,7 @@ void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
     if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
         m_renderQueue.push_back({vulkanMesh, modelMatrix});
     else
-        ENGINE_WARN("Warning: Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI!");
+        ENGINE_WARN("Warning: Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI class!");
 }
 
 void VulkanGraphicsAPI::renderFrame() {
@@ -92,9 +96,7 @@ void VulkanGraphicsAPI::renderFrame() {
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         recreateSwapChain();
         return;
-    } else {
-        ENGINE_VERIFY(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swap chain image!");
-    }
+    } else ENGINE_VERIFY(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swap chain image!");
 
     if (m_syncManager->getImageInFlightFence(imageIndex) != VK_NULL_HANDLE) {
         VkFence fence = m_syncManager->getImageInFlightFence(imageIndex);
@@ -142,10 +144,7 @@ void VulkanGraphicsAPI::renderFrame() {
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_framebufferResized) {
         m_framebufferResized = false;
         recreateSwapChain();
-    }
-    else {
-        ENGINE_VERIFY(result == VK_SUCCESS, "Failed to present swap chain image!");
-    }
+    } else ENGINE_VERIFY(result == VK_SUCCESS, "Failed to present swap chain image!");
 
     m_currentFrame = (m_currentFrame + 1) % Consts::MAX_FRAMES_IN_FLIGHT;
     
@@ -153,6 +152,8 @@ void VulkanGraphicsAPI::renderFrame() {
 }
 
 void VulkanGraphicsAPI::recreateSwapChain() {
+    ENGINE_DEBUG("Recreating Swap Chain...");
+
     int width = 0, height = 0;
     m_window->getFramebufferSize(&width, &height);
     while (width == 0 || height == 0) {
@@ -175,6 +176,8 @@ void VulkanGraphicsAPI::recreateSwapChain() {
     
     m_descriptorManager.reset();
     m_descriptorManager = std::make_unique<VulkanDescriptorManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
+
+    ENGINE_DEBUG("Swap Chain recreated!");
 }
 
 VkBool32 VulkanGraphicsAPI::debugCallback(
@@ -198,15 +201,20 @@ VkBool32 VulkanGraphicsAPI::debugCallback(
 VkResult VulkanGraphicsAPI::CreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
     const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    if (func != nullptr) return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-    else return VK_ERROR_EXTENSION_NOT_PRESENT;
+    if (func != nullptr)
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    else
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
 void VulkanGraphicsAPI::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
     const VkAllocationCallbacks* pAllocator) {
+
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-    if (func != nullptr) func(instance, debugMessenger, pAllocator);
+    if (func != nullptr)
+        func(instance, debugMessenger, pAllocator);
 }
 
 bool VulkanGraphicsAPI::checkValidationLayerSupport() {
@@ -226,15 +234,14 @@ bool VulkanGraphicsAPI::checkValidationLayerSupport() {
             }
         }
 
-        if (!layerFound) {
+        if (!layerFound)
             return false;
-        }
     }
 
     return true;
 }
 
-void VulkanGraphicsAPI::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
+void VulkanGraphicsAPI::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -286,6 +293,7 @@ void VulkanGraphicsAPI::createInstance() {
     }
 
     ENGINE_VERIFY(vkCreateInstance(&createInfo, nullptr, &m_instance) == VK_SUCCESS, "Failed to create instance!");
+    ENGINE_INFO("Vulkan instance created!");
 }
 
 void VulkanGraphicsAPI::setupDebugMessenger() {
@@ -299,6 +307,7 @@ void VulkanGraphicsAPI::setupDebugMessenger() {
 
 void VulkanGraphicsAPI::createSurface() {
     ENGINE_VERIFY(glfwCreateWindowSurface(m_instance, m_window->getWindow(), nullptr, &m_surface) == VK_SUCCESS, "Failed to create window surface!");
+    ENGINE_INFO("Window surface created!");
 }
 
 void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
