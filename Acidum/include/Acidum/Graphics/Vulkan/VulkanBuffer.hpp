@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
+namespace Acidum {
 class VulkanDevice;
 
 class VulkanBuffer {
@@ -29,3 +30,4 @@ private:
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 };
+} // namespace Acidum

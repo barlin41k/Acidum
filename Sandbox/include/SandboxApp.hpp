@@ -2,14 +2,14 @@
 
 #include "Acidum/Core/Application.hpp"
 
-class SandboxApp : public Application {
+class SandboxApp : public Acidum::Application {
 public:
-    SandboxApp(APIType apiType);
+    SandboxApp(Acidum::APIType apiType);
 protected:
     void OnInit() override;
     void OnUpdate(float deltaTime) override;
     void OnRender() override;
 private:
     float m_totalTime;
-    std::unique_ptr<IMesh> m_triangleMesh;
+    std::unique_ptr<Acidum::IMesh> m_triangleMesh;
 };

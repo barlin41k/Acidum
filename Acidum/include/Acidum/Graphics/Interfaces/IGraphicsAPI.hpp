@@ -5,6 +5,7 @@
 #include "Acidum/Core/Base/Types.hpp"
 #include "Acidum/Graphics/Interfaces/IMesh.hpp"
 
+namespace Acidum {
 class IGraphicsAPI {
 public:
     virtual ~IGraphicsAPI() = default;
@@ -21,3 +22,4 @@ public:
 
     virtual void waitIdle() const = 0;
 };
+} // namespace Acidum

@@ -8,6 +8,8 @@
 
 struct GLFWwindow; // forward-declaration
 
+namespace Acidum {
+
 struct WindowConfig {
     uint32_t width;
     uint32_t height;
@@ -42,3 +44,4 @@ private:
     static void internalResizeCallback(GLFWwindow* glfwWindow, int width, int height);
     static void GLFWErrorCallback(int error, const char* description);
 };
+} // namespace Acidum

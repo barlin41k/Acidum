@@ -5,7 +5,7 @@
 
 #include "Acidum/Core/Application.hpp"
 
-static const std::vector<Vertex> VERTICES = {
+static const std::vector<Acidum::Vertex> VERTICES = {
     {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
     {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
@@ -15,8 +15,8 @@ static const std::vector<uint32_t> INDICES = {
     0, 1, 2, 2, 3, 0
 };
 
-SandboxApp::SandboxApp(APIType apiType) 
-    : Application(AppConfig{
+SandboxApp::SandboxApp(Acidum::APIType apiType) 
+    : Acidum::Application(Acidum::AppConfig{
         {0, 1, 0},
         "Acidum: Sandbox",
         1280, 720,

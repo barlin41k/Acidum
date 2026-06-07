@@ -2,6 +2,7 @@
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 
+namespace Acidum {
 std::shared_ptr<spdlog::logger> Logger::s_Logger;
 
 void Logger::Init() {
@@ -13,3 +14,4 @@ void Logger::Init() {
     s_Logger->set_level(spdlog::level::trace);
 #endif
 }
+} // namespace Acidum

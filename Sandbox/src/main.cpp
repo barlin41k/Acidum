@@ -5,11 +5,11 @@
 #include "SandboxApp.hpp"
 
 int main() {
-    Logger::Init();
+    Acidum::Logger::Init();
 
     ENGINE_INFO("Engine have been started!");
 
-    SandboxApp app (Consts::ENGINE_DEFAULT_API);
+    SandboxApp app (Acidum::Consts::ENGINE_DEFAULT_API);
 
     try {
         app.run();

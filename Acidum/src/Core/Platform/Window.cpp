@@ -4,6 +4,7 @@
 
 #include "Acidum/Core/Base/Logger.hpp"
 
+namespace Acidum {
 Window::Window(const WindowConfig& config)
     : m_config(config) {
     initWindow();
@@ -63,3 +64,4 @@ void Window::waitEvents() const noexcept {
 void Window::pollEvents() {
     glfwPollEvents();
 }
+} // namespace Acidum

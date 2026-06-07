@@ -6,6 +6,7 @@
 #include "Acidum/Core/Platform/Window.hpp"
 #include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
 
+namespace Acidum {
 VulkanSwapChain::VulkanSwapChain(VulkanDevice& device, VkSurfaceKHR surface, Window* window)
     : m_device(device), m_surface(surface), m_window(window) {
     createSwapChain();
@@ -166,3 +167,4 @@ void VulkanSwapChain::createFramebuffers(VkRenderPass renderPass) {
     }
     ENGINE_DEBUG("Vulkan Framebuffers created!");
 }
+} // namespace Acidum

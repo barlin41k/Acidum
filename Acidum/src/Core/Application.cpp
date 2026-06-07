@@ -4,6 +4,7 @@
 
 #include "Acidum/Graphics/GraphicsFactory.hpp"
 
+namespace Acidum {
 Application::Application(const AppConfig& config)
     : m_config(config), m_apiType(config.apiType) {}
 
@@ -49,3 +50,4 @@ void Application::mainLoop() {
 
     m_graphicsAPI->waitIdle();
 }
+} // namespace Acidum

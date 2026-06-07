@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 
+namespace Acidum {
 class VulkanDevice; // forward-declaration
 
 class VulkanPipeline {
@@ -33,3 +34,4 @@ private:
     std::vector<char> readFile(const std::string& filename);
     VkShaderModule createShaderModule(const std::vector<char>& code);
 };
+} // namespace Acidum

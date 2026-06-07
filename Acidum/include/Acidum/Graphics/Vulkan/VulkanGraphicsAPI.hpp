@@ -16,6 +16,7 @@
 #include "Acidum/Graphics/Vulkan/VulkanSyncManager.hpp"
 #include "Acidum/Graphics/Vulkan/VulkanDescriptorManager.hpp"
 
+namespace Acidum {
 class Window; // forward-declaration
 
 class VulkanGraphicsAPI : public IGraphicsAPI {
@@ -105,3 +106,4 @@ private:
         VkDebugUtilsMessengerEXT debugMessenger, 
         const VkAllocationCallbacks* pAllocator);
 };
+} // namespace Acidum

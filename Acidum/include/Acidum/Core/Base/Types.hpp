@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+namespace Acidum {
 struct Version {
     uint32_t major;
     uint32_t minor;
@@ -21,3 +22,4 @@ struct UniformBufferObject {
     glm::mat4 view;
     glm::mat4 proj;
 };
+} // namespace Acidum

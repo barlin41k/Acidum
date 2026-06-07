@@ -7,6 +7,8 @@
 #include <cstdlib> // IWYU pragma: keep
 #include <memory>
 
+namespace Acidum {
+
 class Logger {
 public:
     static void Init();
@@ -26,10 +28,10 @@ constexpr const char* GetShortFileName(const char* path) {
     return file;
 }
 
-#define ENGINE_INFO(...) SPDLOG_LOGGER_INFO(Logger::GetLogger(), __VA_ARGS__)
-#define ENGINE_WARN(fmt, ...) SPDLOG_LOGGER_WARN(Logger::GetLogger(), "[{}:{}] " fmt, GetShortFileName(__FILE__), __LINE__ __VA_OPT__(,) __VA_ARGS__)
-#define ENGINE_ERROR(fmt, ...) SPDLOG_LOGGER_ERROR(Logger::GetLogger(), "[{}:{}] " fmt, GetShortFileName(__FILE__), __LINE__ __VA_OPT__(,) __VA_ARGS__)
-#define ENGINE_FATAL(fmt, ...) SPDLOG_LOGGER_CRITICAL(Logger::GetLogger(), "[{}:{}] " fmt, GetShortFileName(__FILE__), __LINE__ __VA_OPT__(,) __VA_ARGS__)
+#define ENGINE_INFO(...) SPDLOG_LOGGER_INFO(Acidum::Logger::GetLogger(), __VA_ARGS__)
+#define ENGINE_WARN(fmt, ...) SPDLOG_LOGGER_WARN(Acidum::Logger::GetLogger(), "[{}:{}] " fmt, Acidum::GetShortFileName(__FILE__), __LINE__ __VA_OPT__(,) __VA_ARGS__)
+#define ENGINE_ERROR(fmt, ...) SPDLOG_LOGGER_ERROR(Acidum::Logger::GetLogger(), "[{}:{}] " fmt, Acidum::GetShortFileName(__FILE__), __LINE__ __VA_OPT__(,) __VA_ARGS__)
+#define ENGINE_FATAL(fmt, ...) SPDLOG_LOGGER_CRITICAL(Acidum::Logger::GetLogger(), "[{}:{}] " fmt, Acidum::GetShortFileName(__FILE__), __LINE__ __VA_OPT__(,) __VA_ARGS__)
 
 #define ENGINE_VERIFY(condition, msg, ...) \
     do { \
@@ -45,8 +47,8 @@ constexpr const char* GetShortFileName(const char* path) {
 
     #define ENGINE_ASSERT(condition, msg, ...)
 #else
-    #define ENGINE_TRACE(...) SPDLOG_LOGGER_TRACE(Logger::GetLogger(), __VA_ARGS__)
-    #define ENGINE_DEBUG(...) SPDLOG_LOGGER_DEBUG(Logger::GetLogger(), __VA_ARGS__)
+    #define ENGINE_TRACE(...) SPDLOG_LOGGER_TRACE(Acidum::Logger::GetLogger(), __VA_ARGS__)
+    #define ENGINE_DEBUG(...) SPDLOG_LOGGER_DEBUG(Acidum::Logger::GetLogger(), __VA_ARGS__)
 
     #define ENGINE_ASSERT(condition, msg, ...) \
         do { \
@@ -56,3 +58,4 @@ constexpr const char* GetShortFileName(const char* path) {
             } \
         } while (false)
 #endif
+} // namespace Acidum

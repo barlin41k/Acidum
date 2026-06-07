@@ -5,6 +5,7 @@
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
 
+namespace Acidum {
 VulkanBuffer::VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
     : m_device(device), m_size(size) {
     VkBufferCreateInfo bufferInfo{};
@@ -96,3 +97,4 @@ void VulkanBuffer::copyTo(void* pData, VkDeviceSize size) {
     std::memcpy(mappedData, pData, static_cast<size_t>(size));
     unmap();
 }
+} // namespace Acidum

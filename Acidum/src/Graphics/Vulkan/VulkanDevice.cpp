@@ -6,6 +6,7 @@
 
 #include "Acidum/Core/Base/Logger.hpp"
 
+namespace Acidum {
 VulkanDevice::VulkanDevice(VkInstance instance, VkSurfaceKHR surface)
     : m_instance(instance), m_surface(surface) {
     pickPhysicalDevice();
@@ -157,3 +158,4 @@ void VulkanDevice::createLogicalDevice() {
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
 }
+} // namespace Acidum

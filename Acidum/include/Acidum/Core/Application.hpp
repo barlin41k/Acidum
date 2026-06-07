@@ -7,6 +7,7 @@
 #include "Acidum/Core/Platform/Window.hpp"
 #include "Acidum/Graphics/Interfaces/IGraphicsAPI.hpp"
 
+namespace Acidum {
 struct AppConfig {                             
     Version version = { 1, 0, 0 };                                                                                                                                                       
     std::string title = Consts::ENGINE_NAME;                                                                                                                                                              
@@ -42,3 +43,4 @@ private:
     void initGraphicsAPI();
     void mainLoop();
 };
+} // namespace Acidum

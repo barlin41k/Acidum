@@ -9,6 +9,7 @@
 #include "Acidum/Graphics/Interfaces/IMesh.hpp"
 #include "Acidum/Graphics/Vulkan/VulkanBuffer.hpp"
 
+namespace Acidum {
 class VulkanDevice; // forward-declaration
 
 class VulkanMesh : public IMesh {
@@ -63,3 +64,4 @@ void VulkanMesh::createVertexBuffer(VulkanDevice& device, VkCommandPool commandP
 
     VulkanBuffer::copyBuffer(device, commandPool, stagingBuffer.getBuffer(), m_vertexBuffer->getBuffer(), bufferSize);
 }
+} // namespace Acidum

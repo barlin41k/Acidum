@@ -3,6 +3,7 @@
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
 
+namespace Acidum {
 VulkanCommandBufferManager::VulkanCommandBufferManager(VulkanDevice& device, uint32_t bufferCount)
     : m_device(device) {
     QueueFamilyIndices queueFamilyIndices = m_device.getQueueFamilies();
@@ -30,3 +31,4 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(VulkanDevice& device, uin
 VulkanCommandBufferManager::~VulkanCommandBufferManager() {
     vkDestroyCommandPool(m_device.getLogicalDevice(), m_commandPool, nullptr);
 }
+} // namespace Acidum

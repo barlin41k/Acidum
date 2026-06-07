@@ -3,6 +3,7 @@
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
 
+namespace Acidum {
 VulkanSyncManager::VulkanSyncManager(VulkanDevice& device, uint32_t maxFramesInFlight, uint32_t imageCount) 
     : m_device(device) {
     m_imageAvailableSemaphores.resize(maxFramesInFlight);
@@ -46,3 +47,4 @@ VulkanSyncManager::~VulkanSyncManager() {
     for (auto fence : m_inFlightFences)
         vkDestroyFence(m_device.getLogicalDevice(), fence, nullptr);
 }
+} // namespace Acidum

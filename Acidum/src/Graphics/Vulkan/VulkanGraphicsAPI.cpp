@@ -12,6 +12,7 @@
 #include "Acidum/Core/Base/Consts.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
 
+namespace Acidum {
 VulkanGraphicsAPI::VulkanGraphicsAPI(Window* window) 
     : m_window(window) {}
 
@@ -392,3 +393,4 @@ void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 void VulkanGraphicsAPI::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
     m_descriptorManager->updateUniformBuffer(currentFrame, ubo);
 }
+} // namespace Acidum

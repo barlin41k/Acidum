@@ -4,6 +4,7 @@
 
 #include <vector>
 
+namespace Acidum {
 // forward-declaration
 class VulkanDevice;
 class Window;
@@ -46,3 +47,4 @@ private:
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void cleanup();
 };
+} // namespace Acidum

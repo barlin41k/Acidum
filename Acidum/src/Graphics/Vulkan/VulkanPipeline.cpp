@@ -10,6 +10,7 @@
 #include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
 #include "Acidum/Graphics/Vulkan/VulkanMesh.hpp"
 
+namespace Acidum {
 VulkanPipeline::VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat)
     : m_device(device) {
     createRenderPass(swapChainFormat);
@@ -246,3 +247,4 @@ void VulkanPipeline::createDescriptorSetLayout() {
     ENGINE_VERIFY(vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) == VK_SUCCESS, "Failed to create descriptor set layout!");
     ENGINE_DEBUG("Vulkan Descriptor Set Layout created!");
 }
+} // namespace Acidum

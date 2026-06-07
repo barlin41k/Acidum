@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 
+namespace Acidum {
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
@@ -54,3 +55,4 @@ private:
     SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
     bool isDeviceSuitable(VkPhysicalDevice device) const;
 };
+} // namespace Acidum
