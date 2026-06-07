@@ -50,15 +50,3 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -Wshadow
     -Wnon-virtual-dtor
 )
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        -fsanitize=address,undefined
-        -fno-sanitize=leak
-        -fno-omit-frame-pointer
-    )
-    target_link_options(${PROJECT_NAME} PRIVATE
-        -fsanitize=address,undefined
-        -fno-sanitize=leak
-    )
-endif()
