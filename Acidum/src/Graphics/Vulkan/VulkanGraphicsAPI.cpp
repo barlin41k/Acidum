@@ -24,8 +24,7 @@ VulkanGraphicsAPI::~VulkanGraphicsAPI() {
     m_swapChain.reset();
     m_pipeline.reset();
     m_device.reset();
-
-    vkDestroySurfaceKHR(m_instance->getInstance(), m_surface, nullptr);
+    m_surface.reset();
     m_instance.reset();
 }
 
@@ -45,11 +44,11 @@ void VulkanGraphicsAPI::initialize() {
     
     m_instance = std::make_unique<VulkanInstance>(m_window->getTitle(), version, windowExtensions);
 
-    createSurface();
+    m_surface = std::make_unique<VulkanSurface>(*m_instance, m_window);
 
-    m_device = std::make_unique<VulkanDevice>(m_instance->getInstance(), m_surface);
+    m_device = std::make_unique<VulkanDevice>(m_instance->getInstance(), m_surface->getSurface());
 
-    m_swapChain = std::make_unique<VulkanSwapChain>(*m_device, m_surface, m_window);
+    m_swapChain = std::make_unique<VulkanSwapChain>(*m_device, m_surface->getSurface(), m_window);
 
     m_pipeline = std::make_unique<VulkanPipeline>(*m_device, m_swapChain->getFormat());
 
@@ -184,11 +183,6 @@ void VulkanGraphicsAPI::recreateSwapChain() {
     m_descriptorManager = std::make_unique<VulkanDescriptorManager>(*m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
 
     ENGINE_DEBUG("Swap Chain recreated!");
-}
-
-void VulkanGraphicsAPI::createSurface() {
-    ENGINE_VERIFY(glfwCreateWindowSurface(m_instance->getInstance(), m_window->getWindow(), nullptr, &m_surface) == VK_SUCCESS, "Failed to create window surface!");
-    ENGINE_INFO("Window surface created!");
 }
 
 void VulkanGraphicsAPI::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {

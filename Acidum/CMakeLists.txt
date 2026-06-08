@@ -5,6 +5,7 @@ add_library(AcidumCore
     src/Core/Platform/Window.cpp
     src/Graphics/Vulkan/VulkanGraphicsAPI.cpp
     src/Graphics/Vulkan/VulkanInstance.cpp
+    src/Graphics/Vulkan/VulkanSurface.cpp
     src/Graphics/Vulkan/VulkanDevice.cpp
     src/Graphics/Vulkan/VulkanSwapChain.cpp
     src/Graphics/Vulkan/VulkanBuffer.cpp

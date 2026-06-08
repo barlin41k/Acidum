@@ -9,6 +9,7 @@
 #include "Acidum/Graphics/Interfaces/IGraphicsAPI.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanInstance.hpp"
+#include "Graphics/Vulkan/VulkanSurface.hpp"
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
 #include "Graphics/Vulkan/VulkanPipeline.hpp"
@@ -45,7 +46,7 @@ private:
     Window* m_window = nullptr;
 
     std::unique_ptr<VulkanInstance> m_instance;
-    VkSurfaceKHR m_surface = VK_NULL_HANDLE;
+    std::unique_ptr<VulkanSurface> m_surface;
     std::unique_ptr<VulkanDevice> m_device;
     std::unique_ptr<VulkanPipeline> m_pipeline;
     std::unique_ptr<VulkanSwapChain> m_swapChain;
@@ -61,9 +62,8 @@ private:
     bool m_framebufferResized = false;
 
     void recreateSwapChain();
-    //create instance
     // create debug messenger
-    void createSurface();
+    // create surface
     // create device
     // create swapchain
     // create pipeline
