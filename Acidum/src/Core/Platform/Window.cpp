@@ -43,6 +43,10 @@ void Window::getFramebufferSize(int* width, int* height) const noexcept {
     glfwGetFramebufferSize(m_window, width, height);
 }
 
+void Window::setTitle(const std::string& title) {
+    glfwSetWindowTitle(m_window, title.c_str());
+}
+
 void Window::internalResizeCallback(GLFWwindow* glfwWindow, int width, int height) {
     auto windowInstance = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     if (windowInstance && windowInstance->m_resizeCallback)

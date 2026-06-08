@@ -34,6 +34,8 @@ public:
     const std::string& getTitle() const noexcept { return m_config.title; }
     const Version& getVersion() const noexcept { return m_config.version; }
     void getFramebufferSize(int* width, int* height) const noexcept;
+
+    void setTitle(const std::string& title);
     void setResizeCallback(std::function<void(int, int)> callback) { m_resizeCallback = callback; }
 private:
     GLFWwindow* m_window = nullptr;
