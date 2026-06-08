@@ -6,6 +6,7 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
+
 VulkanBuffer::VulkanBuffer(const VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
     : m_device(device), m_size(size) {
     VkBufferCreateInfo bufferInfo{};
@@ -22,7 +23,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& device, VkDeviceSize size, VkBuff
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = m_device.findMemoryType(memRequirements.memoryTypeBits, properties);
 
     ENGINE_VERIFY(vkAllocateMemory(m_device.getLogicalDevice(), &allocInfo, nullptr, &m_memory) == VK_SUCCESS, "Failed to allocate buffer memory!");
 
@@ -71,18 +72,6 @@ void VulkanBuffer::copyBuffer(const VulkanDevice& device, VkCommandPool commandP
     vkFreeCommandBuffers(device.getLogicalDevice(), commandPool, 1, &commandBuffer);
 }
 
-uint32_t VulkanBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(m_device.getPhysicalDevice(), &memProperties);
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-            return i;
-    }
-
-    ENGINE_VERIFY(false, "Failed to find suitable memory type!");
-    return 0;
-}
-
 void VulkanBuffer::map(void** ppData) {
     vkMapMemory(m_device.getLogicalDevice(), m_memory, 0, m_size, 0, ppData);
 }
@@ -97,4 +86,5 @@ void VulkanBuffer::copyTo(void* pData, VkDeviceSize size) {
     std::memcpy(mappedData, pData, static_cast<size_t>(size));
     unmap();
 }
+
 } // namespace Acidum

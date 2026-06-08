@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 
 namespace Acidum {
+
 class VulkanDevice;
 
 class VulkanBuffer {
@@ -27,7 +28,6 @@ private:
     VkBuffer m_buffer = VK_NULL_HANDLE;
     VkDeviceMemory m_memory = VK_NULL_HANDLE;
     VkDeviceSize m_size;
-
-    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 };
+
 } // namespace Acidum

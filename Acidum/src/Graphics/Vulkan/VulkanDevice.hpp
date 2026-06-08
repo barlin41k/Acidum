@@ -6,6 +6,7 @@
 #include <vector>
 
 namespace Acidum {
+
 class VulkanInstance;
 class VulkanSurface;
 
@@ -46,6 +47,7 @@ public:
     VkQueue getGraphicsQueue() const noexcept { return m_graphicsQueue; }
     VkQueue getPresentQueue() const noexcept { return m_presentQueue; }
 
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
     QueueFamilyIndices getQueueFamilies() const { return findQueueFamilies(m_physicalDevice); }
     SwapChainSupportDetails getSwapChainSupport() const { return querySwapChainSupport(m_physicalDevice); }
 private:
@@ -64,4 +66,5 @@ private:
     SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
     bool isDeviceSuitable(VkPhysicalDevice device, const DeviceConfig& config) const;
 };
+
 } // namespace Acidum

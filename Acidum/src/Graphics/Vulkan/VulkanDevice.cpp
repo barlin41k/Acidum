@@ -9,6 +9,7 @@
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 
 namespace Acidum {
+
 VulkanDevice::VulkanDevice(const VulkanInstance& instance, const VulkanSurface& surface, const DeviceConfig& config)
     : m_instance(instance),
       m_surface(surface)
@@ -187,4 +188,17 @@ void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
 }
+
+uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+            return i;
+    }
+
+    ENGINE_VERIFY(false, "Failed to find suitable memory type!");
+    return 0;
+}
+
 } // namespace Acidum
