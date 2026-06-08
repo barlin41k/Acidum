@@ -6,8 +6,10 @@
 
 namespace Acidum {
 
-VulkanInstance::VulkanInstance(const std::string& appName, uint32_t appVersion, const std::vector<const char*>& windowExtensions) {
-    createInstance(appName, appVersion, windowExtensions);
+VulkanInstance::VulkanInstance(const InstanceConfig& config)
+    : m_enableValidationLayers(config.enableValidationLayers),
+      m_validationLayers(config.validationLayers) {
+    createInstance(config);
     setupDebugMessenger();
 }
 
@@ -17,26 +19,29 @@ VulkanInstance::~VulkanInstance() {
     vkDestroyInstance(m_instance, nullptr);
 }
 
-void VulkanInstance::createInstance(const std::string& appName, uint32_t appVersion, const std::vector<const char*>& windowExtensions) {
+void VulkanInstance::createInstance(const InstanceConfig& config) {
     ENGINE_VERIFY(!m_enableValidationLayers || checkValidationLayerSupport(), "Validation layers requested, but not available!");
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = appName.c_str();
-    appInfo.applicationVersion = appVersion;
+    appInfo.pApplicationName = config.appName.c_str();
+    appInfo.applicationVersion = config.appVersion;
     appInfo.pEngineName = Consts::ENGINE_NAME.c_str();
     appInfo.engineVersion = VK_MAKE_VERSION(
         Consts::ENGINE_VERSION.major, 
         Consts::ENGINE_VERSION.minor,
         Consts::ENGINE_VERSION.patch
     );
-    appInfo.apiVersion = VK_API_VERSION_1_2;
+    appInfo.apiVersion = config.apiVersion;
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
 
-    auto extensions = getRequiredExtensions(windowExtensions);
+    auto extensions = getRequiredExtensions(config.windowExtensions);
+    for (const char* ext : config.additionalExtensions)
+        extensions.push_back(ext);
+
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     createInfo.ppEnabledExtensionNames = extensions.data();
     
@@ -92,9 +97,8 @@ bool VulkanInstance::checkValidationLayerSupport() const {
 std::vector<const char*> VulkanInstance::getRequiredExtensions(const std::vector<const char*>& windowExtensions) const {
     std::vector<const char*> extensions(windowExtensions);
 
-    if (m_enableValidationLayers) {
+    if (m_enableValidationLayers)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    }
 
     return extensions;
 }

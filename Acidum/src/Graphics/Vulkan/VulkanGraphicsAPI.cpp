@@ -1,4 +1,5 @@
 #include "Graphics/Vulkan/VulkanGraphicsAPI.hpp"
+#include "Graphics/Vulkan/VulkanInstance.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -35,7 +36,13 @@ void VulkanGraphicsAPI::initialize() {
     auto appVersion = m_window->getVersion(); 
     uint32_t version = VK_MAKE_VERSION(appVersion.major, appVersion.minor, appVersion.patch);
     
-    m_instance = std::make_unique<VulkanInstance>(m_window->getTitle(), version, windowExtensions);
+    InstanceConfig instanceConfig;
+    instanceConfig.appName = m_window->getTitle();
+    instanceConfig.appVersion = version;
+    instanceConfig.windowExtensions = windowExtensions;
+    
+    m_instance = std::make_unique<VulkanInstance>(instanceConfig);
+
     m_surface = std::make_unique<VulkanSurface>(*m_instance, m_window);
     m_device = std::make_unique<VulkanDevice>(m_instance->getInstance(), m_surface->getSurface());
 
