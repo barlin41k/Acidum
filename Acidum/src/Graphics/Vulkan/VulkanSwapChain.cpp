@@ -8,8 +8,12 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
-VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const VulkanSurface& surface, Window* window)
-    : m_device(device), m_surface(surface), m_window(window) {
+VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const VulkanSurface& surface, Window* window, const SwapChainConfig& config)
+    : m_device(device),
+      m_surface(surface),
+      m_window(window),
+      m_config(config)
+{
     createSwapChain();
     createImageViews();
 }
@@ -19,20 +23,51 @@ VulkanSwapChain::~VulkanSwapChain() {
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+    ENGINE_VERIFY(!availableFormats.empty(), "No available Swap Surface Formats found!");
+
+    bool isFormatSupported = false;
+    bool isColorSpaceSupported = false;
+
     for (const auto& availableFormat : availableFormats) {
-        if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+        if (availableFormat.format == m_config.prefferedFormat) isFormatSupported = true;
+        if (availableFormat.colorSpace == m_config.prefferedColorSpace) isColorSpaceSupported = true;
+
+        if (availableFormat.format == m_config.prefferedFormat && availableFormat.colorSpace == m_config.prefferedColorSpace)
             return availableFormat;
     }
+    
+    if (!isFormatSupported && !isColorSpaceSupported)
+        ENGINE_WARN("Swap Surface Format selection failed: neither preferred format ({}) nor color space ({}) are supported by the surface", 
+                    static_cast<int>(m_config.prefferedFormat), 
+                    static_cast<int>(m_config.prefferedColorSpace));
+    else if (!isFormatSupported)
+        ENGINE_WARN("Swap Surface Format mismatch: preferred format ({}) is not supported (but color space is available)", 
+                    static_cast<int>(m_config.prefferedFormat));
+    else if (!isColorSpaceSupported)
+        ENGINE_WARN("Swap Surface Format mismatch: preferred color space ({}) is not supported (but format is available)", 
+                    static_cast<int>(m_config.prefferedColorSpace));
+    else
+        ENGINE_WARN("Swap Surface Format mismatch: both preferred format ({}) and color space ({}) are supported individually, but not in this combination",
+                    static_cast<int>(m_config.prefferedFormat),
+                    static_cast<int>(m_config.prefferedColorSpace));
+
+    ENGINE_WARN("Fallback to default Swap Surface Format. Chosen format: {}, color space: {}", 
+                static_cast<int>(availableFormats[0].format), 
+                static_cast<int>(availableFormats[0].colorSpace));
 
     return availableFormats[0];
 }
 
 VkPresentModeKHR VulkanSwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+    ENGINE_VERIFY(!availablePresentModes.empty(), "No available Swap Present Modes found!");
+
     for (const auto& availablePresentMode : availablePresentModes) {
-        if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+        if (availablePresentMode == m_config.prefferedPresentMode)
             return availablePresentMode;
-        }
     }
+
+    ENGINE_WARN("Swap present mode mismatch: preferred mode ({}) is not supported. Falling back to VK_PRESENT_MODE_FIFO_KHR.",
+        static_cast<int>(m_config.prefferedPresentMode));
 
     return VK_PRESENT_MODE_FIFO_KHR;
 }

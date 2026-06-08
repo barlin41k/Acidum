@@ -3,16 +3,24 @@
 #include <vulkan/vulkan.h>
 
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 namespace Acidum {
+
 // forward-declaration
 class VulkanDevice;
 class VulkanSurface;
 class Window;
 
+struct SwapChainConfig {
+    VkFormat prefferedFormat = VK_FORMAT_R8G8B8A8_SRGB;
+    VkColorSpaceKHR prefferedColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+    VkPresentModeKHR prefferedPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+};
+
 class VulkanSwapChain {
 public:
-    VulkanSwapChain(const VulkanDevice& device, const VulkanSurface& surface, Window* window);
+    VulkanSwapChain(const VulkanDevice& device, const VulkanSurface& surface, Window* window, const SwapChainConfig& config);
     ~VulkanSwapChain();
 
     VulkanSwapChain(const VulkanSwapChain&) = delete;
@@ -40,6 +48,8 @@ private:
     std::vector<VkImageView> m_swapChainImageViews;
     std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
+    const SwapChainConfig m_config; // because swapchain can be recreated
+
     void createSwapChain();
     void createImageViews();
 
@@ -48,4 +58,5 @@ private:
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void cleanup();
 };
+
 } // namespace Acidum

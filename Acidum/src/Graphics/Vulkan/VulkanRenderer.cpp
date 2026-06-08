@@ -8,8 +8,11 @@ namespace Acidum {
 VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window)
     : m_device(device), m_surface(surface), m_window(window) {
     ENGINE_INFO("Vulkan Renderer initialization started...");
+    
+    SwapChainConfig swapChainConfig;
 
-    m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window);
+
+    m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, swapChainConfig);
 
     m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat());
 
