@@ -33,7 +33,7 @@ public:
     const std::vector<VkImageView>& getImageViews() const { return m_swapChainImageViews; }
     const std::vector<VkFramebuffer>& getFramebuffers() const { return m_swapChainFramebuffers; }
 
-    void createFramebuffers(VkRenderPass renderPass); 
+    void createFramebuffers(VkRenderPass renderPass, VkImageView depthImageView); 
     
     void recreate();
 private:

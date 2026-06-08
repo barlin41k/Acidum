@@ -12,6 +12,7 @@ add_library(AcidumCore
     src/Graphics/Vulkan/VulkanBuffer.cpp
     src/Graphics/Vulkan/VulkanPipeline.cpp
     src/Graphics/Vulkan/VulkanMesh.cpp
+    src/Graphics/Vulkan/VulkanImage.cpp
     src/Graphics/Vulkan/VulkanCommandBufferManager.cpp
     src/Graphics/Vulkan/VulkanSyncManager.cpp
     src/Graphics/Vulkan/VulkanDescriptorManager.cpp

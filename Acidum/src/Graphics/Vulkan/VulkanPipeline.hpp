@@ -6,11 +6,12 @@
 #include <string>
 
 namespace Acidum {
+
 class VulkanDevice; // forward-declaration
 
 class VulkanPipeline {
 public:
-    VulkanPipeline(const VulkanDevice& device, VkFormat swapChainFormat);
+    VulkanPipeline(const VulkanDevice& device, VkFormat swapChainFormat, VkFormat depthFormat);
     ~VulkanPipeline();
 
     VulkanPipeline(const VulkanPipeline&) = delete;
@@ -27,11 +28,12 @@ private:
     VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
     VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
 
-    void createRenderPass(VkFormat swapChainFormat);
+    void createRenderPass(VkFormat swapChainFormat, VkFormat depthFormat);
     void createGraphicsPipeline();
     void createDescriptorSetLayout();
 
     std::vector<char> readFile(const std::string& filename);
     VkShaderModule createShaderModule(const std::vector<char>& code);
 };
+
 } // namespace Acidum

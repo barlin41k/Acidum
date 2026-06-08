@@ -13,10 +13,11 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
 
 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, swapChainConfig);
+    createDepthResources();
 
-    m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat());
+    m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat(), m_depthFormat);
 
-    m_swapChain->createFramebuffers(m_pipeline->getRenderPass());
+    m_swapChain->createFramebuffers(m_pipeline->getRenderPass(), m_depthImage->getImageView());
 
     m_commandBufferManager = std::make_unique<VulkanCommandBufferManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT);
 
@@ -114,11 +115,12 @@ void VulkanRenderer::recreateSwapChain() {
     vkDeviceWaitIdle(m_device.getLogicalDevice());
 
     m_swapChain->recreate();
+    createDepthResources();
     
     m_pipeline.reset();
-    m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat());
+    m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat(), m_depthFormat);
     
-    m_swapChain->createFramebuffers(m_pipeline->getRenderPass());
+    m_swapChain->createFramebuffers(m_pipeline->getRenderPass(), m_depthImage->getImageView());
     
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
     m_syncManager.reset();
@@ -145,9 +147,12 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = m_swapChain->getExtent();
 
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    std::array<VkClearValue, 2> clearValues{};
+    clearValues[0].color = {{ m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a }};
+    clearValues[1].depthStencil = {1.0f, 0};
+
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -198,6 +203,24 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
 void VulkanRenderer::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
     m_descriptorManager->updateUniformBuffer(currentFrame, ubo);
+}
+
+void VulkanRenderer::createDepthResources() {
+    m_depthFormat = m_device.findDepthFormat();
+    VkExtent2D swapChainExtent = m_swapChain->getExtent();
+
+    m_depthImage = std::make_unique<VulkanImage>(
+        m_device,
+        swapChainExtent.width,
+        swapChainExtent.height,
+        m_depthFormat,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        VK_IMAGE_ASPECT_DEPTH_BIT
+    );
+
+    ENGINE_DEBUG("Vulkan Depth Resources created!");
 }
 
 } // namespace Acidum

@@ -181,19 +181,20 @@ void VulkanSwapChain::createImageViews() {
     ENGINE_DEBUG("Vulkan Image Views created!");
 }
 
-void VulkanSwapChain::createFramebuffers(VkRenderPass renderPass) {
+void VulkanSwapChain::createFramebuffers(VkRenderPass renderPass, VkImageView depthImageView) {
     m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
 
     for (size_t i = 0; i < m_swapChainImageViews.size(); i++) {
-        VkImageView attachments[] = {
-            m_swapChainImageViews[i]
+        std::array<VkImageView, 2> attachments = {
+            m_swapChainImageViews[i],
+            depthImageView
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = m_swapChainExtent.width;
         framebufferInfo.height = m_swapChainExtent.height;
         framebufferInfo.layers = 1;

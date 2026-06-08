@@ -46,7 +46,9 @@ public:
     VkDevice getLogicalDevice() const noexcept { return m_device; }
     VkQueue getGraphicsQueue() const noexcept { return m_graphicsQueue; }
     VkQueue getPresentQueue() const noexcept { return m_presentQueue; }
-
+    
+    VkFormat findDepthFormat() const;
+    VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) const;
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
     QueueFamilyIndices getQueueFamilies() const { return findQueueFamilies(m_physicalDevice); }
     SwapChainSupportDetails getSwapChainSupport() const { return querySwapChainSupport(m_physicalDevice); }
