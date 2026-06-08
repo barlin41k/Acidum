@@ -16,11 +16,6 @@ VulkanGraphicsAPI::VulkanGraphicsAPI(Window* window)
 
 VulkanGraphicsAPI::~VulkanGraphicsAPI() {
     waitIdle();
-
-    m_renderer.reset();
-    m_device.reset();
-    m_surface.reset();
-    m_instance.reset();
 }
 
 void VulkanGraphicsAPI::initialize() {
