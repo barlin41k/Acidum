@@ -7,7 +7,7 @@ class VulkanDevice;
 
 class VulkanBuffer {
 public:
-    VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
+    VulkanBuffer(const VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
     ~VulkanBuffer();
 
     VulkanBuffer(const VulkanBuffer&) = delete;
@@ -21,9 +21,9 @@ public:
     void unmap();
     void copyTo(void* pData, VkDeviceSize size);
 
-    static void copyBuffer(VulkanDevice& device, VkCommandPool commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+    static void copyBuffer(const VulkanDevice& device, VkCommandPool commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 private:
-    VulkanDevice& m_device;
+    const VulkanDevice& m_device;
     VkBuffer m_buffer = VK_NULL_HANDLE;
     VkDeviceMemory m_memory = VK_NULL_HANDLE;
     VkDeviceSize m_size;

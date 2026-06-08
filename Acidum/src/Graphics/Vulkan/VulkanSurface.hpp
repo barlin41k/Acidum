@@ -9,7 +9,7 @@ class VulkanInstance;
 
 class VulkanSurface {
 public:
-    VulkanSurface(VulkanInstance& instance, Window* window);
+    VulkanSurface(const VulkanInstance& instance, Window* window);
     ~VulkanSurface();
 
     VulkanSurface(const VulkanSurface&) = delete;
@@ -17,7 +17,7 @@ public:
 
     VkSurfaceKHR getSurface() const noexcept { return m_surface; }
 private:
-    VkInstance m_instance = VK_NULL_HANDLE;
+    const VulkanInstance& m_instance;
     VkSurfaceKHR m_surface = VK_NULL_HANDLE;
 };
 

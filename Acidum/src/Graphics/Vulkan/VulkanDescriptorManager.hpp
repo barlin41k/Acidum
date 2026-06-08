@@ -12,7 +12,7 @@ class VulkanDevice; // forward-declaration
 
 class VulkanDescriptorManager {
 public:
-    VulkanDescriptorManager(VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout layout);
+    VulkanDescriptorManager(const VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout layout);
     ~VulkanDescriptorManager();
 
     VulkanDescriptorManager(const VulkanDescriptorManager&) = delete;
@@ -22,7 +22,7 @@ public:
     
     VkDescriptorSet getDescriptorSet(uint32_t currentFrame) const { return m_descriptorSets[currentFrame]; }
 private:
-    VulkanDevice& m_device;
+    const VulkanDevice& m_device;
     VkDescriptorPool m_descriptorPool;
     std::vector<VkDescriptorSet> m_descriptorSets;
 

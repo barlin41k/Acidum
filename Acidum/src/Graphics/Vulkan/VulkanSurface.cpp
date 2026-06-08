@@ -9,15 +9,15 @@
 
 namespace Acidum {
 
-VulkanSurface::VulkanSurface(VulkanInstance& instance, Window* window) 
-    : m_instance(instance.getInstance()) {
+VulkanSurface::VulkanSurface(const VulkanInstance& instance, Window* window) 
+    : m_instance(instance) {
     
-    ENGINE_VERIFY(glfwCreateWindowSurface(m_instance, window->getWindow(), nullptr, &m_surface) == VK_SUCCESS, "Failed to create window surface!");
+    ENGINE_VERIFY(glfwCreateWindowSurface(m_instance.getInstance(), window->getWindow(), nullptr, &m_surface) == VK_SUCCESS, "Failed to create window surface!");
     ENGINE_INFO("Window surface created!");
 }
 
 VulkanSurface::~VulkanSurface() {
-    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+    vkDestroySurfaceKHR(m_instance.getInstance(), m_surface, nullptr);
 }
 
 } // namespace Acidum

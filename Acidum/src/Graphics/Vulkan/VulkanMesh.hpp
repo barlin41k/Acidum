@@ -15,7 +15,7 @@ class VulkanDevice; // forward-declaration
 class VulkanMesh : public IMesh {
 public:
     template<typename VertexType>
-    VulkanMesh(VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices);
+    VulkanMesh(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices);
     ~VulkanMesh() = default;
 
     VulkanMesh(const VulkanMesh&) = delete;
@@ -36,20 +36,20 @@ private:
     uint32_t m_indexCount = 0;
 
     template<typename VertexType>
-    void createVertexBuffer(VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices);
-    void createIndexBuffer(VulkanDevice& device, VkCommandPool commandPool, const std::vector<uint32_t>& indices);
+    void createVertexBuffer(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices);
+    void createIndexBuffer(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<uint32_t>& indices);
 };
 
 // templates
 template<typename VertexType>
-VulkanMesh::VulkanMesh(VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices) 
+VulkanMesh::VulkanMesh(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices) 
     : m_vertexCount(static_cast<uint32_t>(vertices.size())), m_indexCount(static_cast<uint32_t>(indices.size())) {
     createVertexBuffer(device, commandPool, vertices);
     createIndexBuffer(device, commandPool, indices);
 }
 
 template<typename VertexType>
-void VulkanMesh::createVertexBuffer(VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices) {
+void VulkanMesh::createVertexBuffer(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices) {
     VkDeviceSize bufferSize = sizeof(VertexType) * vertices.size();
 
     VulkanBuffer stagingBuffer(device, bufferSize, 

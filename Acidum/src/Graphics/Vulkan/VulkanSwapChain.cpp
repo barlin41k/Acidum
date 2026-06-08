@@ -8,8 +8,8 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
-VulkanSwapChain::VulkanSwapChain(VulkanDevice& device, VulkanSurface& surface, Window* window)
-    : m_device(device), m_surface(surface.getSurface()), m_window(window) {
+VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const VulkanSurface& surface, Window* window)
+    : m_device(device), m_surface(surface), m_window(window) {
     createSwapChain();
     createImageViews();
 }
@@ -69,7 +69,7 @@ void VulkanSwapChain::createSwapChain() {
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = m_surface;
+    createInfo.surface = m_surface.getSurface();
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;

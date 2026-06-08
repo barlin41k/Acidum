@@ -9,7 +9,7 @@ class VulkanDevice; // forward-declaration
 
 class VulkanSyncManager {
 public:
-    VulkanSyncManager(VulkanDevice& device, uint32_t maxFramesInFlight, uint32_t imageCount);
+    VulkanSyncManager(const VulkanDevice& device, uint32_t maxFramesInFlight, uint32_t imageCount);
     ~VulkanSyncManager();
 
     VulkanSyncManager(const VulkanSyncManager&) = delete;
@@ -24,7 +24,7 @@ public:
     VkFence getImageInFlightFence(uint32_t imageIndex) const noexcept { return m_imagesInFlight[imageIndex]; }
     void setImageInFlightFence(uint32_t imageIndex, VkFence fence) noexcept { m_imagesInFlight[imageIndex] = fence; }
 private:
-    VulkanDevice& m_device;
+    const VulkanDevice& m_device;
     std::vector<VkSemaphore> m_imageAvailableSemaphores;
     std::vector<VkSemaphore> m_renderFinishedSemaphores;
     std::vector<VkFence> m_inFlightFences;

@@ -4,7 +4,7 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
-VulkanSyncManager::VulkanSyncManager(VulkanDevice& device, uint32_t maxFramesInFlight, uint32_t imageCount) 
+VulkanSyncManager::VulkanSyncManager(const VulkanDevice& device, uint32_t maxFramesInFlight, uint32_t imageCount) 
     : m_device(device) {
     m_imageAvailableSemaphores.resize(maxFramesInFlight);
     m_renderFinishedSemaphores.resize(imageCount);

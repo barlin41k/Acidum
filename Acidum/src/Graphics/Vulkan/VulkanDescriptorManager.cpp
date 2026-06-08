@@ -4,7 +4,7 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
-VulkanDescriptorManager::VulkanDescriptorManager(VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout layout)
+VulkanDescriptorManager::VulkanDescriptorManager(const VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout layout)
     : m_device(device), m_maxFramesInFlight(maxFramesInFlight) {
     createUniformBuffers();
     createDescriptorPool();

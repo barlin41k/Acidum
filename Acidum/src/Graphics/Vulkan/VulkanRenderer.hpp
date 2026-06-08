@@ -23,7 +23,7 @@ struct RenderCommand {
 
 class VulkanRenderer {
 public:
-    VulkanRenderer(VulkanDevice& device, VulkanSurface& surface, Window* window);
+    VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window);
     ~VulkanRenderer();
 
     VulkanRenderer(const VulkanRenderer&) = delete;
@@ -38,8 +38,8 @@ public:
 
     VkCommandPool getCommandPool() const { return m_commandBufferManager->getCommandPool(); }
 private:
-    VulkanDevice& m_device;
-    VulkanSurface& m_surface;
+    const VulkanDevice& m_device;
+    const VulkanSurface& m_surface;
     Window* m_window;
 
     std::unique_ptr<VulkanSwapChain> m_swapChain;

@@ -10,7 +10,7 @@ class VulkanDevice; // forward-declaration
 
 class VulkanPipeline {
 public:
-    VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat);
+    VulkanPipeline(const VulkanDevice& device, VkFormat swapChainFormat);
     ~VulkanPipeline();
 
     VulkanPipeline(const VulkanPipeline&) = delete;
@@ -21,7 +21,7 @@ public:
     VkRenderPass getRenderPass() const noexcept { return m_renderPass; }
     VkDescriptorSetLayout getDescriptorSetLayout() const { return m_descriptorSetLayout; }
 private:
-    VulkanDevice& m_device;
+    const VulkanDevice& m_device;
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
     VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
     VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;

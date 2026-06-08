@@ -5,7 +5,7 @@
 
 namespace Acidum {
 
-VulkanRenderer::VulkanRenderer(VulkanDevice& device, VulkanSurface& surface, Window* window)
+VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window)
     : m_device(device), m_surface(surface), m_window(window) {
     ENGINE_INFO("Vulkan Renderer initialization started...");
 

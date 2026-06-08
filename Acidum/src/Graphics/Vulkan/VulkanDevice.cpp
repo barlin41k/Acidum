@@ -9,8 +9,13 @@
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 
 namespace Acidum {
-VulkanDevice::VulkanDevice(VulkanInstance& instance, VulkanSurface& surface)
-    : m_instance(instance.getInstance()), m_surface(surface.getSurface()) {
+VulkanDevice::VulkanDevice(const VulkanInstance& instance, const VulkanSurface& surface, const DeviceConfig& config)
+    : m_instance(instance),
+      m_surface(surface),
+      m_deviceExtensions(config.deviceExtensions),
+      m_requiredFeatures(config.requiredFeatures),
+      m_preferDiscreteGPU(config.preferDiscreteGPU)
+{
     pickPhysicalDevice();
     createLogicalDevice();
 }
@@ -33,7 +38,7 @@ QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) cons
             indices.graphicsFamily = i;
         
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface.getSurface(), &presentSupport);
         if (presentSupport)
             indices.presentFamily = i;
 
@@ -63,22 +68,22 @@ bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) const {
 SwapChainSupportDetails VulkanDevice::querySwapChainSupport(VkPhysicalDevice device) const {
     SwapChainSupportDetails details;
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface, &details.capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface.getSurface(), &details.capabilities);
 
     uint32_t formatCount;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface.getSurface(), &formatCount, nullptr);
 
     if (formatCount != 0) {
         details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &formatCount, details.formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface.getSurface(), &formatCount, details.formats.data());
     }
 
     uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface.getSurface(), &presentModeCount, nullptr);
 
     if (presentModeCount != 0) {
         details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &presentModeCount, details.presentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface.getSurface(), &presentModeCount, details.presentModes.data());
     }
 
     return details;
@@ -95,30 +100,50 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) const {
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
 
+    /* FOR CHECK m_requiredFeatures
+    VkPhysicalDeviceFeatures supportedFeatures;
+    vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+    */
+
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
 void VulkanDevice::pickPhysicalDevice() {
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(m_instance.getInstance(), &deviceCount, nullptr);
 
     ENGINE_VERIFY(deviceCount > 0, "Failed to find GPUs with Vulkan support!");
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(m_instance.getInstance(), &deviceCount, devices.data());
+
+    int highestScore = -1;
+    VkPhysicalDevice bestDevice = VK_NULL_HANDLE;
 
     for (const auto& device : devices) {
-        if (isDeviceSuitable(device)) {
-            m_physicalDevice = device;
-            break;
+        if (!isDeviceSuitable(device)) continue;
+
+        int score = 0;
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+        if (m_preferDiscreteGPU && deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+            score += 1000;
+
+        score += deviceProperties.limits.maxImageDimension2D;
+
+        if (score > highestScore) {
+            highestScore = score;
+            bestDevice = device;
         }
     }
     
-    ENGINE_VERIFY(m_physicalDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
+    ENGINE_VERIFY(bestDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
+    m_physicalDevice = bestDevice;
 
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(m_physicalDevice, &deviceProperties);
-    ENGINE_INFO("Selected GPU: {}", deviceProperties.deviceName);
+    ENGINE_INFO("Selected GPU: {} (Score: {})", deviceProperties.deviceName, highestScore);
 }
 
 void VulkanDevice::createLogicalDevice() {
@@ -140,13 +165,11 @@ void VulkanDevice::createLogicalDevice() {
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    VkPhysicalDeviceFeatures deviceFeatures{};
-
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    createInfo.pEnabledFeatures = &m_requiredFeatures;
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(m_deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = m_deviceExtensions.data();

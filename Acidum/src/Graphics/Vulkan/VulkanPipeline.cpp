@@ -11,7 +11,7 @@
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 
 namespace Acidum {
-VulkanPipeline::VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat)
+VulkanPipeline::VulkanPipeline(const VulkanDevice& device, VkFormat swapChainFormat)
     : m_device(device) {
     createRenderPass(swapChainFormat);
     createDescriptorSetLayout();

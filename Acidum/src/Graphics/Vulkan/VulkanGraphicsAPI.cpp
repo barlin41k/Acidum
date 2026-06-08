@@ -1,4 +1,5 @@
 #include "Graphics/Vulkan/VulkanGraphicsAPI.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanInstance.hpp"
 
 #define GLFW_INCLUDE_VULKAN
@@ -40,11 +41,14 @@ void VulkanGraphicsAPI::initialize() {
     instanceConfig.appName = m_window->getTitle();
     instanceConfig.appVersion = version;
     instanceConfig.windowExtensions = windowExtensions;
-    
+
+    DeviceConfig deviceConfig;
+
     m_instance = std::make_unique<VulkanInstance>(instanceConfig);
 
     m_surface = std::make_unique<VulkanSurface>(*m_instance, m_window);
-    m_device = std::make_unique<VulkanDevice>(*m_instance, *m_surface);
+
+    m_device = std::make_unique<VulkanDevice>(*m_instance, *m_surface, deviceConfig);
 
     m_renderer = std::make_unique<VulkanRenderer>(*m_device, *m_surface, m_window);
 

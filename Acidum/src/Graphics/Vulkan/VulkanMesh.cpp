@@ -15,7 +15,7 @@ void VulkanMesh::draw(VkCommandBuffer commandBuffer) const {
     vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
 }
 
-void VulkanMesh::createIndexBuffer(VulkanDevice& device, VkCommandPool commandPool, const std::vector<uint32_t>& indices) {
+void VulkanMesh::createIndexBuffer(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<uint32_t>& indices) {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
     VulkanBuffer stagingBuffer(device, bufferSize, 
