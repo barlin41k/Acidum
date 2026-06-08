@@ -44,7 +44,7 @@ void VulkanGraphicsAPI::initialize() {
     m_instance = std::make_unique<VulkanInstance>(instanceConfig);
 
     m_surface = std::make_unique<VulkanSurface>(*m_instance, m_window);
-    m_device = std::make_unique<VulkanDevice>(m_instance->getInstance(), m_surface->getSurface());
+    m_device = std::make_unique<VulkanDevice>(*m_instance, *m_surface);
 
     m_renderer = std::make_unique<VulkanRenderer>(*m_device, *m_surface, m_window);
 

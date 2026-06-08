@@ -1,4 +1,5 @@
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
+#include "Graphics/Vulkan/VulkanSurface.hpp"
 
 #include <algorithm>
 
@@ -7,8 +8,8 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
-VulkanSwapChain::VulkanSwapChain(VulkanDevice& device, VkSurfaceKHR surface, Window* window)
-    : m_device(device), m_surface(surface), m_window(window) {
+VulkanSwapChain::VulkanSwapChain(VulkanDevice& device, VulkanSurface& surface, Window* window)
+    : m_device(device), m_surface(surface.getSurface()), m_window(window) {
     createSwapChain();
     createImageViews();
 }

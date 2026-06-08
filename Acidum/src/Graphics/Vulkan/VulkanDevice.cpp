@@ -5,10 +5,12 @@
 #include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanInstance.hpp"
+#include "Graphics/Vulkan/VulkanSurface.hpp"
 
 namespace Acidum {
-VulkanDevice::VulkanDevice(VkInstance instance, VkSurfaceKHR surface)
-    : m_instance(instance), m_surface(surface) {
+VulkanDevice::VulkanDevice(VulkanInstance& instance, VulkanSurface& surface)
+    : m_instance(instance.getInstance()), m_surface(surface.getSurface()) {
     pickPhysicalDevice();
     createLogicalDevice();
 }

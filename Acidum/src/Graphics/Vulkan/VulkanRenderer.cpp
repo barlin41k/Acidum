@@ -9,7 +9,7 @@ VulkanRenderer::VulkanRenderer(VulkanDevice& device, VulkanSurface& surface, Win
     : m_device(device), m_surface(surface), m_window(window) {
     ENGINE_INFO("Vulkan Renderer initialization started...");
 
-    m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface.getSurface(), m_window);
+    m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window);
 
     m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat());
 

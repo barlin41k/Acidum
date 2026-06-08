@@ -6,6 +6,9 @@
 #include <vector>
 
 namespace Acidum {
+class VulkanInstance;
+class VulkanSurface;
+
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
@@ -22,7 +25,7 @@ struct SwapChainSupportDetails {
 
 class VulkanDevice {
 public:
-    VulkanDevice(VkInstance instance, VkSurfaceKHR surface);
+    VulkanDevice(VulkanInstance& instance, VulkanSurface& surface);
     ~VulkanDevice();
 
     VulkanDevice(const VulkanDevice&) = delete;

@@ -7,11 +7,12 @@
 namespace Acidum {
 // forward-declaration
 class VulkanDevice;
+class VulkanSurface;
 class Window;
 
 class VulkanSwapChain {
 public:
-    VulkanSwapChain(VulkanDevice& device, VkSurfaceKHR surface, Window* window);
+    VulkanSwapChain(VulkanDevice& device, VulkanSurface& surface, Window* window);
     ~VulkanSwapChain();
 
     VulkanSwapChain(const VulkanSwapChain&) = delete;
