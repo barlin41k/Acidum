@@ -100,10 +100,17 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) const {
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
 
-    /* FOR CHECK m_requiredFeatures
     VkPhysicalDeviceFeatures supportedFeatures;
     vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
-    */
+
+    const VkBool32* requested = reinterpret_cast<const VkBool32*>(&m_requiredFeatures);
+    const VkBool32* supported = reinterpret_cast<const VkBool32*>(&supportedFeatures);
+
+    constexpr size_t featureCount = sizeof(VkPhysicalDeviceFeatures) / sizeof(VkBool32);
+
+    for (size_t i = 0; i < featureCount; i++)
+        if (requested[i] == VK_TRUE && supported[i] == VK_FALSE)
+            return false;
 
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
