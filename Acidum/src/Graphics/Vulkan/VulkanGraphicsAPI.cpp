@@ -31,6 +31,7 @@ void VulkanGraphicsAPI::initialize() {
 
     auto appVersion = m_window->getVersion(); 
     uint32_t version = VK_MAKE_VERSION(appVersion.major, appVersion.minor, appVersion.patch);
+
     
     InstanceConfig instanceConfig;
     instanceConfig.appName = m_window->getTitle();
@@ -38,6 +39,7 @@ void VulkanGraphicsAPI::initialize() {
     instanceConfig.windowExtensions = windowExtensions;
 
     DeviceConfig deviceConfig;
+
 
     m_instance = std::make_unique<VulkanInstance>(instanceConfig);
 
@@ -82,7 +84,7 @@ void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
     if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
         m_renderer->submitMesh(vulkanMesh, modelMatrix);
     else
-        ENGINE_WARN("Warning: Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI class!");
+        ENGINE_WARN("drawMesh warning: trying to draw a non-Vulkan mesh in VulkanGraphicsAPI class!");
 }
 
 void VulkanGraphicsAPI::renderFrame() {
