@@ -3,6 +3,7 @@
 #include "Acidum/Core/Base/Types.hpp"
 
 namespace Acidum {
+
 void VulkanMesh::bind(VkCommandBuffer commandBuffer) const {
     VkBuffer vertexBuffers[] = { m_vertexBuffer->getBuffer() };
     VkDeviceSize offsets[] = { 0 };
@@ -45,7 +46,7 @@ std::array<VkVertexInputAttributeDescription, 2> VulkanMesh::getAttributeDescrip
     // Position
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
     attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
     // Color
@@ -56,4 +57,5 @@ std::array<VkVertexInputAttributeDescription, 2> VulkanMesh::getAttributeDescrip
 
     return attributeDescriptions;
 }
+
 } // namespace Acidum

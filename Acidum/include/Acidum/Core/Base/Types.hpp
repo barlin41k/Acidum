@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 namespace Acidum {
+
 struct Version {
     uint32_t major;
     uint32_t minor;
@@ -14,7 +15,7 @@ enum class APIType {
 };
 
 struct Vertex {
-    glm::vec2 pos;
+    glm::vec3 pos;
     glm::vec3 color;
 };
 
@@ -22,4 +23,5 @@ struct UniformBufferObject {
     glm::mat4 view;
     glm::mat4 proj;
 };
+
 } // namespace Acidum
