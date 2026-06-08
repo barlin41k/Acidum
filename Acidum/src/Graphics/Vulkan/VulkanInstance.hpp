@@ -35,19 +35,15 @@ public:
     VulkanInstance& operator=(const VulkanInstance&) = delete;
 
     VkInstance getInstance() const noexcept { return m_instance; }
-
 private:
     VkInstance m_instance = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
 
-    bool m_enableValidationLayers;
-    std::vector<const char*> m_validationLayers;
-
     void createInstance(const InstanceConfig& config);
-    void setupDebugMessenger();
+    void setupDebugMessenger(const InstanceConfig& config);
 
-    bool checkValidationLayerSupport() const;
-    std::vector<const char*> getRequiredExtensions(const std::vector<const char*>& windowExtensions) const;
+    bool checkValidationLayerSupport(const InstanceConfig& config) const;
+    std::vector<const char*> getRequiredExtensions(const InstanceConfig& config) const;
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) const;
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(

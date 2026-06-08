@@ -1,26 +1,25 @@
 #include "Graphics/Vulkan/VulkanInstance.hpp"
 
 #include <cstring>
+#include <vulkan/vulkan_core.h>
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Base/Consts.hpp"
 
 namespace Acidum {
 
-VulkanInstance::VulkanInstance(const InstanceConfig& config)
-    : m_enableValidationLayers(config.enableValidationLayers),
-      m_validationLayers(config.validationLayers) {
+VulkanInstance::VulkanInstance(const InstanceConfig& config) {
     createInstance(config);
-    setupDebugMessenger();
+    setupDebugMessenger(config);
 }
 
 VulkanInstance::~VulkanInstance() {
-    if (m_enableValidationLayers)
+    if (m_debugMessenger != VK_NULL_HANDLE)
         DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
     vkDestroyInstance(m_instance, nullptr);
 }
 
 void VulkanInstance::createInstance(const InstanceConfig& config) {
-    ENGINE_VERIFY(!m_enableValidationLayers || checkValidationLayerSupport(), "Validation layers requested, but not available!");
+    ENGINE_VERIFY(!config.enableValidationLayers || checkValidationLayerSupport(config), "Validation layers requested, but not available!");
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -38,7 +37,7 @@ void VulkanInstance::createInstance(const InstanceConfig& config) {
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
 
-    auto extensions = getRequiredExtensions(config.windowExtensions);
+    auto extensions = getRequiredExtensions(config);
     for (const char* ext : config.additionalExtensions)
         extensions.push_back(ext);
 
@@ -46,9 +45,9 @@ void VulkanInstance::createInstance(const InstanceConfig& config) {
     createInfo.ppEnabledExtensionNames = extensions.data();
     
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-    if (m_enableValidationLayers) {
-        createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
-        createInfo.ppEnabledLayerNames = m_validationLayers.data();
+    if (config.enableValidationLayers) {
+        createInfo.enabledLayerCount = static_cast<uint32_t>(config.validationLayers.size());
+        createInfo.ppEnabledLayerNames = config.validationLayers.data();
 
         populateDebugMessengerCreateInfo(debugCreateInfo);
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
@@ -61,8 +60,8 @@ void VulkanInstance::createInstance(const InstanceConfig& config) {
     ENGINE_INFO("Vulkan instance created!");
 }
 
-void VulkanInstance::setupDebugMessenger() {
-    if (!m_enableValidationLayers) return;
+void VulkanInstance::setupDebugMessenger(const InstanceConfig& config) {
+    if (!config.enableValidationLayers) return;
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo;
     populateDebugMessengerCreateInfo(createInfo);
@@ -70,14 +69,14 @@ void VulkanInstance::setupDebugMessenger() {
     ENGINE_VERIFY(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) == VK_SUCCESS, "Failed to set up debug messenger!");
 }
 
-bool VulkanInstance::checkValidationLayerSupport() const {
+bool VulkanInstance::checkValidationLayerSupport(const InstanceConfig& config) const {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
     std::vector<VkLayerProperties> availableLayers(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-    for (const char* layerName : m_validationLayers) {
+    for (const char* layerName : config.validationLayers) {
         bool layerFound = false;
 
         for (const auto& layerProperties : availableLayers) {
@@ -94,10 +93,10 @@ bool VulkanInstance::checkValidationLayerSupport() const {
     return true;
 }
 
-std::vector<const char*> VulkanInstance::getRequiredExtensions(const std::vector<const char*>& windowExtensions) const {
-    std::vector<const char*> extensions(windowExtensions);
+std::vector<const char*> VulkanInstance::getRequiredExtensions(const InstanceConfig& config) const {
+    std::vector<const char*> extensions(config.windowExtensions);
 
-    if (m_enableValidationLayers)
+    if (config.enableValidationLayers)
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     return extensions;
