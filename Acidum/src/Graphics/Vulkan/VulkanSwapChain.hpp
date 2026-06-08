@@ -13,9 +13,9 @@ class VulkanSurface;
 class Window;
 
 struct SwapChainConfig {
-    VkFormat prefferedFormat = VK_FORMAT_R8G8B8A8_SRGB;
-    VkColorSpaceKHR prefferedColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-    VkPresentModeKHR prefferedPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+    VkFormat preferredFormat = VK_FORMAT_R8G8B8A8_SRGB;
+    VkColorSpaceKHR preferredColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+    VkPresentModeKHR preferredPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 };
 
 class VulkanSwapChain {

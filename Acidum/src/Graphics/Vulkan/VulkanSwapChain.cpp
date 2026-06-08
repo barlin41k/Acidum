@@ -29,27 +29,27 @@ VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<Vk
     bool isColorSpaceSupported = false;
 
     for (const auto& availableFormat : availableFormats) {
-        if (availableFormat.format == m_config.prefferedFormat) isFormatSupported = true;
-        if (availableFormat.colorSpace == m_config.prefferedColorSpace) isColorSpaceSupported = true;
+        if (availableFormat.format == m_config.preferredFormat) isFormatSupported = true;
+        if (availableFormat.colorSpace == m_config.preferredColorSpace) isColorSpaceSupported = true;
 
-        if (availableFormat.format == m_config.prefferedFormat && availableFormat.colorSpace == m_config.prefferedColorSpace)
+        if (availableFormat.format == m_config.preferredFormat && availableFormat.colorSpace == m_config.preferredColorSpace)
             return availableFormat;
     }
     
     if (!isFormatSupported && !isColorSpaceSupported)
         ENGINE_WARN("Swap Surface Format selection failed: neither preferred format ({}) nor color space ({}) are supported by the surface", 
-                    static_cast<int>(m_config.prefferedFormat), 
-                    static_cast<int>(m_config.prefferedColorSpace));
+                    static_cast<int>(m_config.preferredFormat), 
+                    static_cast<int>(m_config.preferredColorSpace));
     else if (!isFormatSupported)
         ENGINE_WARN("Swap Surface Format mismatch: preferred format ({}) is not supported (but color space is available)", 
-                    static_cast<int>(m_config.prefferedFormat));
+                    static_cast<int>(m_config.preferredFormat));
     else if (!isColorSpaceSupported)
         ENGINE_WARN("Swap Surface Format mismatch: preferred color space ({}) is not supported (but format is available)", 
-                    static_cast<int>(m_config.prefferedColorSpace));
+                    static_cast<int>(m_config.preferredColorSpace));
     else
         ENGINE_WARN("Swap Surface Format mismatch: both preferred format ({}) and color space ({}) are supported individually, but not in this combination",
-                    static_cast<int>(m_config.prefferedFormat),
-                    static_cast<int>(m_config.prefferedColorSpace));
+                    static_cast<int>(m_config.preferredFormat),
+                    static_cast<int>(m_config.preferredColorSpace));
 
     ENGINE_WARN("Fallback to default Swap Surface Format. Chosen format: {}, color space: {}", 
                 static_cast<int>(availableFormats[0].format), 
@@ -62,12 +62,12 @@ VkPresentModeKHR VulkanSwapChain::chooseSwapPresentMode(const std::vector<VkPres
     ENGINE_VERIFY(!availablePresentModes.empty(), "No available Swap Present Modes found!");
 
     for (const auto& availablePresentMode : availablePresentModes) {
-        if (availablePresentMode == m_config.prefferedPresentMode)
+        if (availablePresentMode == m_config.preferredPresentMode)
             return availablePresentMode;
     }
 
     ENGINE_WARN("Swap present mode mismatch: preferred mode ({}) is not supported. Falling back to VK_PRESENT_MODE_FIFO_KHR.",
-        static_cast<int>(m_config.prefferedPresentMode));
+        static_cast<int>(m_config.preferredPresentMode));
 
     return VK_PRESENT_MODE_FIFO_KHR;
 }
