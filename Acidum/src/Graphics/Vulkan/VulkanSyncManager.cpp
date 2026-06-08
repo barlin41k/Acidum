@@ -1,7 +1,7 @@
-#include "Acidum/Graphics/Vulkan/VulkanSyncManager.hpp"
+#include "Graphics/Vulkan/VulkanSyncManager.hpp"
 
 #include "Acidum/Core/Base/Logger.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
 VulkanSyncManager::VulkanSyncManager(VulkanDevice& device, uint32_t maxFramesInFlight, uint32_t imageCount) 

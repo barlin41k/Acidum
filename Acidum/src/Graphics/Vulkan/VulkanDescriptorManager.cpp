@@ -1,7 +1,7 @@
-#include "Acidum/Graphics/Vulkan/VulkanDescriptorManager.hpp"
+#include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 
 #include "Acidum/Core/Base/Logger.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
 VulkanDescriptorManager::VulkanDescriptorManager(VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout layout)

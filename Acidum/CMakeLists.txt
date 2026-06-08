@@ -15,13 +15,18 @@ add_library(AcidumCore
     src/Graphics/GraphicsFactory.cpp
 )
 
-target_include_directories(AcidumCore PUBLIC include)
+target_include_directories(AcidumCore
+    PUBLIC  include
+    PRIVATE src
+)
 
-target_link_libraries(AcidumCore PUBLIC
-    Vulkan::Vulkan
-    glfw
-    glm::glm
-    spdlog::spdlog
+target_link_libraries(AcidumCore
+    PUBLIC
+        glfw
+        glm::glm
+        spdlog::spdlog
+    PRIVATE
+        Vulkan::Vulkan
 )
 
 target_compile_options(AcidumCore PRIVATE

@@ -7,14 +7,14 @@
 
 #include "Acidum/Core/Base/Types.hpp"
 #include "Acidum/Graphics/Interfaces/IGraphicsAPI.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanSwapChain.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanBuffer.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanPipeline.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanMesh.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanCommandBufferManager.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanSyncManager.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanDescriptorManager.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanSwapChain.hpp"
+#include "Graphics/Vulkan/VulkanBuffer.hpp"
+#include "Graphics/Vulkan/VulkanPipeline.hpp"
+#include "Graphics/Vulkan/VulkanMesh.hpp"
+#include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
+#include "Graphics/Vulkan/VulkanSyncManager.hpp"
+#include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 
 namespace Acidum {
 class Window; // forward-declaration

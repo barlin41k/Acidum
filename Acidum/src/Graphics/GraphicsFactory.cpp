@@ -1,7 +1,7 @@
 #include "Acidum/Graphics/GraphicsFactory.hpp"
 
 #include "Acidum/Core/Base/Logger.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanGraphicsAPI.hpp"
+#include "Graphics/Vulkan/VulkanGraphicsAPI.hpp"
 
 namespace Acidum {
 std::unique_ptr<IGraphicsAPI> GraphicsFactory::createAPI(APIType type, Window* window) {

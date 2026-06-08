@@ -1,7 +1,7 @@
-#include "Acidum/Graphics/Vulkan/VulkanCommandBufferManager.hpp"
+#include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
 
 #include "Acidum/Core/Base/Logger.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
 VulkanCommandBufferManager::VulkanCommandBufferManager(VulkanDevice& device, uint32_t bufferCount)

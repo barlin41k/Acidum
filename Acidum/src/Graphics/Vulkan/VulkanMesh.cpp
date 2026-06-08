@@ -1,4 +1,4 @@
-#include "Acidum/Graphics/Vulkan/VulkanMesh.hpp"
+#include "Graphics/Vulkan/VulkanMesh.hpp"
 
 #include "Acidum/Core/Base/Types.hpp"
 

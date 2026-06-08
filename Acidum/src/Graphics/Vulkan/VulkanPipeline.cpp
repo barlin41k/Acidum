@@ -1,4 +1,4 @@
-#include "Acidum/Graphics/Vulkan/VulkanPipeline.hpp"
+#include "Graphics/Vulkan/VulkanPipeline.hpp"
 
 #include <glm/glm.hpp>
 
@@ -7,8 +7,8 @@
 #include <array>
 
 #include "Acidum/Core/Base/Logger.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanMesh.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanMesh.hpp"
 
 namespace Acidum {
 VulkanPipeline::VulkanPipeline(VulkanDevice& device, VkFormat swapChainFormat)

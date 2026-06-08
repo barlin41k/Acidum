@@ -1,10 +1,10 @@
-#include "Acidum/Graphics/Vulkan/VulkanSwapChain.hpp"
+#include "Graphics/Vulkan/VulkanSwapChain.hpp"
 
 #include <algorithm>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
 VulkanSwapChain::VulkanSwapChain(VulkanDevice& device, VkSurfaceKHR surface, Window* window)

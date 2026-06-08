@@ -1,9 +1,9 @@
-#include "Acidum/Graphics/Vulkan/VulkanBuffer.hpp"
+#include "Graphics/Vulkan/VulkanBuffer.hpp"
 
 #include <cstring>
 
 #include "Acidum/Core/Base/Logger.hpp"
-#include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
 VulkanBuffer::VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)

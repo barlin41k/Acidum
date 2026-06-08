@@ -1,4 +1,4 @@
-#include "Acidum/Graphics/Vulkan/VulkanGraphicsAPI.hpp"
+#include "Graphics/Vulkan/VulkanGraphicsAPI.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>

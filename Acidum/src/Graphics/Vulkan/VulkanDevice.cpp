@@ -1,4 +1,4 @@
-#include "Acidum/Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
 
 #include <cstdint>
 #include <set>
