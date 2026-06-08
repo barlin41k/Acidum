@@ -45,6 +45,19 @@ void SandboxApp::OnInit() {
 }
 
 void SandboxApp::OnUpdate(float deltaTime) {
+    static float fpsTimer = 0.0f;
+    static int frameCount = 0;
+
+    fpsTimer += deltaTime;
+    frameCount++;
+
+    if (fpsTimer >= 1.0f) {
+        std::string newTitle = "Acidum: Sandbox | FPS: " + std::to_string(frameCount);
+        GetWindow()->setTitle(newTitle);
+        fpsTimer -= 1.0f;
+        frameCount = 0;
+    }
+
     m_totalTime += deltaTime;
 
     float aspect = 1.0f;
