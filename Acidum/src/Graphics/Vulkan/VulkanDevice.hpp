@@ -56,16 +56,12 @@ private:
     VkQueue m_graphicsQueue = VK_NULL_HANDLE;
     VkQueue m_presentQueue = VK_NULL_HANDLE;
 
-    std::vector<const char*> m_deviceExtensions;                                                                                                                                                      
-    VkPhysicalDeviceFeatures m_requiredFeatures;                                                                                                                                                      
-    bool m_preferDiscreteGPU;
-
-    void pickPhysicalDevice();
-    void createLogicalDevice();
+    void pickPhysicalDevice(const DeviceConfig& config);
+    void createLogicalDevice(const DeviceConfig& config);
     
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
-    bool checkDeviceExtensionSupport(VkPhysicalDevice device) const;
+    bool checkDeviceExtensionSupport(VkPhysicalDevice device, const DeviceConfig& config) const;
     SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
-    bool isDeviceSuitable(VkPhysicalDevice device) const;
+    bool isDeviceSuitable(VkPhysicalDevice device, const DeviceConfig& config) const;
 };
 } // namespace Acidum

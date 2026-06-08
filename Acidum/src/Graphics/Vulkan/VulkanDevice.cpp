@@ -11,13 +11,10 @@
 namespace Acidum {
 VulkanDevice::VulkanDevice(const VulkanInstance& instance, const VulkanSurface& surface, const DeviceConfig& config)
     : m_instance(instance),
-      m_surface(surface),
-      m_deviceExtensions(config.deviceExtensions),
-      m_requiredFeatures(config.requiredFeatures),
-      m_preferDiscreteGPU(config.preferDiscreteGPU)
+      m_surface(surface)
 {
-    pickPhysicalDevice();
-    createLogicalDevice();
+    pickPhysicalDevice(config);
+    createLogicalDevice(config);
 }
 
 VulkanDevice::~VulkanDevice() {
@@ -50,14 +47,14 @@ QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) cons
     return indices;
 }
 
-bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) const {
+bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device, const DeviceConfig& config) const {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
-    std::set<std::string> requiredExtensions(m_deviceExtensions.begin(), m_deviceExtensions.end());
+    std::set<std::string> requiredExtensions(config.deviceExtensions.begin(), config.deviceExtensions.end());
 
     for (const auto& extension : availableExtensions)
         requiredExtensions.erase(extension.extensionName);
@@ -89,10 +86,10 @@ SwapChainSupportDetails VulkanDevice::querySwapChainSupport(VkPhysicalDevice dev
     return details;
 }
 
-bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) const {
+bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device, const DeviceConfig& config) const {
     QueueFamilyIndices indices = findQueueFamilies(device);
 
-    bool extensionsSupported = checkDeviceExtensionSupport(device);
+    bool extensionsSupported = checkDeviceExtensionSupport(device, config);
 
     bool swapChainAdequate = false;
     if (extensionsSupported) {
@@ -103,7 +100,7 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) const {
     VkPhysicalDeviceFeatures supportedFeatures;
     vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-    const VkBool32* requested = reinterpret_cast<const VkBool32*>(&m_requiredFeatures);
+    const VkBool32* requested = reinterpret_cast<const VkBool32*>(&config.requiredFeatures);
     const VkBool32* supported = reinterpret_cast<const VkBool32*>(&supportedFeatures);
 
     constexpr size_t featureCount = sizeof(VkPhysicalDeviceFeatures) / sizeof(VkBool32);
@@ -115,7 +112,7 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) const {
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-void VulkanDevice::pickPhysicalDevice() {
+void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(m_instance.getInstance(), &deviceCount, nullptr);
 
@@ -128,13 +125,13 @@ void VulkanDevice::pickPhysicalDevice() {
     VkPhysicalDevice bestDevice = VK_NULL_HANDLE;
 
     for (const auto& device : devices) {
-        if (!isDeviceSuitable(device)) continue;
+        if (!isDeviceSuitable(device, config)) continue;
 
         int score = 0;
         VkPhysicalDeviceProperties deviceProperties;
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
-        if (m_preferDiscreteGPU && deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        if (config.preferDiscreteGPU && deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
             score += 1000;
 
         score += deviceProperties.limits.maxImageDimension2D;
@@ -153,7 +150,7 @@ void VulkanDevice::pickPhysicalDevice() {
     ENGINE_INFO("Selected GPU: {} (Score: {})", deviceProperties.deviceName, highestScore);
 }
 
-void VulkanDevice::createLogicalDevice() {
+void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
     QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -176,10 +173,10 @@ void VulkanDevice::createLogicalDevice() {
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
-    createInfo.pEnabledFeatures = &m_requiredFeatures;
+    createInfo.pEnabledFeatures = &config.requiredFeatures;
 
-    createInfo.enabledExtensionCount = static_cast<uint32_t>(m_deviceExtensions.size());
-    createInfo.ppEnabledExtensionNames = m_deviceExtensions.data();
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(config.deviceExtensions.size());
+    createInfo.ppEnabledExtensionNames = config.deviceExtensions.data();
 
     createInfo.enabledLayerCount = 0;
     createInfo.ppEnabledLayerNames = nullptr;
