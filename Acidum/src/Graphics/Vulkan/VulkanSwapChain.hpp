@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 namespace Acidum {
 
