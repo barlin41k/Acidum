@@ -3,12 +3,14 @@
 #include <chrono>
 
 #include "Acidum/Graphics/GraphicsFactory.hpp"
+#include "Acidum/Core/Resources/ResourceManager.hpp"
 
 namespace Acidum {
 Application::Application(const AppConfig& config)
     : m_config(config), m_apiType(config.apiType) {}
 
 void Application::run() {
+    ResourceManager::initialize();
     initWindow();
     initGraphicsAPI();
     mainLoop();

@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 
 #include <vector>
-#include <string>
 
 namespace Acidum {
 
@@ -32,7 +31,6 @@ private:
     void createGraphicsPipeline();
     void createDescriptorSetLayout();
 
-    std::vector<char> readFile(const std::string& filename);
     VkShaderModule createShaderModule(const std::vector<char>& code);
 };
 

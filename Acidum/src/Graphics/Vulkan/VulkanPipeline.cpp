@@ -2,11 +2,10 @@
 
 #include <glm/glm.hpp>
 
-#include <ios>
-#include <fstream>
 #include <array>
 
 #include "Acidum/Core/Base/Logger.hpp"
+#include "Acidum/Core/Resources/ResourceManager.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 
@@ -26,21 +25,6 @@ VulkanPipeline::~VulkanPipeline() {
     vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_descriptorSetLayout, nullptr);
 
     vkDestroyRenderPass(m_device.getLogicalDevice(), m_renderPass, nullptr);
-}
-
-std::vector<char> VulkanPipeline::readFile(const std::string& filename) {
-    std::ifstream file(filename, std::ios::ate | std::ios::binary);
-
-    ENGINE_VERIFY(file.is_open(), "Failed to open file!");
-    
-    size_t fileSize = (size_t) file.tellg();
-    std::vector<char> buffer(fileSize);
-
-    file.seekg(0);
-    file.read(buffer.data(), static_cast<std::streamsize>(fileSize));
-    file.close();
-
-    return buffer;
 }
 
 VkShaderModule VulkanPipeline::createShaderModule(const std::vector<char>& code) {
@@ -114,8 +98,8 @@ void VulkanPipeline::createRenderPass(VkFormat swapChainFormat, VkFormat depthFo
 }
 
 void VulkanPipeline::createGraphicsPipeline() {
-    auto vertShaderCode = readFile("shaders/spirv/shader_vert.spv");
-    auto fragShaderCode = readFile("shaders/spirv/shader_frag.spv");
+    auto vertShaderCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_vert.spv");
+    auto fragShaderCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_frag.spv");
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
