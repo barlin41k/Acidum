@@ -1,22 +1,31 @@
 #include "Graphics/Vulkan/VulkanRenderer.hpp"
+
 #include "Acidum/Core/Base/Consts.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
+#include "Acidum/Core/Resources/ResourceManager.hpp"
+#include "Graphics/Vulkan/VulkanPipeline.hpp"
 
 namespace Acidum {
 
 VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window)
     : m_device(device), m_surface(surface), m_window(window) {
     ENGINE_INFO("Vulkan Renderer initialization started...");
-    
+
+    auto vertCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_vert.spv");
+    auto fragCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_frag.spv");
     
     SwapChainConfig swapChainConfig;
+
+    PipelineConfig pipelineConfig;
+    pipelineConfig.vertexShaderBytecode = vertCode;
+    pipelineConfig.fragmentShaderBytecode = fragCode;
 
 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, swapChainConfig);
     createDepthResources();
 
-    m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat(), m_depthFormat);
+    m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat(), m_depthFormat, pipelineConfig);
 
     m_swapChain->createFramebuffers(m_pipeline->getRenderPass(), m_depthImage->getImageView());
 
@@ -117,9 +126,6 @@ void VulkanRenderer::recreateSwapChain() {
 
     m_swapChain->recreate();
     createDepthResources();
-    
-    m_pipeline.reset();
-    m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat(), m_depthFormat);
     
     m_swapChain->createFramebuffers(m_pipeline->getRenderPass(), m_depthImage->getImageView());
     
