@@ -20,14 +20,16 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
     PipelineConfig pipelineConfig;
     pipelineConfig.vertexShaderBytecode = vertCode;
     pipelineConfig.fragmentShaderBytecode = fragCode;
-
+    
 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, swapChainConfig);
     createDepthResources();
 
-    m_pipeline = std::make_unique<VulkanPipeline>(m_device, m_swapChain->getFormat(), m_depthFormat, pipelineConfig);
+    m_renderPass = std::make_unique<VulkanRenderPass>(m_device, m_swapChain->getFormat(), m_depthFormat);
 
-    m_swapChain->createFramebuffers(m_pipeline->getRenderPass(), m_depthImage->getImageView());
+    m_pipeline = std::make_unique<VulkanPipeline>(m_device, *m_renderPass, pipelineConfig);
+
+    m_swapChain->createFramebuffers(m_renderPass->getRenderPass(), m_depthImage->getImageView());
 
     m_commandBufferManager = std::make_unique<VulkanCommandBufferManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT);
 
@@ -127,7 +129,7 @@ void VulkanRenderer::recreateSwapChain() {
     m_swapChain->recreate();
     createDepthResources();
     
-    m_swapChain->createFramebuffers(m_pipeline->getRenderPass(), m_depthImage->getImageView());
+    m_swapChain->createFramebuffers(m_renderPass->getRenderPass(), m_depthImage->getImageView());
     
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
     m_syncManager.reset();
@@ -149,7 +151,7 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = m_pipeline->getRenderPass();
+    renderPassInfo.renderPass = m_renderPass->getRenderPass();
     renderPassInfo.framebuffer = m_swapChain->getFramebuffers()[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = m_swapChain->getExtent();

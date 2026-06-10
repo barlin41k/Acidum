@@ -6,7 +6,9 @@
 
 namespace Acidum {
 
-class VulkanDevice; // forward-declaration
+// forward-declaration
+class VulkanDevice;
+class VulkanRenderPass;
 
 struct PipelineConfig {
     std::vector<char> vertexShaderBytecode;
@@ -28,7 +30,7 @@ struct PipelineConfig {
 
 class VulkanPipeline {
 public:
-    VulkanPipeline(const VulkanDevice& device, VkFormat swapChainFormat, VkFormat depthFormat, const PipelineConfig& config);
+    VulkanPipeline(const VulkanDevice& device, const VulkanRenderPass& renderPass, const PipelineConfig& config);
     ~VulkanPipeline();
 
     VulkanPipeline(const VulkanPipeline&) = delete;
@@ -36,17 +38,14 @@ public:
 
     VkPipeline getPipeline() const noexcept { return m_graphicsPipeline; }
     VkPipelineLayout getLayout() const noexcept { return m_pipelineLayout; }
-    VkRenderPass getRenderPass() const noexcept { return m_renderPass; }
     VkDescriptorSetLayout getDescriptorSetLayout() const { return m_descriptorSetLayout; }
 private:
     const VulkanDevice& m_device;
-    VkRenderPass m_renderPass = VK_NULL_HANDLE;
     VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
     VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
     VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
 
-    void createRenderPass(VkFormat swapChainFormat, VkFormat depthFormat);
-    void createGraphicsPipeline(const PipelineConfig& config);
+    void createGraphicsPipeline(const VulkanRenderPass& renderPass, const PipelineConfig& config);
     void createDescriptorSetLayout();
 
     VkShaderModule createShaderModule(const std::vector<char>& code);

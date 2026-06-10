@@ -6,6 +6,7 @@
 
 #include "Graphics/Vulkan/VulkanImage.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
+#include "Graphics/Vulkan/VulkanRenderPass.hpp"
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
@@ -43,6 +44,7 @@ private:
     const VulkanSurface& m_surface;
     Window* m_window;
 
+    std::unique_ptr<VulkanRenderPass> m_renderPass;
     std::unique_ptr<VulkanSwapChain> m_swapChain;
     std::unique_ptr<VulkanPipeline> m_pipeline;
     std::unique_ptr<VulkanCommandBufferManager> m_commandBufferManager;
