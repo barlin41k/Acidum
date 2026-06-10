@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Acidum/Core/Base/Types.hpp"
+#include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
 
 namespace Acidum {
@@ -30,7 +31,7 @@ struct RenderCommand {
 
 class VulkanRenderer {
 public:
-    VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window);
+    VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window, const RendererConfig& config);
     ~VulkanRenderer();
 
     VulkanRenderer(const VulkanRenderer&) = delete;
@@ -49,6 +50,8 @@ private:
     const VulkanSurface& m_surface;
     Window* m_window;
 
+    RendererConfig m_config;
+
     std::unique_ptr<VulkanRenderPass> m_renderPass;
     std::unique_ptr<VulkanSwapChain> m_swapChain;
     std::unique_ptr<VulkanPipeline> m_pipeline;
@@ -61,7 +64,6 @@ private:
     std::vector<RenderCommand> m_renderQueue;
     glm::mat4 m_viewMatrix = glm::mat4(1.0f);
     glm::mat4 m_projectionMatrix = glm::mat4(1.0f);
-    glm::vec4 m_clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
     uint32_t m_currentFrame = 0;
     bool m_framebufferResized = false;

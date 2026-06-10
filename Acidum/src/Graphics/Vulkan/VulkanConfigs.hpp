@@ -57,4 +57,10 @@ struct DeviceConfig {
     bool preferDiscreteGPU = true;
 };
 
+struct RendererConfig {
+    glm::vec4 clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+    SwapChainConfig swapChainConfig;
+    PipelineConfig pipelineConfig;
+};
+
 } // namespace Acidum

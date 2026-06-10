@@ -3,7 +3,6 @@
 #include "Acidum/Core/Base/Consts.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
-#include "Acidum/Core/Resources/ResourceManager.hpp"
 #include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanImage.hpp"
@@ -15,26 +14,16 @@
 
 namespace Acidum {
 
-VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window)
-    : m_device(device), m_surface(surface), m_window(window) {
+VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window, const RendererConfig& config)
+    : m_device(device), m_surface(surface), m_window(window), m_config(config) {
     ENGINE_INFO("Vulkan Renderer initialization started...");
 
-    auto vertCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_vert.spv");
-    auto fragCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_frag.spv");
-    
-    SwapChainConfig swapChainConfig;
-
-    PipelineConfig pipelineConfig;
-    pipelineConfig.vertexShaderBytecode = vertCode;
-    pipelineConfig.fragmentShaderBytecode = fragCode;
-
-
-    m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, swapChainConfig);
+    m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, m_config.swapChainConfig);
     createDepthResources();
 
     m_renderPass = std::make_unique<VulkanRenderPass>(m_device, m_swapChain->getFormat(), m_depthFormat);
 
-    m_pipeline = std::make_unique<VulkanPipeline>(m_device, *m_renderPass, pipelineConfig);
+    m_pipeline = std::make_unique<VulkanPipeline>(m_device, *m_renderPass, m_config.pipelineConfig);
 
     m_swapChain->createFramebuffers(m_renderPass->getRenderPass(), m_depthImage->getImageView());
 
@@ -164,7 +153,9 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     renderPassInfo.renderArea.extent = m_swapChain->getExtent();
 
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = {{ m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a }};
+    clearValues[0].color = {{
+        m_config.clearColor.r, m_config.clearColor.g, m_config.clearColor.b, m_config.clearColor.a
+    }};
     clearValues[1].depthStencil = {1.0f, 0};
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());

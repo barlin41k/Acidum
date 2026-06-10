@@ -7,6 +7,7 @@
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
+#include "Acidum/Core/Resources/ResourceManager.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 #include "Graphics/Vulkan/VulkanInstance.hpp"
@@ -37,6 +38,9 @@ void VulkanGraphicsAPI::initialize() {
     auto appVersion = m_window->getVersion(); 
     uint32_t version = VK_MAKE_VERSION(appVersion.major, appVersion.minor, appVersion.patch);
 
+    auto vertCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_vert.spv");
+    auto fragCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_frag.spv");
+
     
     InstanceConfig instanceConfig;
     instanceConfig.appName = m_window->getTitle();
@@ -46,13 +50,24 @@ void VulkanGraphicsAPI::initialize() {
     DeviceConfig deviceConfig;
     deviceConfig.requiredFeatures.fillModeNonSolid = VK_TRUE;
 
+    SwapChainConfig swapChainConfig;
+
+    PipelineConfig pipelineConfig;
+    pipelineConfig.vertexShaderBytecode = vertCode;
+    pipelineConfig.fragmentShaderBytecode = fragCode;
+
+    RendererConfig rendererConfig;
+    rendererConfig.swapChainConfig = swapChainConfig;
+    rendererConfig.pipelineConfig = pipelineConfig;
+    
+
     m_instance = std::make_unique<VulkanInstance>(instanceConfig);
 
     m_surface = std::make_unique<VulkanSurface>(*m_instance, m_window);
 
     m_device = std::make_unique<VulkanDevice>(*m_instance, *m_surface, deviceConfig);
 
-    m_renderer = std::make_unique<VulkanRenderer>(*m_device, *m_surface, m_window);
+    m_renderer = std::make_unique<VulkanRenderer>(*m_device, *m_surface, m_window, rendererConfig);
 
     ENGINE_INFO("Vulkan initialized!");
 }
