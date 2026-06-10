@@ -4,6 +4,9 @@ add_library(AcidumCore
     src/Core/Application.cpp
     src/Core/Platform/Window.cpp
     src/Core/Resources/ResourceManager.cpp
+    
+    src/Scene/Camera.cpp
+
     src/Graphics/Vulkan/VulkanGraphicsAPI.cpp
     src/Graphics/Vulkan/VulkanInstance.cpp
     src/Graphics/Vulkan/VulkanSurface.cpp

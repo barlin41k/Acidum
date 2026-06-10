@@ -63,14 +63,13 @@ void SandboxApp::OnUpdate(float deltaTime) {
     float aspect = 1.0f;
     int width = 0, height = 0;
     GetWindow()->getFramebufferSize(&width, &height);
-    if (height > 0)
+    if (width > 0 && height > 0) {
         aspect = static_cast<float>(width) / static_cast<float>(height);
+        m_camera.setAspectRatio(aspect);
 
-    glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 10.0f);
-
-    GetGraphicsAPI()->setViewMatrix(view);
-    GetGraphicsAPI()->setProjectionMatrix(proj);
+        GetGraphicsAPI()->setViewMatrix(m_camera.getViewMatrix());
+        GetGraphicsAPI()->setProjectionMatrix(m_camera.getProjectionMatrix());
+    }
 }
 
 void SandboxApp::OnRender() {
