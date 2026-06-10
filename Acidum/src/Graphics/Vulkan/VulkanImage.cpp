@@ -61,7 +61,6 @@ void VulkanImage::createImageView(VkFormat format, VkImageAspectFlags aspectFlag
     viewInfo.image = m_image;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = format;
-    viewInfo.subresourceRange.layerCount = 1;
     viewInfo.subresourceRange.aspectMask = aspectFlags;
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
