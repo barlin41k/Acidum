@@ -6,7 +6,8 @@
 
 namespace Acidum {
 
-class VulkanDevice; // forward-declaration
+// forward-declaration
+class VulkanDevice;
 
 class VulkanImage {
 public:

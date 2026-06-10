@@ -7,6 +7,7 @@
 
 namespace Acidum {
 
+// forward-declaration
 class VulkanInstance;
 class VulkanSurface;
 

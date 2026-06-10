@@ -5,7 +5,9 @@
 #include <vector>
 
 namespace Acidum {
-class VulkanDevice; // forward-declaration
+
+// forward-declaration
+class VulkanDevice;
 
 class VulkanCommandBufferManager {
 public:
@@ -23,4 +25,5 @@ private:
     VkCommandPool m_commandPool = VK_NULL_HANDLE;
     std::vector<VkCommandBuffer> m_commandBuffers;
 };
+
 } // namespace Acidum

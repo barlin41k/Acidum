@@ -5,7 +5,9 @@
 #include <vector>
 
 namespace Acidum {
-class VulkanDevice; // forward-declaration
+
+// forward-declaration
+class VulkanDevice;
 
 class VulkanSyncManager {
 public:
@@ -30,4 +32,5 @@ private:
     std::vector<VkFence> m_inFlightFences;
     std::vector<VkFence> m_imagesInFlight;
 };
+
 } // namespace Acidum

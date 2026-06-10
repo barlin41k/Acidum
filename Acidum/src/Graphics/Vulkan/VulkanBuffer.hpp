@@ -4,6 +4,7 @@
 
 namespace Acidum {
 
+// forward-declaration
 class VulkanDevice;
 
 class VulkanBuffer {
