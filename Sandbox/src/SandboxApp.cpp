@@ -35,8 +35,8 @@ static const std::vector<uint32_t> INDICES = {
 SandboxApp::SandboxApp(Acidum::APIType apiType) 
     : Acidum::Application(Acidum::AppConfig{
         {0, 1, 0},
-        "Acidum: Sandbox",
-        1280, 720,
+        SandboxConsts::WINDOW_TITLE,
+        SandboxConsts::WINDOW_WIDTH, SandboxConsts::WINDOW_HEIGHT,
         apiType
     }), m_totalTime(0.0f) {}
 
@@ -52,7 +52,7 @@ void SandboxApp::OnUpdate(float deltaTime) {
     frameCount++;
 
     if (fpsTimer >= 1.0f) {
-        std::string newTitle = "Acidum: Sandbox | FPS: " + std::to_string(frameCount);
+        std::string newTitle = std::string(SandboxConsts::WINDOW_TITLE) + " | FPS: " + std::to_string(frameCount);
         GetWindow()->setTitle(newTitle);
         fpsTimer -= 1.0f;
         frameCount = 0;
