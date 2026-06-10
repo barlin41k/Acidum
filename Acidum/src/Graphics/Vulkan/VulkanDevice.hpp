@@ -10,6 +10,7 @@ namespace Acidum {
 // forward-declaration
 class VulkanInstance;
 class VulkanSurface;
+struct DeviceConfig;
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
@@ -23,16 +24,6 @@ struct SwapChainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
-};
-
-struct DeviceConfig {
-    std::vector<const char*> deviceExtensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    };
-
-    VkPhysicalDeviceFeatures requiredFeatures{};
-    
-    bool preferDiscreteGPU = true;
 };
 
 class VulkanDevice {

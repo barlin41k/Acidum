@@ -4,18 +4,14 @@
 
 #include <vector>
 
+#include "Graphics/Vulkan/VulkanConfigs.hpp"
+
 namespace Acidum {
 
 // forward-declaration
 class VulkanDevice;
 class VulkanSurface;
 class Window;
-
-struct SwapChainConfig {
-    VkFormat preferredFormat = VK_FORMAT_R8G8B8A8_SRGB;
-    VkColorSpaceKHR preferredColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-    VkPresentModeKHR preferredPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-};
 
 class VulkanSwapChain {
 public:

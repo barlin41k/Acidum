@@ -5,6 +5,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanInstance.hpp"
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 

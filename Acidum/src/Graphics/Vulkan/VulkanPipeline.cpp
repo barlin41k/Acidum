@@ -5,6 +5,7 @@
 #include <array>
 
 #include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanRenderPass.hpp"

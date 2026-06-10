@@ -1,9 +1,12 @@
 #include "Graphics/Vulkan/VulkanInstance.hpp"
 
+#include <vulkan/vulkan.h>
+
 #include <cstring>
-#include <vulkan/vulkan_core.h>
+
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Base/Consts.hpp"
+#include "Graphics/Vulkan/VulkanConfigs.hpp"
 
 namespace Acidum {
 

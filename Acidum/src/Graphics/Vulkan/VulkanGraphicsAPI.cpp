@@ -7,6 +7,7 @@
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
+#include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 #include "Graphics/Vulkan/VulkanInstance.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"

@@ -2,29 +2,12 @@
 
 #include <vulkan/vulkan.h>
 
-#include <cstdint>
-#include <string>
 #include <vector>
-#include <vulkan/vulkan_core.h>
-
-#include "Acidum/Core/Base/Consts.hpp"
 
 namespace Acidum {
 
-struct InstanceConfig {
-    std::string appName = Consts::ENGINE_NAME;
-    uint32_t appVersion = VK_MAKE_VERSION(1, 0, 0);
-    uint32_t apiVersion = VK_API_VERSION_1_2;
-
-    std::vector<const char*> windowExtensions;
-    std::vector<const char*> additionalExtensions;
-    std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-#ifdef NDEBUG
-    bool enableValidationLayers = false;
-#else
-    bool enableValidationLayers = true;
-#endif
-};
+// forward-declaration
+struct InstanceConfig;
 
 class VulkanInstance {
 public:
