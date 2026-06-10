@@ -6,14 +6,14 @@
 #include "Acidum/Core/Base/Types.hpp"
 #include "Acidum/Graphics/Interfaces/IGraphicsAPI.hpp"
 
-#include "Graphics/Vulkan/VulkanInstance.hpp"
-#include "Graphics/Vulkan/VulkanSurface.hpp"
-#include "Graphics/Vulkan/VulkanDevice.hpp"
-#include "Graphics/Vulkan/VulkanRenderer.hpp"
-
 namespace Acidum {
 
-class Window; // forward-declaration
+// forward-declaration
+class Window;
+class VulkanInstance;
+class VulkanDevice;
+class VulkanRenderer;
+class VulkanSurface;
 
 class VulkanGraphicsAPI : public IGraphicsAPI {
 public:

@@ -5,10 +5,12 @@
 #include <vector>
 
 #include "Acidum/Core/Base/Types.hpp"
-#include "Graphics/Vulkan/VulkanBuffer.hpp"
 
 namespace Acidum {
-class VulkanDevice; // forward-declaration
+
+// forward-declaration
+class VulkanDevice;
+class VulkanBuffer;
 
 class VulkanDescriptorManager {
 public:
@@ -34,4 +36,5 @@ private:
 
     std::vector<std::unique_ptr<VulkanBuffer>> m_uniformBuffers;
 };
+
 } // namespace Acidum

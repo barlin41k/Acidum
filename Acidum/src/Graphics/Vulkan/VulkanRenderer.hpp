@@ -1,22 +1,27 @@
 #pragma once
 
-#include <memory>
-#include <vector>
 #include <glm/glm.hpp>
 
-#include "Graphics/Vulkan/VulkanImage.hpp"
-#include "Graphics/Vulkan/VulkanMesh.hpp"
-#include "Graphics/Vulkan/VulkanRenderPass.hpp"
-#include "Graphics/Vulkan/VulkanSurface.hpp"
-#include "Graphics/Vulkan/VulkanDevice.hpp"
-#include "Graphics/Vulkan/VulkanSwapChain.hpp"
-#include "Graphics/Vulkan/VulkanPipeline.hpp"
+#include <memory>
+#include <vector>
+
+#include "Acidum/Core/Base/Types.hpp"
 #include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
-#include "Graphics/Vulkan/VulkanSyncManager.hpp"
-#include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 
 namespace Acidum {
+
+// forward-declaration
 class Window;
+class VulkanImage;
+class VulkanMesh;
+class VulkanRenderPass;
+class VulkanSurface;
+class VulkanDevice;
+class VulkanSwapChain;
+class VulkanPipeline;
+class VulkanCommandBufferManager;
+class VulkanSyncManager;
+class VulkanDescriptorManager;
 
 struct RenderCommand {
     VulkanMesh* mesh;

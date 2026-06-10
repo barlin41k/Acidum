@@ -4,7 +4,14 @@
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
 #include "Acidum/Core/Resources/ResourceManager.hpp"
+#include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanImage.hpp"
+#include "Graphics/Vulkan/VulkanMesh.hpp"
 #include "Graphics/Vulkan/VulkanPipeline.hpp"
+#include "Graphics/Vulkan/VulkanRenderPass.hpp"
+#include "Graphics/Vulkan/VulkanSwapChain.hpp"
+#include "Graphics/Vulkan/VulkanSyncManager.hpp"
 
 namespace Acidum {
 
@@ -20,7 +27,7 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
     PipelineConfig pipelineConfig;
     pipelineConfig.vertexShaderBytecode = vertCode;
     pipelineConfig.fragmentShaderBytecode = fragCode;
-    
+
 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, swapChainConfig);
     createDepthResources();

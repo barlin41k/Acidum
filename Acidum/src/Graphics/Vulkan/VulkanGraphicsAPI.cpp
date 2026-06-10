@@ -1,13 +1,17 @@
 #include "Graphics/Vulkan/VulkanGraphicsAPI.hpp"
-#include "Graphics/Vulkan/VulkanDevice.hpp"
-#include "Graphics/Vulkan/VulkanInstance.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vulkan/vulkan.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
+#include "Graphics/Vulkan/VulkanSurface.hpp"
+#include "Graphics/Vulkan/VulkanInstance.hpp"
+#include "Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanMesh.hpp"
+#include "Graphics/Vulkan/VulkanRenderer.hpp"
 
 namespace Acidum {
 
@@ -39,7 +43,7 @@ void VulkanGraphicsAPI::initialize() {
     instanceConfig.windowExtensions = windowExtensions;
 
     DeviceConfig deviceConfig;
-
+    deviceConfig.requiredFeatures.fillModeNonSolid = VK_TRUE;
 
     m_instance = std::make_unique<VulkanInstance>(instanceConfig);
 
