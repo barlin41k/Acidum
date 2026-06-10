@@ -1,6 +1,7 @@
 #include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 
 #include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanBuffer.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
