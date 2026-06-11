@@ -3,6 +3,7 @@ add_library(AcidumCore
     src/Core/Base/Logger.cpp
     src/Core/Application.cpp
     src/Core/Platform/Window.cpp
+    src/Core/Platform/Input.cpp
     src/Core/Resources/ResourceManager.cpp
     
     src/Scene/Camera.cpp

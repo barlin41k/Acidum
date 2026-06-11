@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Acidum/Core/Platform/KeyboardCode.hpp"
+#include "Acidum/Core/Platform/Input.hpp"
 #include "Acidum/Core/Application.hpp"
 
 namespace Acidum {
@@ -38,28 +40,61 @@ SandboxApp::SandboxApp(Acidum::APIType apiType)
         SandboxConsts::WINDOW_TITLE,
         SandboxConsts::WINDOW_WIDTH, SandboxConsts::WINDOW_HEIGHT,
         apiType
-    }), m_totalTime(0.0f) {}
+    }),
+      m_totalTime(0.0f) {}
 
 void SandboxApp::OnInit() {
-    m_triangleMesh = GetGraphicsAPI()->createMesh(VERTICES, INDICES);
+    Acidum::Input::SetCursorMode(Acidum::CursorMode::Locked);
+    m_cubeMesh = GetGraphicsAPI()->createMesh(VERTICES, INDICES);
 }
 
 void SandboxApp::OnUpdate(float deltaTime) {
-    static float fpsTimer = 0.0f;
-    static int frameCount = 0;
-
-    fpsTimer += deltaTime;
-    frameCount++;
-
-    if (fpsTimer >= 1.0f) {
-        std::string newTitle = std::string(SandboxConsts::WINDOW_TITLE) + " | FPS: " + std::to_string(frameCount);
-        GetWindow()->setTitle(newTitle);
-        fpsTimer -= 1.0f;
-        frameCount = 0;
-    }
-
     m_totalTime += deltaTime;
 
+    updateCamera(deltaTime);
+    updateShaderMatrices();
+}
+
+void SandboxApp::OnRender() {
+    if (m_cubeMesh) {
+        glm::mat4 modelMatrix = glm::rotate(glm::mat4(1.0f), m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        GetGraphicsAPI()->drawMesh(m_cubeMesh.get(), modelMatrix);
+    }
+}
+
+void SandboxApp::updateCamera(float deltaTime) {
+    glm::vec2 currentMousePos = Acidum::Input::GetMousePosition();
+    if (m_firstMouse) {
+        m_lastMousePos = currentMousePos;
+        m_firstMouse = false;
+    }
+
+    float xoffset = currentMousePos.x - m_lastMousePos.x;
+    float yoffset = m_lastMousePos.y - currentMousePos.y;
+    m_lastMousePos = currentMousePos;
+
+    float sensitivity = 0.1f;
+    m_yaw += xoffset * sensitivity;
+    m_pitch += yoffset * sensitivity;
+
+    if (m_pitch > 89.0f) m_pitch = 89.0f;
+    if (m_pitch < -89.0f) m_pitch = -89.0f;
+
+    float cameraSpeed = SandboxConsts::CAMERA_SPEED * deltaTime;
+    if (Acidum::Input::IsKeyPressed(Acidum::Keyboard::W))
+        m_cameraPos += m_camera.getFront() * cameraSpeed;
+    if (Acidum::Input::IsKeyPressed(Acidum::Keyboard::S))
+        m_cameraPos -= m_camera.getFront() * cameraSpeed;
+    if (Acidum::Input::IsKeyPressed(Acidum::Keyboard::A))
+        m_cameraPos -= m_camera.getRight() * cameraSpeed;
+    if (Acidum::Input::IsKeyPressed(Acidum::Keyboard::D))
+        m_cameraPos += m_camera.getRight() * cameraSpeed;
+
+    m_camera.setRotation(m_pitch, m_yaw);
+    m_camera.setPosition(m_cameraPos);
+}
+
+void SandboxApp::updateShaderMatrices() {
     float aspect = 1.0f;
     int width = 0, height = 0;
     GetWindow()->getFramebufferSize(&width, &height);
@@ -69,12 +104,5 @@ void SandboxApp::OnUpdate(float deltaTime) {
 
         GetGraphicsAPI()->setViewMatrix(m_camera.getViewMatrix());
         GetGraphicsAPI()->setProjectionMatrix(m_camera.getProjectionMatrix());
-    }
-}
-
-void SandboxApp::OnRender() {
-    if (m_triangleMesh) {
-        glm::mat4 modelMatrix = glm::rotate(glm::mat4(1.0f), m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        GetGraphicsAPI()->drawMesh(m_triangleMesh.get(), modelMatrix);
     }
 }
