@@ -25,6 +25,7 @@ void Camera::recalculateViewMatrix() {
     front.y = static_cast<float>(sinPitch);
     front.z = static_cast<float>(sinYaw * cosPitch);
 
+    m_front = glm::normalize(front);
     m_right = glm::normalize(glm::cross(m_front, m_worldUp));
     m_up = glm::normalize(glm::cross(m_right, m_front));
 
