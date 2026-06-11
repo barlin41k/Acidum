@@ -2,12 +2,20 @@
 
 #include <chrono>
 
+#include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Graphics/GraphicsFactory.hpp"
 #include "Acidum/Core/Resources/ResourceManager.hpp"
 
 namespace Acidum {
+
+Application* Application::s_Instance = nullptr;
+
 Application::Application(const AppConfig& config)
-    : m_config(config), m_apiType(config.apiType) {}
+    : m_config(config), m_apiType(config.apiType)
+{
+    ENGINE_VERIFY(!s_Instance, "Application already exists!");
+    s_Instance = this;
+}
 
 void Application::run() {
     ResourceManager::initialize();
@@ -52,4 +60,5 @@ void Application::mainLoop() {
 
     m_graphicsAPI->waitIdle();
 }
+
 } // namespace Acidum

@@ -26,14 +26,18 @@ public:
     Application& operator=(const Application&) = delete;
 
     void run();
+
+    inline static Application& Get() { return *s_Instance; }
+    Window* GetWindow() { return m_window.get(); }
 protected:
     virtual void OnInit() {}
-    virtual void OnUpdate(float deltaTime) {} // NOLINT
+    virtual void OnUpdate([[maybe_unused]] float deltaTime) {}
     virtual void OnRender() {}
 
     IGraphicsAPI* GetGraphicsAPI() { return m_graphicsAPI.get(); }
-    Window* GetWindow() { return m_window.get(); }
 private:
+    static Application* s_Instance;
+
     std::unique_ptr<Window> m_window;
     std::unique_ptr<IGraphicsAPI> m_graphicsAPI;
 
