@@ -32,13 +32,19 @@ public:
 
     void waitIdle() const override;
 private:
-
     Window* m_window = nullptr;
 
     std::unique_ptr<VulkanInstance> m_instance;
     std::unique_ptr<VulkanSurface> m_surface;
     std::unique_ptr<VulkanDevice> m_device;
     std::unique_ptr<VulkanRenderer> m_renderer;
+
+    static constexpr glm::mat4 CLIP_CORRECTION = glm::mat4(
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.5f, 0.0f,
+        0.0f, 0.0f, 0.5f, 1.0f
+    );
 };
 
 } // namespace Acidum

@@ -31,6 +31,7 @@ void VulkanGraphicsAPI::initialize() {
         if (m_renderer) m_renderer->setFramebufferResized(true);
     });
 
+
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     std::vector<const char*> windowExtensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
@@ -77,15 +78,8 @@ void VulkanGraphicsAPI::waitIdle() const {
 }
 
 void VulkanGraphicsAPI::setProjectionMatrix(const glm::mat4& proj) {
-    static const glm::mat4 clipCorrection(
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.5f, 0.0f,
-        0.0f, 0.0f, 0.5f, 1.0f
-    );
-
     ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
-    m_renderer->setProjectionMatrix(clipCorrection * proj);
+    m_renderer->setProjectionMatrix(CLIP_CORRECTION * proj);
 }
 
 void VulkanGraphicsAPI::setViewMatrix(const glm::mat4& view) {
@@ -94,6 +88,7 @@ void VulkanGraphicsAPI::setViewMatrix(const glm::mat4& view) {
 }
 
 std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
+    ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
     return std::make_unique<VulkanMesh>(*m_device, m_renderer->getCommandPool(), vertices, indices);
 }
 
