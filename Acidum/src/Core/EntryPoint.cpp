@@ -1,4 +1,4 @@
-
+#include "Acidum/Core/Base/Consts.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Application.hpp"
 
@@ -9,7 +9,11 @@ namespace Acidum {
 int main() {
     Acidum::Logger::Init();
 
-    ENGINE_INFO("Acidum Engine started!");
+    ENGINE_INFO("Acidum Engine v{}.{}.{} started!",
+        Acidum::Consts::ENGINE_VERSION.major,
+        Acidum::Consts::ENGINE_VERSION.minor,
+        Acidum::Consts::ENGINE_VERSION.patch
+    );
 
     auto app = Acidum::CreateApplication();
 

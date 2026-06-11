@@ -41,7 +41,7 @@ void ResourceManager::initialize() {
 
     s_assetsPath = executeDir / "assets";
 
-    ENGINE_INFO("ResourceManager initialized, base path: {}", s_assetsPath.string());
+    ENGINE_INFO("ResourceManager initialized with base path: {}", s_assetsPath.string());
 }
 
 std::vector<char> ResourceManager::loadBinaryFile(const std::string& relativePath) {

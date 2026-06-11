@@ -1,10 +1,12 @@
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
-#include "Graphics/Vulkan/VulkanSurface.hpp"
+
+#include <vulkan/vk_enum_string_helper.h>
 
 #include <algorithm>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
+#include "Graphics/Vulkan/VulkanSurface.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
@@ -132,6 +134,11 @@ void VulkanSwapChain::createSwapChain() {
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     ENGINE_VERIFY(vkCreateSwapchainKHR(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChain) == VK_SUCCESS, "Failed to create swap chain!");
+    ENGINE_DEBUG("Vulkan SwapChain created: {}x{}, Format {}, Present Mode {}",
+        extent.width, extent.height,
+        string_VkFormat(surfaceFormat.format),
+        string_VkPresentModeKHR(presentMode)
+    );
     
     vkGetSwapchainImagesKHR(m_device.getLogicalDevice(), m_swapChain, &imageCount, nullptr);
     m_swapChainImages.resize(imageCount);

@@ -1,8 +1,9 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
+#include <vulkan/vk_enum_string_helper.h>
+
 #include <cstdint>
 #include <set>
-#include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
@@ -117,14 +118,15 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device, const DeviceConfig&
 void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(m_instance.getInstance(), &deviceCount, nullptr);
-
     ENGINE_VERIFY(deviceCount > 0, "Failed to find GPUs with Vulkan support!");
+    ENGINE_INFO("Found {} GPUs with Vulkan support", deviceCount);
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(m_instance.getInstance(), &deviceCount, devices.data());
 
     int highestScore = -1;
     VkPhysicalDevice bestDevice = VK_NULL_HANDLE;
+    VkPhysicalDeviceProperties bestDeviceProperties {};
 
     for (const auto& device : devices) {
         if (!isDeviceSuitable(device, config)) continue;
@@ -141,15 +143,18 @@ void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
         if (score > highestScore) {
             highestScore = score;
             bestDevice = device;
+            bestDeviceProperties = deviceProperties;
         }
     }
     
     ENGINE_VERIFY(bestDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
     m_physicalDevice = bestDevice;
 
-    VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(m_physicalDevice, &deviceProperties);
-    ENGINE_INFO("Selected GPU: {} (Score: {})", deviceProperties.deviceName, highestScore);
+    uint32_t version = bestDeviceProperties.apiVersion;
+    ENGINE_INFO("Selected GPU: {} (Score: {}, Vulkan API: {}.{}.{})",
+        bestDeviceProperties.deviceName, highestScore,
+        VK_VERSION_MAJOR(version), VK_VERSION_MINOR(version), VK_VERSION_PATCH(version)
+    );
 }
 
 void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
