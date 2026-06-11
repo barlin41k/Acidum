@@ -184,7 +184,6 @@ void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
     createInfo.ppEnabledLayerNames = nullptr;
 
     ENGINE_VERIFY(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) == VK_SUCCESS, "Failed to create logical device!");
-    ENGINE_DEBUG("Vulkan Logical Device created!");
 
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
@@ -199,6 +198,7 @@ uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags
     }
 
     ENGINE_VERIFY(false, "Failed to find suitable memory type!");
+    
     return 0;
 }
 

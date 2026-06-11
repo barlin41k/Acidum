@@ -132,7 +132,6 @@ void VulkanSwapChain::createSwapChain() {
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     ENGINE_VERIFY(vkCreateSwapchainKHR(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChain) == VK_SUCCESS, "Failed to create swap chain!");
-    ENGINE_DEBUG("Vulkan SwapChain created!");
     
     vkGetSwapchainImagesKHR(m_device.getLogicalDevice(), m_swapChain, &imageCount, nullptr);
     m_swapChainImages.resize(imageCount);
@@ -176,9 +175,7 @@ void VulkanSwapChain::createImageViews() {
         createInfo.subresourceRange.layerCount = 1;
 
         ENGINE_VERIFY(vkCreateImageView(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) == VK_SUCCESS, "Failed to create image views!");
-        ENGINE_DEBUG("Vulkan Image View ({}) created!", i);
     }
-    ENGINE_DEBUG("Vulkan Image Views created!");
 }
 
 void VulkanSwapChain::createFramebuffers(VkRenderPass renderPass, VkImageView depthImageView) {
@@ -200,8 +197,6 @@ void VulkanSwapChain::createFramebuffers(VkRenderPass renderPass, VkImageView de
         framebufferInfo.layers = 1;
 
         ENGINE_VERIFY(vkCreateFramebuffer(m_device.getLogicalDevice(), &framebufferInfo, nullptr, &m_swapChainFramebuffers[i]) == VK_SUCCESS, "Failed to create framebuffer!");
-        ENGINE_DEBUG("Vulkan Framebuffer ({}) created!", i);
     }
-    ENGINE_DEBUG("Vulkan Framebuffers created!");
 }
 } // namespace Acidum

@@ -14,7 +14,6 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(const VulkanDevice& devic
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
     ENGINE_VERIFY(vkCreateCommandPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_commandPool) == VK_SUCCESS, "Failed to create command pool!");
-    ENGINE_DEBUG("Vulkan Command Pool created!");
 
     m_commandBuffers.resize(bufferCount);
 
@@ -25,7 +24,6 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(const VulkanDevice& devic
     allocInfo.commandBufferCount = (uint32_t) m_commandBuffers.size();
 
     ENGINE_VERIFY(vkAllocateCommandBuffers(m_device.getLogicalDevice(), &allocInfo, m_commandBuffers.data()) == VK_SUCCESS, "Failed to allocate command buffers!");
-    ENGINE_DEBUG("Vulkan Command Buffers allocated!");
 }
 
 VulkanCommandBufferManager::~VulkanCommandBufferManager() {

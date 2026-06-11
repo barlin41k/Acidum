@@ -13,7 +13,6 @@ VulkanSurface::VulkanSurface(const VulkanInstance& instance, Window* window)
     : m_instance(instance) {
     
     ENGINE_VERIFY(glfwCreateWindowSurface(m_instance.getInstance(), window->getWindow(), nullptr, &m_surface) == VK_SUCCESS, "Failed to create window surface!");
-    ENGINE_INFO("Window surface created!");
 }
 
 VulkanSurface::~VulkanSurface() {

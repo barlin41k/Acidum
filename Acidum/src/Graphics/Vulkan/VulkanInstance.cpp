@@ -60,7 +60,6 @@ void VulkanInstance::createInstance(const InstanceConfig& config) {
     }
 
     ENGINE_VERIFY(vkCreateInstance(&createInfo, nullptr, &m_instance) == VK_SUCCESS, "Failed to create instance!");
-    ENGINE_INFO("Vulkan instance created!");
 }
 
 void VulkanInstance::setupDebugMessenger(const InstanceConfig& config) {

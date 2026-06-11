@@ -72,7 +72,6 @@ void VulkanRenderPass::createRenderPass(VkFormat colorFormat, VkFormat depthForm
     renderPassInfo.pDependencies = &dependency;
 
     ENGINE_VERIFY(vkCreateRenderPass(m_device.getLogicalDevice(), &renderPassInfo, nullptr, &m_renderPass) == VK_SUCCESS, "Failed to create render pass!");
-    ENGINE_DEBUG("Vulkan Render Pass created!");
 }
 
 } // namespace Acidum

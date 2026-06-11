@@ -16,7 +16,7 @@ namespace Acidum {
 
 VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window, const RendererConfig& config)
     : m_device(device), m_surface(surface), m_window(window), m_config(config) {
-    ENGINE_INFO("Vulkan Renderer initialization started...");
+    ENGINE_INFO("Initializing Vulkan Renderer...");
 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, m_config.swapChainConfig);
     createDepthResources();
@@ -111,8 +111,6 @@ void VulkanRenderer::drawFrame() {
 }
 
 void VulkanRenderer::recreateSwapChain() {
-    ENGINE_DEBUG("Recreating Swap Chain...");
-
     int width = 0, height = 0;
     m_window->getFramebufferSize(&width, &height);
     while (width == 0 || height == 0) {
@@ -133,8 +131,6 @@ void VulkanRenderer::recreateSwapChain() {
     
     m_descriptorManager.reset();
     m_descriptorManager = std::make_unique<VulkanDescriptorManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
-
-    ENGINE_DEBUG("Swap Chain recreated!");
 }
 
 void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
@@ -226,8 +222,6 @@ void VulkanRenderer::createDepthResources() {
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VK_IMAGE_ASPECT_DEPTH_BIT
     );
-
-    ENGINE_DEBUG("Vulkan Depth Resources created!");
 }
 
 } // namespace Acidum

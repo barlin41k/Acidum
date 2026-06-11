@@ -46,7 +46,6 @@ void VulkanDescriptorManager::createDescriptorPool() {
     poolInfo.maxSets = static_cast<uint32_t>(m_maxFramesInFlight);
 
     ENGINE_VERIFY(vkCreateDescriptorPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_descriptorPool) == VK_SUCCESS, "Failed to create descriptor pool!");
-    ENGINE_DEBUG("Vulkan Descriptor Pool created!");
 }
 
 void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout layout) {
@@ -60,7 +59,6 @@ void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout layout)
 
     m_descriptorSets.resize(m_maxFramesInFlight);
     ENGINE_VERIFY(vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, m_descriptorSets.data()) == VK_SUCCESS, "Failed to allocate descriptor sets!");
-    ENGINE_DEBUG("Vulkan Descriptor Sets allocated!");
 
     for (size_t i = 0; i < m_maxFramesInFlight; i++) {
         VkDescriptorBufferInfo bufferInfo{};

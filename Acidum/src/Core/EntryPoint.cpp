@@ -9,7 +9,7 @@ namespace Acidum {
 int main() {
     Acidum::Logger::Init();
 
-    ENGINE_INFO("Acidum Engine has started!");
+    ENGINE_INFO("Acidum Engine started!");
 
     auto app = Acidum::CreateApplication();
 

@@ -152,7 +152,6 @@ void VulkanPipeline::createGraphicsPipeline(const VulkanRenderPass& renderPass, 
     pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
     ENGINE_VERIFY(vkCreatePipelineLayout(m_device.getLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) == VK_SUCCESS, "Failed to create pipeline layout!");
-    ENGINE_DEBUG("Vulkan Pipeline Layout created!");
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -173,7 +172,6 @@ void VulkanPipeline::createGraphicsPipeline(const VulkanRenderPass& renderPass, 
     pipelineInfo.basePipelineIndex = -1;
 
     ENGINE_VERIFY(vkCreateGraphicsPipelines(m_device.getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) == VK_SUCCESS, "Failed to create graphics pipeline!");
-    ENGINE_DEBUG("Vulkan Graphics Pipeline created!");
 
     vkDestroyShaderModule(m_device.getLogicalDevice(), fragShaderModule, nullptr);
     vkDestroyShaderModule(m_device.getLogicalDevice(), vertShaderModule, nullptr);
@@ -193,7 +191,6 @@ void VulkanPipeline::createDescriptorSetLayout() {
     layoutInfo.pBindings = &uboLayoutBinding;
 
     ENGINE_VERIFY(vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) == VK_SUCCESS, "Failed to create descriptor set layout!");
-    ENGINE_DEBUG("Vulkan Descriptor Set Layout created!");
 }
 
 } // namespace Acidum
