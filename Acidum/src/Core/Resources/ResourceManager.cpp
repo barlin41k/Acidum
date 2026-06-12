@@ -51,7 +51,7 @@ std::vector<char> ResourceManager::loadBinaryFile(const std::string& relativePat
 
     ENGINE_VERIFY(file.is_open(), "Failed to open file: {}", fullPath.string());
     
-    size_t fileSize = (size_t) file.tellg();
+    size_t fileSize = static_cast<size_t>(file.tellg());
     std::vector<char> buffer(fileSize);
 
     file.seekg(0);
