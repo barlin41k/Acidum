@@ -21,7 +21,7 @@ struct AppConfig {
 class Application {
 public:
     Application(const AppConfig& config);
-    virtual ~Application() = default;
+    virtual ~Application();
 
     Application(const Application&) = delete;
     Application& operator=(const Application&) = delete;
@@ -43,7 +43,6 @@ private:
     std::unique_ptr<IGraphicsAPI> m_graphicsAPI;
 
     AppConfig m_config;
-    APIType m_apiType;
 
     void initWindow();
     void initGraphicsAPI();

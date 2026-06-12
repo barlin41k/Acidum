@@ -5,21 +5,18 @@
 #include "Acidum/Core/Base/Logger.hpp"
 
 namespace Acidum {
+
 Window::Window(const WindowConfig& config)
-    : m_config(config) {
+    : m_config(config)
+{
     initWindow();
 }
 
 Window::~Window() {
     glfwDestroyWindow(m_window);
-    glfwTerminate();
 }
 
 void Window::initWindow() {
-    glfwSetErrorCallback(GLFWErrorCallback);
-
-    ENGINE_VERIFY(glfwInit(), "Failed to initialize GLFW!");
-
     if (m_config.apiType == APIType::Vulkan)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
@@ -51,10 +48,6 @@ void Window::internalResizeCallback(GLFWwindow* glfwWindow, int width, int heigh
         windowInstance->m_resizeCallback(width, height);
 }
 
-void Window::GLFWErrorCallback(int error, const char* description) {
-    ENGINE_ERROR("GLFW encountered an error ({}): {}", error, description);
-}
-
 bool Window::shouldClose() const noexcept {
     return glfwWindowShouldClose(m_window);
 }
@@ -66,4 +59,5 @@ void Window::waitEvents() const noexcept {
 void Window::pollEvents() {
     glfwPollEvents();
 }
+
 } // namespace Acidum
