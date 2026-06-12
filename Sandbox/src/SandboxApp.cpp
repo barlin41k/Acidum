@@ -2,14 +2,15 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
 #include "Acidum/Core/Platform/KeyboardCode.hpp"
 #include "Acidum/Core/Platform/Input.hpp"
 #include "Acidum/Core/Application.hpp"
 
 namespace Acidum {
-    Application* CreateApplication() {
-        return new ::SandboxApp(Consts::ENGINE_DEFAULT_API);
+    std::unique_ptr<Acidum::Application> CreateApplication() {
+        return std::make_unique<SandboxApp>(Consts::ENGINE_DEFAULT_API);
     }
 }
 

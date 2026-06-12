@@ -3,7 +3,7 @@
 #include "Acidum/Core/Application.hpp"
 
 namespace Acidum {
-    extern Application* CreateApplication();
+    extern std::unique_ptr<Acidum::Application> CreateApplication();
 }
 
 int main() {
@@ -21,12 +21,9 @@ int main() {
         app->run();
     } catch (const std::exception& error) {
         ENGINE_FATAL("An unhandled exception occurred in Acidum Engine! Reason: {}", error.what());
-
-        delete app;
         return EXIT_FAILURE;
     }
 
-    delete app;
     ENGINE_INFO("Acidum Engine shutdown successfully!");
     return EXIT_SUCCESS;
 }
