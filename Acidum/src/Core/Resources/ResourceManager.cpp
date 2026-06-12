@@ -1,11 +1,10 @@
 #include "Acidum/Core/Resources/ResourceManager.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
 
-#include <linux/limits.h>
-#include <sys/types.h>
 #include <filesystem>
 
 #if defined (__linux__)
+    #include <sys/types.h>
     #include <unistd.h>
     #include <limits.h>
 #elif defined(_WIN32)
