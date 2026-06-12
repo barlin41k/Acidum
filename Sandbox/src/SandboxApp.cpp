@@ -36,7 +36,7 @@ static const std::vector<uint32_t> INDICES = {
 };
 
 SandboxApp::SandboxApp(Acidum::APIType apiType) 
-    : Acidum::Application(Acidum::AppConfig{
+    : Acidum::Application(Acidum::AppConfig {
         {0, 1, 0},
         SandboxConsts::WINDOW_TITLE,
         SandboxConsts::WINDOW_WIDTH, SandboxConsts::WINDOW_HEIGHT,
