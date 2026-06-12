@@ -4,6 +4,7 @@
 
 #include "Acidum/Core/Base/Types.hpp"
 #include "Acidum/Core/Base/Consts.hpp"
+#include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
 #include "Acidum/Graphics/Interfaces/IGraphicsAPI.hpp"
 
@@ -27,7 +28,7 @@ public:
 
     void run();
 
-    inline static Application& Get() { return *s_Instance; }
+    inline static Application& Get() { ENGINE_ASSERT(s_Instance, "Application instance is null!"); return *s_Instance; }
     Window* GetWindow() { return m_window.get(); }
 protected:
     virtual void OnInit() {}
