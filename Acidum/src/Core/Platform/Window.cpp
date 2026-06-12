@@ -43,7 +43,7 @@ void Window::setTitle(const std::string& title) {
 }
 
 void Window::internalResizeCallback(GLFWwindow* glfwWindow, int width, int height) {
-    auto windowInstance = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+    auto windowInstance = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     if (windowInstance && windowInstance->m_resizeCallback)
         windowInstance->m_resizeCallback(width, height);
 }
