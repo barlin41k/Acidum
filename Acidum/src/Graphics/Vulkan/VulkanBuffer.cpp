@@ -67,6 +67,8 @@ void VulkanBuffer::copyBuffer(const VulkanDevice& device, VkCommandPool commandP
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
+    // TODO(Architecture): Заменить на асинхронный батчинг через Transfer Queue, 
+    // когда появится загрузчик больших сцен (Assimp) и множество мешей.
     vkQueueSubmit(device.getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(device.getGraphicsQueue());
 
