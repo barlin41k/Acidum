@@ -45,13 +45,15 @@ private:
 
     const SwapChainConfig m_config; // because swapchain can be recreated
 
-    void createSwapChain();
+    void createSwapChain(VkSwapchainKHR oldSwapChain=VK_NULL_HANDLE);
     void createImageViews();
 
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
     VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-    void cleanup();
+    
+    void cleanupSwapChain(VkSwapchainKHR swapChainToDestroy);
+    void cleanupSwapChainDependencies();
 };
 
 } // namespace Acidum

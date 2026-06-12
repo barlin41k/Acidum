@@ -3,6 +3,7 @@
 #include <vulkan/vk_enum_string_helper.h>
 
 #include <algorithm>
+#include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
@@ -21,7 +22,31 @@ VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const VulkanSurface
 }
 
 VulkanSwapChain::~VulkanSwapChain() {
-    cleanup();
+    cleanupSwapChainDependencies();
+    cleanupSwapChain(m_swapChain);
+}
+
+void VulkanSwapChain::cleanupSwapChainDependencies() {
+    for (auto framebuffer : m_swapChainFramebuffers)
+        vkDestroyFramebuffer(m_device.getLogicalDevice(), framebuffer, nullptr);
+    for (auto imageView : m_swapChainImageViews)
+        vkDestroyImageView(m_device.getLogicalDevice(), imageView, nullptr);
+    
+    m_swapChainFramebuffers.clear();
+    m_swapChainImageViews.clear();
+}
+
+void VulkanSwapChain::cleanupSwapChain(VkSwapchainKHR swapChainToDestroy) {
+    if (m_swapChain != VK_NULL_HANDLE)
+        vkDestroySwapchainKHR(m_device.getLogicalDevice(), swapChainToDestroy, nullptr);
+}
+
+void VulkanSwapChain::recreate() {
+    VkSwapchainKHR oldSwapchain = m_swapChain;
+    cleanupSwapChainDependencies();
+    createSwapChain(oldSwapchain);
+    cleanupSwapChain(oldSwapchain);
+    createImageViews();
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
@@ -93,7 +118,7 @@ VkExtent2D VulkanSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
     }
 }
 
-void VulkanSwapChain::createSwapChain() {
+void VulkanSwapChain::createSwapChain(VkSwapchainKHR oldSwapChain) {
     SwapChainSupportDetails swapChainSupport = m_device.getSwapChainSupport();
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -113,6 +138,11 @@ void VulkanSwapChain::createSwapChain() {
     createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    createInfo.presentMode = presentMode;
+    createInfo.clipped = VK_TRUE;
+    createInfo.oldSwapchain = oldSwapChain;
 
     QueueFamilyIndices indices = m_device.getQueueFamilies();
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
@@ -127,12 +157,6 @@ void VulkanSwapChain::createSwapChain() {
         createInfo.pQueueFamilyIndices = nullptr;
     }
 
-    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    createInfo.presentMode = presentMode;
-    createInfo.clipped = VK_TRUE;
-    createInfo.oldSwapchain = VK_NULL_HANDLE;
-
     ENGINE_VERIFY(vkCreateSwapchainKHR(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChain) == VK_SUCCESS, "Failed to create swap chain!");
     ENGINE_DEBUG("Vulkan SwapChain created: {}x{}, Format {}, Present Mode {}",
         extent.width, extent.height,
@@ -146,21 +170,6 @@ void VulkanSwapChain::createSwapChain() {
 
     m_swapChainImageFormat = surfaceFormat.format;
     m_swapChainExtent = extent;
-}
-
-void VulkanSwapChain::cleanup() {
-    for (auto framebuffer : m_swapChainFramebuffers)
-        vkDestroyFramebuffer(m_device.getLogicalDevice(), framebuffer, nullptr);
-    for (auto imageView : m_swapChainImageViews)
-        vkDestroyImageView(m_device.getLogicalDevice(), imageView, nullptr);
-
-    vkDestroySwapchainKHR(m_device.getLogicalDevice(), m_swapChain, nullptr);
-}
-
-void VulkanSwapChain::recreate() {
-    cleanup();
-    createSwapChain();
-    createImageViews();
 }
 
 void VulkanSwapChain::createImageViews() {
