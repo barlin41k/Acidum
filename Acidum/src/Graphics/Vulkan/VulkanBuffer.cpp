@@ -31,6 +31,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& device, VkDeviceSize size, VkBuff
 }
 
 VulkanBuffer::~VulkanBuffer() {
+    unmap();
     if (m_buffer != VK_NULL_HANDLE)
         vkDestroyBuffer(m_device.getLogicalDevice(), m_buffer, nullptr);
     if (m_memory != VK_NULL_HANDLE)
@@ -72,19 +73,21 @@ void VulkanBuffer::copyBuffer(const VulkanDevice& device, VkCommandPool commandP
     vkFreeCommandBuffers(device.getLogicalDevice(), commandPool, 1, &commandBuffer);
 }
 
-void VulkanBuffer::map(void** ppData) {
-    vkMapMemory(m_device.getLogicalDevice(), m_memory, 0, m_size, 0, ppData);
+void VulkanBuffer::map() {
+    if (!m_mappedData)
+        vkMapMemory(m_device.getLogicalDevice(), m_memory, 0, m_size, 0, &m_mappedData);
 }
 
 void VulkanBuffer::unmap() {
-    vkUnmapMemory(m_device.getLogicalDevice(), m_memory);
+    if (m_mappedData) {
+        vkUnmapMemory(m_device.getLogicalDevice(), m_memory);
+        m_mappedData = nullptr;
+    }
 }
 
-void VulkanBuffer::copyTo(void* pData, VkDeviceSize size) {
-    void* mappedData;
-    map(&mappedData);
-    std::memcpy(mappedData, pData, static_cast<size_t>(size));
-    unmap();
+void VulkanBuffer::copyTo(const void* pData, VkDeviceSize size) {
+    ENGINE_VERIFY(m_mappedData != nullptr, "Buffer must be mapped before copying!");
+    std::memcpy(m_mappedData, pData, static_cast<size_t>(size));
 }
 
 } // namespace Acidum

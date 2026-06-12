@@ -26,12 +26,14 @@ void VulkanDescriptorManager::createUniformBuffers() {
             VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
+
+        m_uniformBuffers[i]->map();
     }
 }
 
 void VulkanDescriptorManager::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
     ENGINE_VERIFY(currentFrame < m_maxFramesInFlight, "currentFrame({}) is out of bounds! Max frames in flight is {}.", currentFrame, m_maxFramesInFlight);
-    m_uniformBuffers[currentFrame]->copyTo(const_cast<UniformBufferObject*>(&ubo), sizeof(ubo));
+    m_uniformBuffers[currentFrame]->copyTo(&ubo, sizeof(ubo));
 }
 
 void VulkanDescriptorManager::createDescriptorPool() {

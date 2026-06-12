@@ -57,7 +57,7 @@ void VulkanMesh::createVertexBuffer(const VulkanDevice& device, VkCommandPool co
     VulkanBuffer stagingBuffer(device, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
+    stagingBuffer.map();
     stagingBuffer.copyTo((void*)vertices.data(), bufferSize);
 
     m_vertexBuffer = std::make_unique<VulkanBuffer>(device, bufferSize, 

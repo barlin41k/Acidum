@@ -22,7 +22,7 @@ void VulkanMesh::createIndexBuffer(const VulkanDevice& device, VkCommandPool com
     VulkanBuffer stagingBuffer(device, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
+    stagingBuffer.map();
     stagingBuffer.copyTo((void*)indices.data(), bufferSize);
 
     m_indexBuffer = std::make_unique<VulkanBuffer>(device, bufferSize, 

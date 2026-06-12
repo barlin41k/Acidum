@@ -19,9 +19,9 @@ public:
     VkDeviceMemory getMemory() const noexcept { return m_memory; }
     VkDeviceSize getSize() const noexcept { return m_size; }
 
-    void map(void** ppData);
+    void map();
     void unmap();
-    void copyTo(void* pData, VkDeviceSize size);
+    void copyTo(const void* pData, VkDeviceSize size);
 
     static void copyBuffer(const VulkanDevice& device, VkCommandPool commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 private:
@@ -29,6 +29,7 @@ private:
     VkBuffer m_buffer = VK_NULL_HANDLE;
     VkDeviceMemory m_memory = VK_NULL_HANDLE;
     VkDeviceSize m_size;
+    void* m_mappedData = nullptr;
 };
 
 } // namespace Acidum
