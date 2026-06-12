@@ -15,13 +15,14 @@ int main() {
         Acidum::Consts::ENGINE_VERSION.patch
     );
 
-    auto app = Acidum::CreateApplication();
-
-    try {
-        app->run();
-    } catch (const std::exception& error) {
-        ENGINE_FATAL("An unhandled exception occurred in Acidum Engine! Reason: {}", error.what());
-        return EXIT_FAILURE;
+    {
+        try {
+            auto app = Acidum::CreateApplication();
+            app->run();
+        } catch (const std::exception& error) {
+            ENGINE_FATAL("An unhandled exception occurred in Acidum Engine! Reason: {}", error.what());
+            return EXIT_FAILURE;
+        }
     }
 
     ENGINE_INFO("Acidum Engine shutdown successfully!");
