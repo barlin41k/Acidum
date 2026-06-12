@@ -158,8 +158,10 @@ void VulkanSwapChain::createSwapChain(VkSwapchainKHR oldSwapChain) {
     }
 
     ENGINE_VERIFY(vkCreateSwapchainKHR(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChain) == VK_SUCCESS, "Failed to create swap chain!");
-    ENGINE_DEBUG("Vulkan SwapChain created: {}x{}, Format {}, Present Mode {}",
-        extent.width, extent.height,
+
+    std::string swapChainState = oldSwapChain == VK_NULL_HANDLE ? "created" : "recreated";
+    ENGINE_DEBUG("Vulkan SwapChain {}: {}x{}, Format {}, Present Mode {}",
+        swapChainState, extent.width, extent.height,
         string_VkFormat(surfaceFormat.format),
         string_VkPresentModeKHR(presentMode)
     );
