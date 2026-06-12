@@ -12,6 +12,11 @@ public:
     VulkanRenderPass(const VulkanDevice& device, VkFormat colorFormat, VkFormat depthFormat);
     ~VulkanRenderPass();
 
+    VulkanRenderPass(const VulkanRenderPass&) = delete;
+    VulkanRenderPass& operator=(const VulkanRenderPass&) = delete;
+    VulkanRenderPass(VulkanRenderPass&&) = delete;
+    VulkanRenderPass& operator=(VulkanRenderPass&&) = delete;
+
     VkRenderPass getRenderPass() const { return m_renderPass; }
 private:
     const VulkanDevice& m_device;

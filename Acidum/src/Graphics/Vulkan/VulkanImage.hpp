@@ -18,6 +18,8 @@ public:
 
     VulkanImage(const VulkanImage&) = delete;
     VulkanImage& operator=(const VulkanImage&) = delete;
+    VulkanImage(VulkanImage&&) = delete;
+    VulkanImage& operator=(VulkanImage&&) = delete;
 
     VkImage getImage() const { return m_image; }
     VkImageView getImageView() const { return m_imageView; }
