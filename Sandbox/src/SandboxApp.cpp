@@ -82,13 +82,13 @@ void SandboxApp::updateCamera(float deltaTime) {
     if (m_pitch < -89.0f) m_pitch = -89.0f;
 
     float cameraSpeed = SandboxConsts::CAMERA_SPEED * deltaTime;
-    if (Acidum::Input::IsKeyPressed(Acidum::Keyboard::W))
+    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::W))
         m_cameraPos += m_camera.getFront() * cameraSpeed;
-    if (Acidum::Input::IsKeyPressed(Acidum::Keyboard::S))
+    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::S))
         m_cameraPos -= m_camera.getFront() * cameraSpeed;
-    if (Acidum::Input::IsKeyPressed(Acidum::Keyboard::A))
+    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::A))
         m_cameraPos -= m_camera.getRight() * cameraSpeed;
-    if (Acidum::Input::IsKeyPressed(Acidum::Keyboard::D))
+    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::D))
         m_cameraPos += m_camera.getRight() * cameraSpeed;
 
     m_camera.setRotation(m_pitch, m_yaw);

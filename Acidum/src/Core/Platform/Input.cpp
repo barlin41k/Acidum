@@ -25,7 +25,7 @@ void Input::SetCursorMode(CursorMode mode) {
 
 bool Input::IsKeyPressed(KeyCode key) {
     auto* window = static_cast<GLFWwindow*>(Application::Get().GetWindow()->getWindow());
-    auto state = glfwGetKey(window, static_cast<int32_t>(key));
+    auto state = glfwGetKey(window, static_cast<int>(key));
 
     return state == GLFW_PRESS || state == GLFW_REPEAT;
 }
