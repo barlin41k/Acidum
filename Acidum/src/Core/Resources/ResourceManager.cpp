@@ -2,6 +2,7 @@
 #include "Acidum/Core/Base/Logger.hpp"
 
 #include <filesystem>
+#include <fstream>
 
 #if defined (__linux__)
     #include <sys/types.h>
