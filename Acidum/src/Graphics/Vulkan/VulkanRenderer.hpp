@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "Acidum/Core/Base/Types.hpp"
+#include "Graphics/Vulkan/VulkanTypes.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
 
