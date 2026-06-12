@@ -25,6 +25,7 @@ public:
     
     VkFence getImageInFlightFence(uint32_t imageIndex) const noexcept { return m_imagesInFlight[imageIndex]; }
     void setImageInFlightFence(uint32_t imageIndex, VkFence fence) noexcept { m_imagesInFlight[imageIndex] = fence; }
+    void resizeImagesInFlight(uint32_t newImageCount);
 private:
     const VulkanDevice& m_device;
     std::vector<VkSemaphore> m_imageAvailableSemaphores;

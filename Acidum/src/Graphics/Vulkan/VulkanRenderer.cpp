@@ -126,8 +126,7 @@ void VulkanRenderer::recreateSwapChain() {
     m_swapChain->createFramebuffers(m_renderPass->getRenderPass(), m_depthImage->getImageView());
     
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
-    m_syncManager.reset();
-    m_syncManager = std::make_unique<VulkanSyncManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
+    m_syncManager->resizeImagesInFlight(imageCount);
     
     m_descriptorManager.reset();
     m_descriptorManager = std::make_unique<VulkanDescriptorManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
