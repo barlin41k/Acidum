@@ -58,4 +58,5 @@ constexpr const char* GetShortFileName(const char* path) {
             } \
         } while (false)
 #endif
+
 } // namespace Acidum

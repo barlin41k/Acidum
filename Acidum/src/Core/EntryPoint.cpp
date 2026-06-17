@@ -3,7 +3,7 @@
 #include "Acidum/Core/Application.hpp"
 
 namespace Acidum {
-    extern std::unique_ptr<Acidum::Application> CreateApplication();
+    extern std::unique_ptr<Application> CreateApplication();
 }
 
 int main() {
