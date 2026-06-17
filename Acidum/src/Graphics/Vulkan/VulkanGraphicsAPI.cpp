@@ -39,8 +39,8 @@ void VulkanGraphicsAPI::initialize() {
     auto appVersion = m_window->getVersion(); 
     uint32_t version = VK_MAKE_VERSION(appVersion.major, appVersion.minor, appVersion.patch);
 
-    auto vertCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_vert.spv");
-    auto fragCode = ResourceManager::loadBinaryFile("shaders/spirv/shader_frag.spv");
+    auto vertCode = ResourceManager::loadBinaryFile("shaders/spirv/shader.vert.spv");
+    auto fragCode = ResourceManager::loadBinaryFile("shaders/spirv/shader.frag.spv");
 
     
     InstanceConfig instanceConfig;
