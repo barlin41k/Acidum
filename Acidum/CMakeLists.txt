@@ -1,4 +1,28 @@
-file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+set(CORE_SOURCES
+    src/Core/Application.cpp
+    src/Core/Base/Logger.cpp
+    src/Core/EntryPoint.cpp
+    src/Core/Platform/GLFWContext.cpp
+    src/Core/Platform/Input.cpp
+    src/Core/Platform/Window.cpp
+    src/Core/Resources/ResourceManager.cpp
+    src/Graphics/GraphicsFactory.cpp
+    src/Graphics/Vulkan/VulkanBuffer.cpp
+    src/Graphics/Vulkan/VulkanCommandBufferManager.cpp
+    src/Graphics/Vulkan/VulkanDescriptorManager.cpp
+    src/Graphics/Vulkan/VulkanDevice.cpp
+    src/Graphics/Vulkan/VulkanGraphicsAPI.cpp
+    src/Graphics/Vulkan/VulkanImage.cpp
+    src/Graphics/Vulkan/VulkanInstance.cpp
+    src/Graphics/Vulkan/VulkanMesh.cpp
+    src/Graphics/Vulkan/VulkanPipeline.cpp
+    src/Graphics/Vulkan/VulkanRenderPass.cpp
+    src/Graphics/Vulkan/VulkanRenderer.cpp
+    src/Graphics/Vulkan/VulkanSurface.cpp
+    src/Graphics/Vulkan/VulkanSwapChain.cpp
+    src/Graphics/Vulkan/VulkanSyncManager.cpp
+    src/Scene/Camera.cpp
+)
 
 add_library(AcidumCore ${CORE_SOURCES})
 
