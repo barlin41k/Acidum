@@ -17,7 +17,7 @@ Acidum is a graphics engine developed in C++.
   - **GLFW 3** — a multi-platform library for window creation, graphic contexts, and input management
   - **Vulkan SDK** — a low-overhead, cross-platform 3D graphics and compute API for high-performance rendering
 
-*Note: `spdlog` (v1.17.0) is downloaded automatically via CMake `FetchContent`.*
+*Note: some libraries is downloaded automatically via CMake `FetchContent`.*
 
 ## Build
 

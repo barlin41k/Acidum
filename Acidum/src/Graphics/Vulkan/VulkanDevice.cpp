@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <set>
+#include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
@@ -18,10 +19,14 @@ VulkanDevice::VulkanDevice(const VulkanInstance& instance, const VulkanSurface& 
 {
     pickPhysicalDevice(config);
     createLogicalDevice(config);
+    createVmaAllocator();
 }
 
 VulkanDevice::~VulkanDevice() {
-    vkDestroyDevice(m_device, nullptr);
+    if (m_allocator != VK_NULL_HANDLE)
+        vmaDestroyAllocator(m_allocator);
+    if (m_device != VK_NULL_HANDLE)
+        vkDestroyDevice(m_device, nullptr);
 }
 
 QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) const {
@@ -192,6 +197,16 @@ void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
 
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
+}
+
+void VulkanDevice::createVmaAllocator() {
+    VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.physicalDevice = m_physicalDevice;
+    allocatorInfo.device = m_device;
+    allocatorInfo.instance = m_instance.getInstance();
+    allocatorInfo.vulkanApiVersion = m_instance.getApiVersion();
+
+    ENGINE_VERIFY(vmaCreateAllocator(&allocatorInfo, &m_allocator) == VK_SUCCESS, "Failed to create VMA allocator!");
 }
 
 uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {

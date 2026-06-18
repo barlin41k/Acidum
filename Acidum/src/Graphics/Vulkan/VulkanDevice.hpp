@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 #include <optional>
 #include <vector>
@@ -38,6 +39,7 @@ public:
     VkDevice getLogicalDevice() const noexcept { return m_device; }
     VkQueue getGraphicsQueue() const noexcept { return m_graphicsQueue; }
     VkQueue getPresentQueue() const noexcept { return m_presentQueue; }
+    VmaAllocator getAllocator() const noexcept { return m_allocator; }
     
     VkFormat findDepthFormat() const;
     VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) const;
@@ -47,13 +49,16 @@ public:
 private:
     const VulkanInstance& m_instance;
     const VulkanSurface& m_surface;
+
     VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
     VkDevice m_device = VK_NULL_HANDLE;
     VkQueue m_graphicsQueue = VK_NULL_HANDLE;
     VkQueue m_presentQueue = VK_NULL_HANDLE;
+    VmaAllocator m_allocator = VK_NULL_HANDLE;
 
     void pickPhysicalDevice(const DeviceConfig& config);
     void createLogicalDevice(const DeviceConfig& config);
+    void createVmaAllocator();
     
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
     bool checkDeviceExtensionSupport(VkPhysicalDevice device, const DeviceConfig& config) const;

@@ -21,7 +21,15 @@ FetchContent_Declare(
     GIT_TAG        v1.17.0
 )
 set(SPDLOG_INSTALL OFF CACHE INTERNAL "") 
+
+FetchContent_Declare(
+    VulkanMemoryAllocator
+    GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+    GIT_TAG        v3.4.0
+)
+
 FetchContent_MakeAvailable(spdlog)
+FetchContent_MakeAvailable(VulkanMemoryAllocator)
 
 find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)

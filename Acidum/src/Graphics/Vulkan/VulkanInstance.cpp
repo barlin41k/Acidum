@@ -10,7 +10,9 @@
 
 namespace Acidum {
 
-VulkanInstance::VulkanInstance(const InstanceConfig& config) {
+VulkanInstance::VulkanInstance(const InstanceConfig& config)
+    : m_apiVersion(config.apiVersion)
+{
     createInstance(config);
     setupDebugMessenger(config);
 }

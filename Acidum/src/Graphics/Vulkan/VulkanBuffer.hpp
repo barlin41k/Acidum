@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 namespace Acidum {
 
@@ -16,7 +17,6 @@ public:
     VulkanBuffer& operator=(const VulkanBuffer&) = delete;
 
     VkBuffer getBuffer() const noexcept { return m_buffer; }
-    VkDeviceMemory getMemory() const noexcept { return m_memory; }
     VkDeviceSize getSize() const noexcept { return m_size; }
 
     void map();
@@ -27,7 +27,7 @@ public:
 private:
     const VulkanDevice& m_device;
     VkBuffer m_buffer = VK_NULL_HANDLE;
-    VkDeviceMemory m_memory = VK_NULL_HANDLE;
+    VmaAllocation m_allocation;
     VkDeviceSize m_size;
     void* m_mappedData = nullptr;
 };

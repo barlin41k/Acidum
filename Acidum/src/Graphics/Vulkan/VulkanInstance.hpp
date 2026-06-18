@@ -18,9 +18,12 @@ public:
     VulkanInstance& operator=(const VulkanInstance&) = delete;
 
     VkInstance getInstance() const noexcept { return m_instance; }
+    uint32_t getApiVersion() const noexcept { return m_apiVersion; }
 private:
     VkInstance m_instance = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
+
+    uint32_t m_apiVersion;
 
     void createInstance(const InstanceConfig& config);
     void setupDebugMessenger(const InstanceConfig& config);

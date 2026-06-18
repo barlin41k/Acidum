@@ -9,33 +9,29 @@ namespace Acidum {
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
     : m_device(device), m_size(size) {
+    
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    VmaAllocationCreateInfo allocInfo = {};
+    allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
     
-    ENGINE_VERIFY(vkCreateBuffer(m_device.getLogicalDevice(), &bufferInfo, nullptr, &m_buffer) == VK_SUCCESS, "Failed to create buffer!");
+    if (properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+        allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(m_device.getLogicalDevice(), m_buffer, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = m_device.findMemoryType(memRequirements.memoryTypeBits, properties);
-
-    ENGINE_VERIFY(vkAllocateMemory(m_device.getLogicalDevice(), &allocInfo, nullptr, &m_memory) == VK_SUCCESS, "Failed to allocate buffer memory!");
-
-    vkBindBufferMemory(m_device.getLogicalDevice(), m_buffer, m_memory, 0);
+    ENGINE_VERIFY(
+        vmaCreateBuffer(m_device.getAllocator(), &bufferInfo, &allocInfo, &m_buffer, &m_allocation, nullptr) == VK_SUCCESS, 
+        "Failed to create buffer via VMA!"
+    );
 }
 
 VulkanBuffer::~VulkanBuffer() {
     unmap();
-    if (m_buffer != VK_NULL_HANDLE)
-        vkDestroyBuffer(m_device.getLogicalDevice(), m_buffer, nullptr);
-    if (m_memory != VK_NULL_HANDLE)
-        vkFreeMemory(m_device.getLogicalDevice(), m_memory, nullptr);
+    if (m_buffer != VK_NULL_HANDLE && m_allocation != VK_NULL_HANDLE)
+        vmaDestroyBuffer(m_device.getAllocator(), m_buffer, m_allocation);
 }
 
 void VulkanBuffer::copyBuffer(const VulkanDevice& device, VkCommandPool commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
@@ -67,8 +63,7 @@ void VulkanBuffer::copyBuffer(const VulkanDevice& device, VkCommandPool commandP
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    // TODO(Architecture): Заменить на асинхронный батчинг через Transfer Queue, 
-    // когда появится загрузчик больших сцен (Assimp) и множество мешей.
+    // TODO: batching with Transfer Queue
     vkQueueSubmit(device.getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(device.getGraphicsQueue());
 
@@ -77,12 +72,12 @@ void VulkanBuffer::copyBuffer(const VulkanDevice& device, VkCommandPool commandP
 
 void VulkanBuffer::map() {
     if (!m_mappedData)
-        vkMapMemory(m_device.getLogicalDevice(), m_memory, 0, m_size, 0, &m_mappedData);
+        vmaMapMemory(m_device.getAllocator(), m_allocation, &m_mappedData);
 }
 
 void VulkanBuffer::unmap() {
     if (m_mappedData) {
-        vkUnmapMemory(m_device.getLogicalDevice(), m_memory);
+        vmaUnmapMemory(m_device.getAllocator(), m_allocation);
         m_mappedData = nullptr;
     }
 }
