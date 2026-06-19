@@ -6,12 +6,12 @@
 #include "Acidum/Core/Platform/SystemInfo.hpp"
 
 namespace Acidum {
-
-extern std::unique_ptr<Application> CreateApplication();
-
-} // namespace Acidum
+    extern std::unique_ptr<Application> CreateApplication();
+}
 
 namespace {
+
+using Clock = std::chrono::high_resolution_clock;
 
 void startupLog() {
     std::string version = std::format("v{}.{}.{}",
@@ -29,10 +29,34 @@ void startupLog() {
     ENGINE_INFO("============================================");
 }
 
+void shutdownLog(Clock::time_point startTime, Clock::time_point endTime) {
+    std::chrono::duration<float> elapsed = endTime - startTime;
+
+    auto hours = std::chrono::duration_cast<std::chrono::hours>(elapsed);
+    elapsed -= hours;
+
+    auto minutes = std::chrono::duration_cast<std::chrono::minutes>(elapsed);
+    elapsed -= minutes;
+
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(elapsed);
+
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed - seconds);
+
+    if (hours.count() > 0)
+        ENGINE_INFO("Acidum Engine shutdown successfully! Total runtime: {}h {}m {}s", 
+                    hours.count(), minutes.count(), seconds.count());
+    else if (minutes.count() > 0)
+        ENGINE_INFO("Acidum Engine shutdown successfully! Total runtime: {}m {}.{}s", 
+                    minutes.count(), seconds.count(), milliseconds.count());
+    else
+        ENGINE_INFO("Acidum Engine shutdown successfully! Total runtime: {}.{}s", 
+                    seconds.count(), milliseconds.count());
+}
+
 } // namespace
 
 int main() {
-    auto startTime = std::chrono::high_resolution_clock::now();
+    auto startTime = Clock::now();
 
     Acidum::Logger::Init();
     startupLog();
@@ -51,9 +75,8 @@ int main() {
         }
     }
 
-    auto endTime = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> elapsed = endTime - startTime;
-
-    ENGINE_INFO("Acidum Engine shutdown successfully! Total runtime: {:.2f}s", elapsed.count());
+    auto endTime = Clock::now();
+    
+    shutdownLog(startTime, endTime);
     return EXIT_SUCCESS;
 }
