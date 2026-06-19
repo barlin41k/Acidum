@@ -41,12 +41,7 @@ constexpr const char* GetShortFileName(const char* path) {
         } \
     } while (false)
 
-#ifdef NDEBUG
-    #define ENGINE_TRACE(...)
-    #define ENGINE_DEBUG(...)
-
-    #define ENGINE_ASSERT(condition, msg, ...)
-#else
+#ifdef ACIDUM_DEBUG
     #define ENGINE_TRACE(...) SPDLOG_LOGGER_TRACE(Acidum::Logger::GetLogger(), __VA_ARGS__)
     #define ENGINE_DEBUG(...) SPDLOG_LOGGER_DEBUG(Acidum::Logger::GetLogger(), __VA_ARGS__)
 
@@ -57,6 +52,11 @@ constexpr const char* GetShortFileName(const char* path) {
                 std::abort(); \
             } \
         } while (false)
+#else
+    #define ENGINE_TRACE(...)
+    #define ENGINE_DEBUG(...)
+
+    #define ENGINE_ASSERT(condition, msg, ...)
 #endif
 
 } // namespace Acidum

@@ -16,10 +16,10 @@ struct InstanceConfig {
     std::vector<const char*> windowExtensions;
     std::vector<const char*> additionalExtensions;
     std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-#ifdef NDEBUG
-    bool enableValidationLayers = false;
-#else
+#ifdef ACIDUM_DEBUG
     bool enableValidationLayers = true;
+#else
+    bool enableValidationLayers = false;
 #endif
 };
 
