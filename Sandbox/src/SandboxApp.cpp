@@ -57,6 +57,7 @@ void SandboxApp::OnInit() {
 void SandboxApp::OnUpdate(float deltaTime) {
     m_totalTime += deltaTime;
 
+    updateWindowTitle(deltaTime);
     updateCamera(deltaTime);
     updateShaderMatrices();
 }
@@ -65,6 +66,21 @@ void SandboxApp::OnRender() {
     if (m_cubeMesh) {
         glm::mat4 modelMatrix = glm::rotate(glm::mat4(1.0f), m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         GetGraphicsAPI()->drawMesh(m_cubeMesh.get(), modelMatrix);
+    }
+}
+
+void SandboxApp::updateWindowTitle(float deltaTime) {
+    m_fpsTimer += deltaTime;
+    m_frameCount++;
+
+    if (m_fpsTimer >= 1.0f) {
+        float fps = m_frameCount / m_fpsTimer; 
+        
+        std::string newTitle = "FPS: " + std::to_string(static_cast<int>(fps));
+        GetWindow()->setTitle(newTitle);
+
+        m_fpsTimer = 0.0f;
+        m_frameCount = 0;
     }
 }
 

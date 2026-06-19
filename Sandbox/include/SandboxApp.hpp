@@ -13,7 +13,7 @@ namespace SandboxConsts {
 
     inline constexpr uint32_t WINDOW_WIDTH = 1280;
     inline constexpr uint32_t WINDOW_HEIGHT = 720;
-    inline constexpr const char* WINDOW_TITLE = "Acidum: Sandbox";
+    inline constexpr const char* WINDOW_TITLE = "Sandbox";
 }
 
 class SandboxApp : public Acidum::Application {
@@ -37,8 +37,12 @@ private:
         SandboxConsts::CAMERA_NEAR_CLIP, SandboxConsts::CAMERA_FAR_CLIP
     };
 
+    float m_fpsTimer = 0.0f;
+    uint32_t m_frameCount = 0;
+
     std::unique_ptr<Acidum::IMesh> m_cubeMesh;
     
+    void updateWindowTitle(float deltaTime);
     void updateCamera(float deltaTime);
     void updateShaderMatrices();
 };
