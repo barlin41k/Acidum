@@ -17,9 +17,7 @@ Window::~Window() {
 }
 
 void Window::initWindow() {
-    if (m_config.apiType == APIType::Vulkan)
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     m_window = glfwCreateWindow(
