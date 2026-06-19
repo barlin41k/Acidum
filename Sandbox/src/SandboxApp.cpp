@@ -46,7 +46,12 @@ SandboxApp::SandboxApp(Acidum::APIType apiType)
 
 void SandboxApp::OnInit() {
     Acidum::Input::SetCursorMode(Acidum::CursorMode::Locked);
+
+    GetGraphicsAPI()->beginUpload();
+
     m_cubeMesh = GetGraphicsAPI()->createMesh(VERTICES, INDICES);
+
+    GetGraphicsAPI()->endUploadAndWait();
 }
 
 void SandboxApp::OnUpdate(float deltaTime) {

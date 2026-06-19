@@ -8,16 +8,18 @@
 
 #include "Acidum/Graphics/Interfaces/IMesh.hpp"
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
+#include "Graphics/Vulkan/VulkanStagingManager.hpp"
 
 namespace Acidum {
 
 // forward-declaration
 class VulkanDevice;
+class VulkanStagingManager;
 
 class VulkanMesh : public IMesh {
 public:
     template<typename VertexType>
-    VulkanMesh(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices);
+    VulkanMesh(const VulkanDevice& device, VulkanStagingManager* stagingManager, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices);
     ~VulkanMesh() = default;
 
     VulkanMesh(const VulkanMesh&) = delete;
@@ -38,35 +40,42 @@ private:
     uint32_t m_indexCount = 0;
 
     template<typename VertexType>
-    void createVertexBuffer(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices);
-    void createIndexBuffer(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<uint32_t>& indices);
+    void createVertexBuffer(const VulkanDevice& device, VulkanStagingManager* stagingManager, const std::vector<VertexType>& vertices);
+    void createIndexBuffer(const VulkanDevice& device, VulkanStagingManager* stagingManager, const std::vector<uint32_t>& indices);
 };
 
-// templates
+// funcs with templates
+
 template<typename VertexType>
-VulkanMesh::VulkanMesh(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices) 
+VulkanMesh::VulkanMesh(const VulkanDevice& device, VulkanStagingManager* stagingManager, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices) 
     : m_vertexCount(static_cast<uint32_t>(vertices.size())),
       m_indexCount(static_cast<uint32_t>(indices.size()))
 {
-    createVertexBuffer(device, commandPool, vertices);
-    createIndexBuffer(device, commandPool, indices);
+    createVertexBuffer(device, stagingManager, vertices);
+    createIndexBuffer(device, stagingManager, indices);
 }
 
 template<typename VertexType>
-void VulkanMesh::createVertexBuffer(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices) {
+void VulkanMesh::createVertexBuffer(const VulkanDevice& device, VulkanStagingManager* stagingManager, const std::vector<VertexType>& vertices) {
     VkDeviceSize bufferSize = sizeof(VertexType) * vertices.size();
 
-    VulkanBuffer stagingBuffer(device, bufferSize, 
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    stagingBuffer.map();
-    stagingBuffer.copyTo((void*)vertices.data(), bufferSize);
+    auto stagingBuffer = std::make_unique<VulkanBuffer>(
+        device, bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
 
-    m_vertexBuffer = std::make_unique<VulkanBuffer>(device, bufferSize, 
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    stagingBuffer->map();
+    stagingBuffer->copyTo((void*)vertices.data(), bufferSize);
+    stagingBuffer->unmap();
 
-    VulkanBuffer::copyBuffer(device, commandPool, stagingBuffer.getBuffer(), m_vertexBuffer->getBuffer(), bufferSize);
+    m_vertexBuffer = std::make_unique<VulkanBuffer>(
+        device, bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    );
+
+    stagingManager->stageCopy(std::move(stagingBuffer), m_vertexBuffer->getBuffer(), bufferSize);
 }
 
 } // namespace Acidum

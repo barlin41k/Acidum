@@ -16,20 +16,24 @@ void VulkanMesh::draw(VkCommandBuffer commandBuffer) const {
     vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
 }
 
-void VulkanMesh::createIndexBuffer(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<uint32_t>& indices) {
+void VulkanMesh::createIndexBuffer(const VulkanDevice& device, VulkanStagingManager* stagingManager, const std::vector<uint32_t>& indices) {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
-    VulkanBuffer stagingBuffer(device, bufferSize, 
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    stagingBuffer.map();
-    stagingBuffer.copyTo((void*)indices.data(), bufferSize);
+    auto stagingBuffer = std::make_unique<VulkanBuffer>(
+        device, bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
+
+    stagingBuffer->map();
+    stagingBuffer->copyTo((void*)indices.data(), bufferSize);
+    stagingBuffer->unmap();
 
     m_indexBuffer = std::make_unique<VulkanBuffer>(device, bufferSize, 
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    VulkanBuffer::copyBuffer(device, commandPool, stagingBuffer.getBuffer(), m_indexBuffer->getBuffer(), bufferSize);
+    stagingManager->stageCopy(std::move(stagingBuffer), m_indexBuffer->getBuffer(), bufferSize);
 }
 
 VkVertexInputBindingDescription VulkanMesh::getBindingDescription() {

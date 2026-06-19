@@ -24,6 +24,9 @@ private:
     const VulkanDevice& m_device;
     VkCommandPool m_commandPool = VK_NULL_HANDLE;
     std::vector<VkCommandBuffer> m_commandBuffers;
+
+    void createCommandPool();
+    void allocateCommandBuffers(uint32_t bufferCount);
 };
 
 } // namespace Acidum

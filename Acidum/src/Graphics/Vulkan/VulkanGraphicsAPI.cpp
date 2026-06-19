@@ -14,6 +14,7 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 #include "Graphics/Vulkan/VulkanRenderer.hpp"
+#include "Graphics/Vulkan/VulkanStagingManager.hpp"
 
 namespace Acidum {
 
@@ -68,6 +69,8 @@ void VulkanGraphicsAPI::initialize() {
 
     m_device = std::make_unique<VulkanDevice>(*m_instance, *m_surface, deviceConfig);
 
+    m_stagingManager = std::make_unique<VulkanStagingManager>(*m_device);
+
     m_renderer = std::make_unique<VulkanRenderer>(*m_device, *m_surface, m_window, rendererConfig);
 
     ENGINE_INFO("Vulkan initialized!");
@@ -87,9 +90,18 @@ void VulkanGraphicsAPI::setViewMatrix(const glm::mat4& view) {
     m_renderer->setViewMatrix(view);
 }
 
+void VulkanGraphicsAPI::beginUpload() {
+    m_stagingManager->begin();
+}
+
 std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
     ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
-    return std::make_unique<VulkanMesh>(*m_device, m_renderer->getCommandPool(), vertices, indices);
+    return std::make_unique<VulkanMesh>(*m_device, m_stagingManager.get(), vertices, indices);
+}
+
+void VulkanGraphicsAPI::endUploadAndWait() {
+    m_stagingManager->submit();
+    m_stagingManager->waitForUpload();
 }
 
 void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {

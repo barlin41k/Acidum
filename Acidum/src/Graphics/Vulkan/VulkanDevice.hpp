@@ -16,8 +16,9 @@ struct DeviceConfig;
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
+    std::optional<uint32_t> transferFamily;
     bool isComplete() {
-        return graphicsFamily.has_value() && presentFamily.has_value();
+        return graphicsFamily.has_value() && presentFamily.has_value() && transferFamily.has_value();
     }
 };
 
@@ -39,6 +40,7 @@ public:
     VkDevice getLogicalDevice() const noexcept { return m_device; }
     VkQueue getGraphicsQueue() const noexcept { return m_graphicsQueue; }
     VkQueue getPresentQueue() const noexcept { return m_presentQueue; }
+    VkQueue getTransferQueue() const noexcept { return m_transferQueue; }
     VmaAllocator getAllocator() const noexcept { return m_allocator; }
     
     VkFormat findDepthFormat() const;
@@ -54,6 +56,7 @@ private:
     VkDevice m_device = VK_NULL_HANDLE;
     VkQueue m_graphicsQueue = VK_NULL_HANDLE;
     VkQueue m_presentQueue = VK_NULL_HANDLE;
+    VkQueue m_transferQueue = VK_NULL_HANDLE;
     VmaAllocator m_allocator = VK_NULL_HANDLE;
 
     void pickPhysicalDevice(const DeviceConfig& config);

@@ -47,7 +47,12 @@ QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) cons
         if (presentSupport)
             indices.presentFamily = i;
 
-        if (indices.isComplete()) break;
+        if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT) {
+            if ((queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0)
+                indices.transferFamily = i;
+            else if (!indices.transferFamily.has_value())
+                indices.transferFamily = i;
+        }
 
         i++;
     }
@@ -168,7 +173,8 @@ void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {
         indices.graphicsFamily.value(),
-        indices.presentFamily.value()
+        indices.presentFamily.value(),
+        indices.transferFamily.value()
     };
 
     float queuePriority = 1.0f;
@@ -197,6 +203,7 @@ void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
 
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
+    vkGetDeviceQueue(m_device, indices.transferFamily.value(), 0, &m_transferQueue);
 }
 
 void VulkanDevice::createVmaAllocator() {

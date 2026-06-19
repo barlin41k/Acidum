@@ -6,6 +6,7 @@ set(CORE_SOURCES
     src/Core/Platform/Input.cpp
     src/Core/Platform/Window.cpp
     src/Core/Resources/ResourceManager.cpp
+
     src/Graphics/GraphicsFactory.cpp
     src/Graphics/Vulkan/VulkanBuffer.cpp
     src/Graphics/Vulkan/VulkanCommandBufferManager.cpp
@@ -21,6 +22,8 @@ set(CORE_SOURCES
     src/Graphics/Vulkan/VulkanSurface.cpp
     src/Graphics/Vulkan/VulkanSwapChain.cpp
     src/Graphics/Vulkan/VulkanSyncManager.cpp
+    src/Graphics/Vulkan/VulkanStagingManager.cpp
+    
     src/Scene/Camera.cpp
 )
 

@@ -22,8 +22,6 @@ public:
     void map();
     void unmap();
     void copyTo(const void* pData, VkDeviceSize size);
-
-    static void copyBuffer(const VulkanDevice& device, VkCommandPool commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 private:
     const VulkanDevice& m_device;
     VkBuffer m_buffer = VK_NULL_HANDLE;
