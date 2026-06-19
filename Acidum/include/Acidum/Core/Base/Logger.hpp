@@ -12,7 +12,10 @@ namespace Acidum {
 class Logger {
 public:
     static void Init();
+
     inline static std::shared_ptr<spdlog::logger>& GetLogger() { return s_Logger; }
+
+    static void PrintCrashBanner(const char* errorType, const std::string& details);
 private:
     static std::shared_ptr<spdlog::logger> s_Logger;
 };
@@ -36,7 +39,8 @@ constexpr const char* GetShortFileName(const char* path) {
 #define ENGINE_VERIFY(condition, msg, ...) \
     do { \
         if (!(condition)) { \
-            ENGINE_FATAL("Engine verification failed: " msg __VA_OPT__(,) __VA_ARGS__); \
+            std::string details = fmt::format("[{}:{}] " msg, Acidum::GetShortFileName(__FILE__), __LINE__ __VA_OPT__(,) __VA_ARGS__); \
+            Acidum::Logger::PrintCrashBanner("Verification Failed", details); \
             std::abort(); \
         } \
     } while (false)
@@ -48,7 +52,8 @@ constexpr const char* GetShortFileName(const char* path) {
     #define ENGINE_ASSERT(condition, msg, ...) \
         do { \
             if (!(condition)) { \
-                ENGINE_FATAL("Engine assertion failed: " msg __VA_OPT__(,) __VA_ARGS__); \
+                std::string details = fmt::format("[{}:{}] " msg, Acidum::GetShortFileName(__FILE__), __LINE__ __VA_OPT__(,) __VA_ARGS__); \
+                Acidum::Logger::PrintCrashBanner("Assertion Failed", details); \
                 std::abort(); \
             } \
         } while (false)

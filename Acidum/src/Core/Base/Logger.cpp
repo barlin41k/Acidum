@@ -17,4 +17,22 @@ void Logger::Init() {
 #endif
 }
 
+void Logger::PrintCrashBanner(const char* errorType, const std::string& details) {
+    auto& logger = GetLogger();
+    
+    std::string banner = fmt::format(
+        "\n"
+        "========================================================\n"
+        "                 ACIDUM ENGINE CRASHED!                 \n"
+        "========================================================\n"
+        "Type    : {}\n"
+        "Details : {}\n"
+        "========================================================",
+        errorType, details
+    );
+
+    logger->critical(banner);
+    logger->flush();
+}
+
 } // namespace Acidum
