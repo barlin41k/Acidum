@@ -40,7 +40,9 @@ add_library(AcidumCore ${CORE_SOURCES})
 
 target_include_directories(AcidumVMA SYSTEM PUBLIC ${vulkanmemoryallocator_SOURCE_DIR}/include)
 target_include_directories(AcidumCore
-    PUBLIC  include
+    PUBLIC
+        include
+        ${stb_SOURCE_DIR}
     PRIVATE src
 )
 
