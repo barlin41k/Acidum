@@ -5,6 +5,7 @@
 #include "Acidum/Core/Base/Types.hpp"
 
 namespace Acidum {
+
 namespace Consts {
     inline constexpr const char* ENGINE_NAME = "Acidum Engine";
     inline constexpr uint32_t ENGINE_DEFAULT_WIDTH = 800;
@@ -14,4 +15,5 @@ namespace Consts {
 
     inline constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 }
+
 } // namespace Acidum

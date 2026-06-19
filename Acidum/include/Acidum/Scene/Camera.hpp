@@ -22,7 +22,7 @@ public:
 private:
     bool m_isViewMatrixDirty = true;
 
-    glm::vec3 m_position{0.0f, 0.0f, 3.0f};
+    glm::vec3 m_position{ 0.0f, 0.0f, 3.0f };
     
     float m_pitch = 0.0f;
     float m_yaw = -90.0f;
@@ -31,13 +31,13 @@ private:
     float m_nearClip = 0.1f;
     float m_farClip = 100.0f;
 
-    glm::vec3 m_front {0.0f, 0.0f, -1.0f};
-    glm::vec3 m_right {1.0f, 0.0f, 0.0f};
-    glm::vec3 m_up {0.0f, 1.0f, 0.0f};
-    const glm::vec3 m_worldUp{0.0f, 1.0f, 0.0f};
+    glm::vec3 m_front { 0.0f, 0.0f, -1.0f };
+    glm::vec3 m_right { 1.0f, 0.0f, 0.0f };
+    glm::vec3 m_up { 0.0f, 1.0f, 0.0f };
+    const glm::vec3 m_worldUp{ 0.0f, 1.0f, 0.0f };
 
-    glm::mat4 m_viewMatrix {1.0f};
-    glm::mat4 m_projectionMatrix {1.0f};
+    glm::mat4 m_viewMatrix { 1.0f };
+    glm::mat4 m_projectionMatrix { 1.0f };
 
     void updateVectors();
 
