@@ -6,14 +6,14 @@
 #include "Acidum/Core/Platform/SystemInfo.hpp"
 
 namespace Acidum {
-    extern std::unique_ptr<Application> CreateApplication();
-}
 
-int main() {
-    auto startTime = std::chrono::high_resolution_clock::now();
+extern std::unique_ptr<Application> CreateApplication();
 
-    Acidum::Logger::Init();
+} // namespace Acidum
 
+namespace {
+
+void startupLog() {
     std::string version = std::format("v{}.{}.{}",
         Acidum::Consts::ENGINE_VERSION.major,
         Acidum::Consts::ENGINE_VERSION.minor,
@@ -27,6 +27,15 @@ int main() {
     ENGINE_INFO("Arch       : {}", Acidum::SystemInfo::GetArchitecture());
     ENGINE_INFO("Build Type : {}", Acidum::SystemInfo::GetBuildType());
     ENGINE_INFO("============================================");
+}
+
+} // namespace
+
+int main() {
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    Acidum::Logger::Init();
+    startupLog();
 
     {
         try {
