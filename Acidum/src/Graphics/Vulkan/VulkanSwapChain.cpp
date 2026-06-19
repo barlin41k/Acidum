@@ -11,6 +11,7 @@
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
+
 VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const VulkanSurface& surface, Window* window, const SwapChainConfig& config)
     : m_device(device),
       m_surface(surface),
@@ -217,4 +218,5 @@ void VulkanSwapChain::createFramebuffers(VkRenderPass renderPass, VkImageView de
         ENGINE_VERIFY(vkCreateFramebuffer(m_device.getLogicalDevice(), &framebufferInfo, nullptr, &m_swapChainFramebuffers[i]) == VK_SUCCESS, "Failed to create framebuffer!");
     }
 }
+
 } // namespace Acidum
