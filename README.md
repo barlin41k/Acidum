@@ -13,11 +13,9 @@ Acidum is a graphics engine developed in C++.
 - a compiler with **C++20 support**
 - **CMake 3.20** or newer
 - the following libraries must be installed in the system and available to `find_package`:
-  - **GLM** — a header-only C++ mathematics library for graphics software
-  - **GLFW 3** — a multi-platform library for window creation, graphic contexts, and input management
   - **Vulkan SDK** — a low-overhead, cross-platform 3D graphics and compute API for high-performance rendering
 
-*Note: some libraries is downloaded automatically via CMake `FetchContent`.*
+*Note: some libraries are downloaded automatically via CMake `FetchContent`.*
 
 ## Build
 
@@ -27,10 +25,10 @@ git clone https://github.com/barlin41k/Acidum.git
 cd Acidum
 ```
 
-2. Generate the build files and compile the project *(Release mode is highly recommended for performance)*
+2. Generate the build files and compile the project *(Release mode is highly recommended for performance, but you can use Debug mode)*
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
+cmake -S . -G Ninja -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release -j
 ```
 
 ## Launch Sandbox
@@ -38,7 +36,7 @@ cmake --build build -j
 After building you can start your **Sandbox application**:
 
 ```bash
-./build/Sandbox/Sandbox
+build-release/Sandbox/Sandbox
 ```
 
 ## License
