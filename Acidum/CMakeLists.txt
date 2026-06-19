@@ -24,6 +24,14 @@ set(CORE_SOURCES
     src/Scene/Camera.cpp
 )
 
+if (WIN32)
+    list(APPEND CORE_SOURCES src/Core/Platform/Windows/PlatformUtils.cpp)
+elseif (UNIX AND NOT APPLE)
+    list(APPEND CORE_SOURCES src/Core/Platform/Linux/PlatformUtils.cpp)
+else()
+    message(FATAL_ERROR "Unsupported platform for Acidum Engine!")
+endif()
+
 add_library(AcidumVMA STATIC src/Graphics/Vulkan/VulkanMemoryAllocator.cpp)
 add_library(AcidumCore ${CORE_SOURCES})
 
