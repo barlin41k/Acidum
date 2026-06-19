@@ -6,7 +6,8 @@
 namespace Acidum {
 
 VulkanCommandBufferManager::VulkanCommandBufferManager(const VulkanDevice& device, uint32_t bufferCount)
-    : m_device(device) {
+    : m_device(device)
+{
     QueueFamilyIndices queueFamilyIndices = m_device.getQueueFamilies();
 
     VkCommandPoolCreateInfo poolInfo{};

@@ -45,7 +45,9 @@ private:
 // templates
 template<typename VertexType>
 VulkanMesh::VulkanMesh(const VulkanDevice& device, VkCommandPool commandPool, const std::vector<VertexType>& vertices, const std::vector<uint32_t>& indices) 
-    : m_vertexCount(static_cast<uint32_t>(vertices.size())), m_indexCount(static_cast<uint32_t>(indices.size())) {
+    : m_vertexCount(static_cast<uint32_t>(vertices.size())),
+      m_indexCount(static_cast<uint32_t>(indices.size()))
+{
     createVertexBuffer(device, commandPool, vertices);
     createIndexBuffer(device, commandPool, indices);
 }

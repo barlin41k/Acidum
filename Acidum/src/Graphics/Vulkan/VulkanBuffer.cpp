@@ -8,8 +8,9 @@
 namespace Acidum {
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
-    : m_device(device), m_size(size) {
-    
+    : m_device(device),
+      m_size(size)
+{    
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;

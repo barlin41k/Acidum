@@ -7,7 +7,9 @@
 namespace Acidum {
 
 VulkanDescriptorManager::VulkanDescriptorManager(const VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout layout)
-    : m_device(device), m_maxFramesInFlight(maxFramesInFlight) {
+    : m_device(device),
+      m_maxFramesInFlight(maxFramesInFlight)
+{
     createUniformBuffers();
     createDescriptorPool();
     createDescriptorSets(layout);
