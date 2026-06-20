@@ -9,7 +9,8 @@ enum class KeyCode : uint16_t {
     W = 87,
     A = 65,
     S = 83,
-    D = 68
+    D = 68,
+    L_CTRL = 341
 };
 
 } // namespace Acidum

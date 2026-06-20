@@ -97,6 +97,10 @@ void SandboxApp::updateCamera(float deltaTime) {
         m_cameraPos -= m_camera.getRight() * cameraSpeed;
     if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::D))
         m_cameraPos += m_camera.getRight() * cameraSpeed;
+    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::SPACE))
+        m_cameraPos.y += cameraSpeed;
+    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::L_CTRL))
+        m_cameraPos.y -= cameraSpeed;
 
     m_camera.setRotation(m_pitch, m_yaw);
     m_camera.setPosition(m_cameraPos);
