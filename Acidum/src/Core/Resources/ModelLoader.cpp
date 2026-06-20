@@ -30,12 +30,20 @@ MeshData ModelLoader::load(const std::string& path) {
 
             vertex.color = { 1.0f, 1.0f, 1.0f };
 
-            if (index.texcoord_index >= 0) {
+            if (index.texcoord_index >= 0)
                 vertex.texCoord = {
                     attrib.texcoords[2 * static_cast<size_t>(index.texcoord_index) + 0],
                     1.0f - attrib.texcoords[2 * static_cast<size_t>(index.texcoord_index) + 1] // TODO: Move flip UV to IGraphicsAPI settings
                 };
-            }
+
+            if (index.normal_index >= 0)
+                vertex.normal = {
+                    attrib.normals[3 * static_cast<size_t>(index.normal_index) + 0],
+                    attrib.normals[3 * static_cast<size_t>(index.normal_index) + 1],
+                    attrib.normals[3 * static_cast<size_t>(index.normal_index) + 2]
+                };
+            else
+                vertex.normal = {0.0f, 1.0f, 0.0f};
 
             meshData.vertices.push_back(vertex);
             meshData.indices.push_back(static_cast<uint32_t>(meshData.indices.size()));
