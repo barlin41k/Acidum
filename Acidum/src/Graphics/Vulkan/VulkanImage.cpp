@@ -8,23 +8,21 @@ namespace Acidum {
 
 VulkanImage::VulkanImage(const VulkanDevice& device, uint32_t width, uint32_t height, 
                 VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, 
-                VkMemoryPropertyFlags properties, VkImageAspectFlags aspectFlags)
+                VkImageAspectFlags aspectFlags)
                 : m_device(device)
 {
-    createImage(width, height, format, tiling, usage, properties);
+    createImage(width, height, format, tiling, usage);
     createImageView(format, aspectFlags);
 }
 
 VulkanImage::~VulkanImage() {
     if (m_imageView != VK_NULL_HANDLE)
         vkDestroyImageView(m_device.getLogicalDevice(), m_imageView, nullptr);
-    if (m_image != VK_NULL_HANDLE)
-        vkDestroyImage(m_device.getLogicalDevice(), m_image, nullptr);
-    if (m_imageMemory != VK_NULL_HANDLE)
-        vkFreeMemory(m_device.getLogicalDevice(), m_imageMemory, nullptr);
+    if (m_image != VK_NULL_HANDLE && m_allocation != VK_NULL_HANDLE)
+        vmaDestroyImage(m_device.getAllocator(), m_image, m_allocation);
 }
 
-void VulkanImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties) {
+void VulkanImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage) {
     VkImageCreateInfo imageInfo {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -40,19 +38,13 @@ void VulkanImage::createImage(uint32_t width, uint32_t height, VkFormat format, 
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    ENGINE_VERIFY(vkCreateImage(m_device.getLogicalDevice(), &imageInfo, nullptr, &m_image) == VK_SUCCESS, "Failed to create image!");
+    VmaAllocationCreateInfo allocInfo = {};
+    allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(m_device.getLogicalDevice(), m_image, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-
-    allocInfo.memoryTypeIndex = m_device.findMemoryType(memRequirements.memoryTypeBits, properties);
-    ENGINE_VERIFY(vkAllocateMemory(m_device.getLogicalDevice(), &allocInfo, nullptr, &m_imageMemory) == VK_SUCCESS,
-        "Failed to allocate image memory!");
-    vkBindImageMemory(m_device.getLogicalDevice(), m_image, m_imageMemory, 0);
+    ENGINE_VERIFY(
+        vmaCreateImage(m_device.getAllocator(), &imageInfo, &allocInfo, &m_image, &m_allocation, nullptr) == VK_SUCCESS, 
+        "Failed to create image via VMA!"
+    );
 }
 
 void VulkanImage::createImageView(VkFormat format, VkImageAspectFlags aspectFlags) {
