@@ -1,14 +1,18 @@
 #include "Acidum/Core/Resources/ResourceManager.hpp"
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/PlatformUtils.hpp"
+#include "Acidum/Core/Resources/ImageLoader.hpp"
 
 namespace Acidum {
 
+IGraphicsAPI* ResourceManager::s_graphicsAPI;
 std::filesystem::path ResourceManager::s_assetsPath;
+std::unordered_map<std::string, std::shared_ptr<ITexture2D>> ResourceManager::s_textures;
 
 void ResourceManager::initialize() {
     std::filesystem::path executeDir = Platform::GetExecutableDir();
@@ -19,6 +23,13 @@ void ResourceManager::initialize() {
     s_assetsPath = executeDir / "assets";
 
     ENGINE_INFO("ResourceManager initialized with base path: {}", s_assetsPath.string());
+}
+
+void ResourceManager::shutdown() {
+    s_textures.clear();
+    s_graphicsAPI = nullptr;
+
+    ENGINE_INFO("ResourceManager shutdown successfully!");
 }
 
 std::vector<char> ResourceManager::loadBinaryFile(const std::string& relativePath) {
@@ -36,6 +47,24 @@ std::vector<char> ResourceManager::loadBinaryFile(const std::string& relativePat
     file.close();
 
     return buffer;
+}
+
+std::shared_ptr<ITexture2D> ResourceManager::loadTexture(const std::string& relativePath) {
+    if (s_textures.contains(relativePath))
+        return s_textures[relativePath];
+
+    std::filesystem::path fullPath = s_assetsPath / relativePath;
+
+    ImageData data = ImageLoader::load(fullPath);
+
+    auto texture = s_graphicsAPI->createTexture2D(
+        data.pixels.data(),
+        static_cast<uint32_t>(data.width),
+        static_cast<uint32_t>(data.height)
+    );
+
+    s_textures[relativePath] = std::move(texture);
+    return s_textures[relativePath];
 }
 
 } // namespace Acidum

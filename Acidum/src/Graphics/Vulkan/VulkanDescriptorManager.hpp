@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+
 #include <memory>
 #include <vector>
 
@@ -11,6 +12,7 @@ namespace Acidum {
 // forward-declaration
 class VulkanDevice;
 class VulkanBuffer;
+class VulkanTexture2D;
 
 class VulkanDescriptorManager {
 public:
@@ -21,6 +23,7 @@ public:
     VulkanDescriptorManager& operator=(const VulkanDescriptorManager&) = delete;
 
     void updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo);
+    void bindTexture(uint32_t currentFrame, VulkanTexture2D* texture);
     
     VkDescriptorSet getDescriptorSet(uint32_t currentFrame) const { return m_descriptorSets[currentFrame]; }
 private:

@@ -5,6 +5,7 @@
 
 #include "Acidum/Core/Base/Types.hpp"
 #include "Acidum/Graphics/Interfaces/IGraphicsAPI.hpp"
+#include "Acidum/Graphics/Interfaces/ITexture2D.hpp"
 
 namespace Acidum {
 
@@ -22,6 +23,9 @@ public:
     ~VulkanGraphicsAPI() override;
 
     void initialize() override;
+
+    std::shared_ptr<ITexture2D> createTexture2D(const void* data, uint32_t width, uint32_t height) override;
+    void bindTexture(std::shared_ptr<ITexture2D> texture) override;
 
     void beginUpload() override;
     std::unique_ptr<IMesh> createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) override;

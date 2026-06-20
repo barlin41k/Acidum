@@ -19,6 +19,7 @@ Application::Application(const AppConfig& config)
 }
 
 Application::~Application() {
+    ResourceManager::shutdown();
     m_graphicsAPI.reset();
     m_window.reset();
     GLFWContext::Shutdown();
@@ -29,6 +30,7 @@ void Application::run() {
     ResourceManager::initialize();
     initWindow();
     initGraphicsAPI();
+    ResourceManager::setGraphicsAPI(m_graphicsAPI.get());
     mainLoop();
 }
 

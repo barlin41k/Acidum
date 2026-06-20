@@ -15,6 +15,7 @@
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 #include "Graphics/Vulkan/VulkanRenderer.hpp"
 #include "Graphics/Vulkan/VulkanStagingManager.hpp"
+#include "Graphics/Vulkan/VulkanTexture2D.hpp"
 
 namespace Acidum {
 
@@ -88,6 +89,14 @@ void VulkanGraphicsAPI::setProjectionMatrix(const glm::mat4& proj) {
 void VulkanGraphicsAPI::setViewMatrix(const glm::mat4& view) {
     ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
     m_renderer->setViewMatrix(view);
+}
+
+std::shared_ptr<ITexture2D> VulkanGraphicsAPI::createTexture2D(const void* data, uint32_t width, uint32_t height) {
+    return std::make_shared<VulkanTexture2D>(*m_device, m_stagingManager.get(), data, width, height);
+}
+
+void VulkanGraphicsAPI::bindTexture(std::shared_ptr<ITexture2D> texture) {
+    m_renderer->bindTexture(texture);
 }
 
 void VulkanGraphicsAPI::beginUpload() {

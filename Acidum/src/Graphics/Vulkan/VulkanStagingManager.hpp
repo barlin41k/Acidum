@@ -19,9 +19,11 @@ public:
     ~VulkanStagingManager();
 
     void begin();
-    void stageCopy(std::unique_ptr<VulkanBuffer> stagingBuffer, VkBuffer dst, VkDeviceSize size);
     void submit();
     void waitForUpload();
+
+    void stageCopy(std::unique_ptr<VulkanBuffer> stagingBuffer, VkBuffer dst, VkDeviceSize size);
+    void stageCopy(std::unique_ptr<VulkanBuffer> stagingBuffer, VkImage dstImage, uint32_t width, uint32_t height);
 private:
     const VulkanDevice& m_device;
 

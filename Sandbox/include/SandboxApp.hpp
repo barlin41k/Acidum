@@ -40,6 +40,7 @@ private:
     float m_fpsTimer = 0.0f;
     uint32_t m_frameCount = 0;
 
+    std::shared_ptr<Acidum::ITexture2D> m_cubeTexture;
     std::unique_ptr<Acidum::IMesh> m_cubeMesh;
     
     void updateWindowTitle(float deltaTime);

@@ -4,6 +4,7 @@
 
 #include "Acidum/Core/Base/Types.hpp"
 #include "Acidum/Graphics/Interfaces/IMesh.hpp"
+#include "Acidum/Graphics/Interfaces/ITexture2D.hpp"
 
 namespace Acidum {
 
@@ -12,6 +13,9 @@ public:
     virtual ~IGraphicsAPI() = default;
 
     virtual void initialize() = 0;
+    
+    virtual std::shared_ptr<ITexture2D> createTexture2D(const void* data, uint32_t width, uint32_t height) = 0;
+    virtual void bindTexture(std::shared_ptr<ITexture2D> texture) = 0;
     
     virtual void beginUpload() = 0;
     virtual std::unique_ptr<IMesh> createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) = 0;

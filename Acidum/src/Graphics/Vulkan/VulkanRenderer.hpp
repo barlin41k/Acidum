@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "Acidum/Graphics/Interfaces/ITexture2D.hpp"
 #include "Graphics/Vulkan/VulkanTypes.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
@@ -40,6 +41,8 @@ public:
     void drawFrame();
     void submitMesh(VulkanMesh* mesh, const glm::mat4& modelMatrix);
 
+    void bindTexture(std::shared_ptr<ITexture2D> texture) { m_currentTexture = texture; }
+
     void setViewMatrix(const glm::mat4& view) { m_viewMatrix = view; }
     void setProjectionMatrix(const glm::mat4& proj) { m_projectionMatrix = proj; }
     void setFramebufferResized(bool resized) { m_framebufferResized = resized; }
@@ -60,6 +63,7 @@ private:
     std::unique_ptr<VulkanDescriptorManager> m_descriptorManager;
     std::unique_ptr<VulkanImage> m_depthImage;
     VkFormat m_depthFormat;
+    std::shared_ptr<ITexture2D> m_currentTexture;
 
     std::vector<RenderCommand> m_renderQueue;
     glm::mat4 m_viewMatrix = glm::mat4(1.0f);

@@ -3,6 +3,7 @@
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
+#include "Graphics/Vulkan/VulkanTexture2D.hpp"
 
 namespace Acidum {
 
@@ -40,38 +41,46 @@ void VulkanDescriptorManager::updateUniformBuffer(uint32_t currentFrame, const U
 }
 
 void VulkanDescriptorManager::createDescriptorPool() {
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight);
+    std::array<VkDescriptorPoolSize, 2> poolSizes {};
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight);
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[1].descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight);
 
-    VkDescriptorPoolCreateInfo poolInfo{};
+    VkDescriptorPoolCreateInfo poolInfo {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.poolSizeCount = 2;
+    poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = static_cast<uint32_t>(m_maxFramesInFlight);
 
-    ENGINE_VERIFY(vkCreateDescriptorPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_descriptorPool) == VK_SUCCESS, "Failed to create descriptor pool!");
+    ENGINE_VERIFY(vkCreateDescriptorPool(
+        m_device.getLogicalDevice(), &poolInfo, nullptr, &m_descriptorPool) == VK_SUCCESS,
+        "Failed to create descriptor pool!"
+    );
 }
 
 void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout layout) {
     std::vector<VkDescriptorSetLayout> layouts(m_maxFramesInFlight, layout);
 
-    VkDescriptorSetAllocateInfo allocInfo{};
+    VkDescriptorSetAllocateInfo allocInfo {};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = m_descriptorPool;
     allocInfo.descriptorSetCount = static_cast<uint32_t>(m_maxFramesInFlight);
     allocInfo.pSetLayouts = layouts.data();
 
     m_descriptorSets.resize(m_maxFramesInFlight);
-    ENGINE_VERIFY(vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, m_descriptorSets.data()) == VK_SUCCESS, "Failed to allocate descriptor sets!");
+    ENGINE_VERIFY(
+        vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, m_descriptorSets.data()) == VK_SUCCESS,
+        "Failed to allocate descriptor sets!"
+    );
 
     for (size_t i = 0; i < m_maxFramesInFlight; i++) {
-        VkDescriptorBufferInfo bufferInfo{};
+        VkDescriptorBufferInfo bufferInfo {};
         bufferInfo.buffer = m_uniformBuffers[i]->getBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(UniformBufferObject);
 
-        VkWriteDescriptorSet descriptorWrite{};
+        VkWriteDescriptorSet descriptorWrite {};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrite.dstSet = m_descriptorSets[i];
         descriptorWrite.dstBinding = 0;
@@ -84,6 +93,26 @@ void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout layout)
 
         vkUpdateDescriptorSets(m_device.getLogicalDevice(), 1, &descriptorWrite, 0, nullptr);
     }
+}
+
+void VulkanDescriptorManager::bindTexture(uint32_t currentFrame, VulkanTexture2D* texture) {
+    if (!texture) return;
+
+    VkDescriptorImageInfo imageInfo {};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = texture->getImageView();
+    imageInfo.sampler = texture->getSampler();
+
+    VkWriteDescriptorSet descriptorWrite {};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = m_descriptorSets[currentFrame];
+    descriptorWrite.dstBinding = 1;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrite.descriptorCount = 1;
+    descriptorWrite.pImageInfo = &imageInfo;
+
+    vkUpdateDescriptorSets(m_device.getLogicalDevice(), 1, &descriptorWrite, 0, nullptr);
 }
 
 } // namespace Acidum

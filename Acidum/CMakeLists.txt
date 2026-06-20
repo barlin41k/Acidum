@@ -6,6 +6,8 @@ set(CORE_SOURCES
     src/Core/Platform/Input.cpp
     src/Core/Platform/Window.cpp
     src/Core/Resources/ResourceManager.cpp
+    src/Core/Resources/STBImage.cpp
+    src/Core/Resources/ImageLoader.cpp
 
     src/Graphics/GraphicsFactory.cpp
     src/Graphics/Vulkan/VulkanBuffer.cpp
@@ -23,6 +25,7 @@ set(CORE_SOURCES
     src/Graphics/Vulkan/VulkanSwapChain.cpp
     src/Graphics/Vulkan/VulkanSyncManager.cpp
     src/Graphics/Vulkan/VulkanStagingManager.cpp
+    src/Graphics/Vulkan/VulkanTexture2D.cpp
     
     src/Scene/Camera.cpp
 )
@@ -40,9 +43,8 @@ add_library(AcidumCore ${CORE_SOURCES})
 
 target_include_directories(AcidumVMA SYSTEM PUBLIC ${vulkanmemoryallocator_SOURCE_DIR}/include)
 target_include_directories(AcidumCore
-    PUBLIC
-        include
-        ${stb_SOURCE_DIR}
+    PUBLIC include
+    SYSTEM PUBLIC ${stb_SOURCE_DIR}
     PRIVATE src
 )
 

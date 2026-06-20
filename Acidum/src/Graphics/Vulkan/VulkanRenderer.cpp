@@ -11,6 +11,7 @@
 #include "Graphics/Vulkan/VulkanRenderPass.hpp"
 #include "Graphics/Vulkan/VulkanSwapChain.hpp"
 #include "Graphics/Vulkan/VulkanSyncManager.hpp"
+#include "Graphics/Vulkan/VulkanTexture2D.hpp"
 
 namespace Acidum {
 
@@ -46,8 +47,7 @@ VulkanRenderer::~VulkanRenderer() {
 }
 
 void VulkanRenderer::submitMesh(VulkanMesh* mesh, const glm::mat4& modelMatrix) {
-    if (mesh)
-        m_renderQueue.push_back({mesh, modelMatrix});
+    if (mesh) m_renderQueue.push_back({mesh, modelMatrix});
 }
 
 void VulkanRenderer::drawFrame() {
@@ -76,8 +76,8 @@ void VulkanRenderer::drawFrame() {
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    VkSemaphore waitSemaphores[] = {m_syncManager->getAvailableSemaphore(m_currentFrame)};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    VkSemaphore waitSemaphores[] = { m_syncManager->getAvailableSemaphore(m_currentFrame) };
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
@@ -86,18 +86,23 @@ void VulkanRenderer::drawFrame() {
     VkCommandBuffer cmdBuffer = m_commandBufferManager->getCommandBuffer(m_currentFrame);
     submitInfo.pCommandBuffers = &cmdBuffer;
 
-    VkSemaphore signalSemaphores[] = {m_syncManager->getFinishedSemaphore(imageIndex)};
+    VkSemaphore signalSemaphores[] = { m_syncManager->getFinishedSemaphore(imageIndex) };
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    ENGINE_VERIFY(vkQueueSubmit(m_device.getGraphicsQueue(), 1, &submitInfo, m_syncManager->getInFlightFence(m_currentFrame)) == VK_SUCCESS, "Failed to submit draw command buffer!");
+    ENGINE_VERIFY(
+        vkQueueSubmit(
+            m_device.getGraphicsQueue(), 1, &submitInfo, m_syncManager->getInFlightFence(m_currentFrame)
+        ) == VK_SUCCESS,
+        "Failed to submit draw command buffer!"
+    );
 
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkSwapchainKHR swapChains[] = {m_swapChain->getSwapChain()};
+    VkSwapchainKHR swapChains[] = { m_swapChain->getSwapChain() };
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
@@ -137,25 +142,25 @@ void VulkanRenderer::recreateSwapChain() {
 }
 
 void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-    VkCommandBufferBeginInfo beginInfo{};
+    VkCommandBufferBeginInfo beginInfo {};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = 0;
     beginInfo.pInheritanceInfo = nullptr;
 
     ENGINE_VERIFY(vkBeginCommandBuffer(commandBuffer, &beginInfo) == VK_SUCCESS, "Failed to begin recording command buffer!");
 
-    VkRenderPassBeginInfo renderPassInfo{};
+    VkRenderPassBeginInfo renderPassInfo {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = m_renderPass->getRenderPass();
     renderPassInfo.framebuffer = m_swapChain->getFramebuffers()[imageIndex];
-    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.offset = { 0, 0 };
     renderPassInfo.renderArea.extent = m_swapChain->getExtent();
 
-    std::array<VkClearValue, 2> clearValues{};
+    std::array<VkClearValue, 2> clearValues {};
     clearValues[0].color = {{
         m_config.clearColor.r, m_config.clearColor.g, m_config.clearColor.b, m_config.clearColor.a
     }};
-    clearValues[1].depthStencil = {1.0f, 0};
+    clearValues[1].depthStencil = { 1.0f, 0 };
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
@@ -164,7 +169,7 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipeline());
 
-    VkViewport viewport{};
+    VkViewport viewport {};
     viewport.x = 0.0f;
     viewport.y = static_cast<float>(m_swapChain->getExtent().height);
     viewport.width = static_cast<float>(m_swapChain->getExtent().width);
@@ -173,10 +178,15 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
+    VkRect2D scissor {};
+    scissor.offset = { 0, 0 };
     scissor.extent = m_swapChain->getExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    if (m_currentTexture) {
+        auto vkTexture = std::static_pointer_cast<VulkanTexture2D>(m_currentTexture);
+        m_descriptorManager->bindTexture(m_currentFrame, vkTexture.get());
+    }
 
     VkDescriptorSet currentDescriptorSet = m_descriptorManager->getDescriptorSet(m_currentFrame);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getLayout(), 0, 1, &currentDescriptorSet, 0, nullptr);
@@ -207,10 +217,6 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     ENGINE_VERIFY(vkEndCommandBuffer(commandBuffer) == VK_SUCCESS, "Failed to record command buffer!");
 }
 
-void VulkanRenderer::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
-    m_descriptorManager->updateUniformBuffer(currentFrame, ubo);
-}
-
 void VulkanRenderer::createDepthResources() {
     m_depthFormat = m_device.findDepthFormat();
     VkExtent2D swapChainExtent = m_swapChain->getExtent();
@@ -224,6 +230,10 @@ void VulkanRenderer::createDepthResources() {
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VK_IMAGE_ASPECT_DEPTH_BIT
     );
+}
+
+void VulkanRenderer::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
+    m_descriptorManager->updateUniformBuffer(currentFrame, ubo);
 }
 
 } // namespace Acidum
