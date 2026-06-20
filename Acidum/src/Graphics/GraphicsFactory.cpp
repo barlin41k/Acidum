@@ -4,6 +4,7 @@
 #include "Graphics/Vulkan/VulkanGraphicsAPI.hpp"
 
 namespace Acidum {
+
 std::unique_ptr<IGraphicsAPI> GraphicsFactory::createAPI(APIType type, Window* window) {
     switch (type) {
         case APIType::Vulkan:
@@ -13,4 +14,5 @@ std::unique_ptr<IGraphicsAPI> GraphicsFactory::createAPI(APIType type, Window* w
             return nullptr;
     }
 }
+
 } // namespace Acidum
