@@ -21,12 +21,15 @@ public:
 
     VkPipeline getPipeline() const noexcept { return m_graphicsPipeline; }
     VkPipelineLayout getLayout() const noexcept { return m_pipelineLayout; }
-    VkDescriptorSetLayout getDescriptorSetLayout() const { return m_descriptorSetLayout; }
+
+    VkDescriptorSetLayout getGlobalDescriptorSetLayout() const { return m_globalDescriptorSetLayout; }
+    VkDescriptorSetLayout getMaterialDescriptorSetLayout() const { return m_materialDescriptorSetLayout; }
 private:
     const VulkanDevice& m_device;
     VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
     VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
-    VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_globalDescriptorSetLayout = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_materialDescriptorSetLayout = VK_NULL_HANDLE;
 
     void createGraphicsPipeline(const VulkanRenderPass& renderPass, const PipelineConfig& config);
     void createDescriptorSetLayout();

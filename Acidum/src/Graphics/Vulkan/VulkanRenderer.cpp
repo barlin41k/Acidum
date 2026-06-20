@@ -37,7 +37,11 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
     m_syncManager = std::make_unique<VulkanSyncManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
 
-    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
+    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(
+        m_device, Consts::MAX_FRAMES_IN_FLIGHT,
+        m_pipeline->getGlobalDescriptorSetLayout(),
+        m_pipeline->getMaterialDescriptorSetLayout()
+    );
     ENGINE_INFO("Vulkan Renderer initialized!");
 }
 
@@ -138,7 +142,11 @@ void VulkanRenderer::recreateSwapChain() {
     m_syncManager->resizeImagesInFlight(imageCount);
     
     m_descriptorManager.reset();
-    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, m_pipeline->getDescriptorSetLayout());
+    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(
+        m_device, Consts::MAX_FRAMES_IN_FLIGHT,
+        m_pipeline->getGlobalDescriptorSetLayout(),
+        m_pipeline->getMaterialDescriptorSetLayout()
+    );
 }
 
 void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
@@ -183,14 +191,6 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     scissor.extent = m_swapChain->getExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    if (m_currentTexture) {
-        auto vkTexture = std::static_pointer_cast<VulkanTexture2D>(m_currentTexture);
-        m_descriptorManager->bindTexture(m_currentFrame, vkTexture.get());
-    }
-
-    VkDescriptorSet currentDescriptorSet = m_descriptorManager->getDescriptorSet(m_currentFrame);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getLayout(), 0, 1, &currentDescriptorSet, 0, nullptr);
-
     UniformBufferObject ubo {};
     ubo.view = m_viewMatrix;
     ubo.proj = m_projectionMatrix;
@@ -198,6 +198,16 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     for (const auto& command : m_renderQueue) {
         if (command.mesh != nullptr) {
+            VkDescriptorSet globalSet = m_descriptorManager->getGlobalDescriptorSet(m_currentFrame);
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getLayout(), 0, 1, &globalSet, 0, nullptr);
+
+            auto material = command.mesh->getMaterial();
+            if (material) {
+                VkDescriptorSet matSet = m_descriptorManager->getMaterialDescriptorSet(material.get(), m_currentFrame);
+                if (matSet != VK_NULL_HANDLE)
+                    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getLayout(), 1, 1, &matSet, 0, nullptr);
+            }
+
             vkCmdPushConstants(
                 commandBuffer, 
                 m_pipeline->getLayout(), 

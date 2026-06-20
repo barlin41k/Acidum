@@ -25,7 +25,8 @@ VulkanPipeline::~VulkanPipeline() {
 
     vkDestroyPipelineLayout(m_device.getLogicalDevice(), m_pipelineLayout, nullptr);
 
-    vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_descriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_globalDescriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_materialDescriptorSetLayout, nullptr);
 }
 
 VkShaderModule VulkanPipeline::createShaderModule(const std::vector<char>& code) {
@@ -142,10 +143,11 @@ void VulkanPipeline::createGraphicsPipeline(const VulkanRenderPass& renderPass, 
     depthStencil.depthWriteEnable = static_cast<VkBool32>(config.enableDepthWrite);
     depthStencil.depthCompareOp = config.depthCompareOp;
 
+    std::array<VkDescriptorSetLayout, 2> setLayouts = {m_globalDescriptorSetLayout, m_materialDescriptorSetLayout};
     VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
+    pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(setLayouts.size());
+    pipelineLayoutInfo.pSetLayouts = setLayouts.data();
 
     VkPushConstantRange pushConstantRange{};
     pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -189,26 +191,32 @@ void VulkanPipeline::createDescriptorSetLayout() {
     uboLayoutBinding.pImmutableSamplers = nullptr;
     uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
+    VkDescriptorSetLayoutCreateInfo globalLayoutInfo {};
+    globalLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    globalLayoutInfo.bindingCount = 1;
+    globalLayoutInfo.pBindings = &uboLayoutBinding;
+
+    ENGINE_VERIFY(vkCreateDescriptorSetLayout(
+        m_device.getLogicalDevice(), &globalLayoutInfo, nullptr, &m_globalDescriptorSetLayout) == VK_SUCCESS,
+        "Failed to create global descriptor set layout!"
+    );
+
+
     VkDescriptorSetLayoutBinding samplerLayoutBinding {};
-    samplerLayoutBinding.binding = 1;
+    samplerLayoutBinding.binding = 0;
     samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    std::vector<VkDescriptorSetLayoutBinding> layoutBindings = { 
-        uboLayoutBinding, 
-        samplerLayoutBinding 
-    };
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo {};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
-    layoutInfo.pBindings = layoutBindings.data();
+    VkDescriptorSetLayoutCreateInfo materialLayoutInfo {};
+    materialLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    materialLayoutInfo.bindingCount = 1;
+    materialLayoutInfo.pBindings = &samplerLayoutBinding;
 
     ENGINE_VERIFY(
-        vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) == VK_SUCCESS,
-        "Failed to create descriptor set layout!"
+        vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &materialLayoutInfo, nullptr, &m_materialDescriptorSetLayout) == VK_SUCCESS,
+        "Failed to create material descriptor set layout!"
     );
 }
 

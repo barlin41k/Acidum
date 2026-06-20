@@ -29,8 +29,11 @@ void SandboxApp::OnInit() {
 
     GetGraphicsAPI()->beginUpload();
 
-    m_garlicTexture = Acidum::ResourceManager::loadTexture("textures/Garlic_u1_v1.jpg");
+    m_garlicMaterial = std::make_shared<Acidum::Material>();
+    m_garlicMaterial->albedoTexture = Acidum::ResourceManager::loadTexture("textures/Garlic_u1_v1.jpg");
+    
     m_garlicMesh = Acidum::ResourceManager::loadMesh("models/Garlic.obj");
+    m_garlicMesh->setMaterial(m_garlicMaterial);
 
     GetGraphicsAPI()->endUploadAndWait();
 }
@@ -50,7 +53,6 @@ void SandboxApp::OnRender() {
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.01f)); 
         modelMatrix = glm::rotate(modelMatrix, m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        GetGraphicsAPI()->bindTexture(m_garlicTexture);
         GetGraphicsAPI()->drawMesh(m_garlicMesh.get(), modelMatrix);
     }
 }

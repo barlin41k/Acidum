@@ -7,13 +7,17 @@
 
 namespace Acidum {
 
-VulkanDescriptorManager::VulkanDescriptorManager(const VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout layout)
+VulkanDescriptorManager::VulkanDescriptorManager(
+    const VulkanDevice& device, uint32_t maxFramesInFlight,
+    VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout materialLayout
+)
     : m_device(device),
+      m_materialLayout(materialLayout),
       m_maxFramesInFlight(maxFramesInFlight)
 {
     createUniformBuffers();
     createDescriptorPool();
-    createDescriptorSets(layout);
+    createDescriptorSets(globalLayout);
 }
 
 VulkanDescriptorManager::~VulkanDescriptorManager() {
@@ -43,15 +47,15 @@ void VulkanDescriptorManager::updateUniformBuffer(uint32_t currentFrame, const U
 void VulkanDescriptorManager::createDescriptorPool() {
     std::array<VkDescriptorPoolSize, 2> poolSizes {};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight);
+    poolSizes[0].descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight * 100); // TODO: DescriptorAllocator
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight);
+    poolSizes[1].descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight * 100); // TODO: DescriptorAllocator
 
     VkDescriptorPoolCreateInfo poolInfo {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = 2;
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(m_maxFramesInFlight);
+    poolInfo.maxSets = static_cast<uint32_t>(m_maxFramesInFlight * 100); // TODO: DescriptorAllocator
 
     ENGINE_VERIFY(vkCreateDescriptorPool(
         m_device.getLogicalDevice(), &poolInfo, nullptr, &m_descriptorPool) == VK_SUCCESS,
@@ -59,60 +63,78 @@ void VulkanDescriptorManager::createDescriptorPool() {
     );
 }
 
-void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout layout) {
-    std::vector<VkDescriptorSetLayout> layouts(m_maxFramesInFlight, layout);
+void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout globalLayout) { // rename
+    std::vector<VkDescriptorSetLayout> globalLayouts(m_maxFramesInFlight, globalLayout);
+    VkDescriptorSetAllocateInfo globalAllocInfo{};
+    globalAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    globalAllocInfo.descriptorPool = m_descriptorPool;
+    globalAllocInfo.descriptorSetCount = m_maxFramesInFlight;
+    globalAllocInfo.pSetLayouts = globalLayouts.data();
 
-    VkDescriptorSetAllocateInfo allocInfo {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = m_descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(m_maxFramesInFlight);
-    allocInfo.pSetLayouts = layouts.data();
-
-    m_descriptorSets.resize(m_maxFramesInFlight);
+    m_globalDescriptorSets.resize(m_maxFramesInFlight);
     ENGINE_VERIFY(
-        vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, m_descriptorSets.data()) == VK_SUCCESS,
-        "Failed to allocate descriptor sets!"
+        vkAllocateDescriptorSets(m_device.getLogicalDevice(), &globalAllocInfo, m_globalDescriptorSets.data()) == VK_SUCCESS, 
+        "Failed to allocate global sets!"
     );
 
     for (size_t i = 0; i < m_maxFramesInFlight; i++) {
-        VkDescriptorBufferInfo bufferInfo {};
+        VkDescriptorBufferInfo bufferInfo{};
         bufferInfo.buffer = m_uniformBuffers[i]->getBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(UniformBufferObject);
 
-        VkWriteDescriptorSet descriptorWrite {};
+        VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = m_descriptorSets[i];
+        descriptorWrite.dstSet = m_globalDescriptorSets[i];
         descriptorWrite.dstBinding = 0;
         descriptorWrite.dstArrayElement = 0;
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.pBufferInfo = &bufferInfo;
-        descriptorWrite.pImageInfo = nullptr;
-        descriptorWrite.pTexelBufferView = nullptr;
 
         vkUpdateDescriptorSets(m_device.getLogicalDevice(), 1, &descriptorWrite, 0, nullptr);
     }
 }
 
-void VulkanDescriptorManager::bindTexture(uint32_t currentFrame, VulkanTexture2D* texture) {
-    if (!texture) return;
+VkDescriptorSet VulkanDescriptorManager::getMaterialDescriptorSet(Material* material, uint32_t currentFrame) {
+    if (!material) return VK_NULL_HANDLE;
 
-    VkDescriptorImageInfo imageInfo {};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = texture->getImageView();
-    imageInfo.sampler = texture->getSampler();
+    if (m_materialSetsCache.find(material) != m_materialSetsCache.end())
+        return m_materialSetsCache[material][currentFrame];
 
-    VkWriteDescriptorSet descriptorWrite {};
-    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrite.dstSet = m_descriptorSets[currentFrame];
-    descriptorWrite.dstBinding = 1;
-    descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrite.descriptorCount = 1;
-    descriptorWrite.pImageInfo = &imageInfo;
+    std::vector<VkDescriptorSetLayout> layouts(m_maxFramesInFlight, m_materialLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = m_descriptorPool;
+    allocInfo.descriptorSetCount = m_maxFramesInFlight;
+    allocInfo.pSetLayouts = layouts.data();
 
-    vkUpdateDescriptorSets(m_device.getLogicalDevice(), 1, &descriptorWrite, 0, nullptr);
+    std::vector<VkDescriptorSet> newSets(m_maxFramesInFlight);
+    vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, newSets.data());
+
+    if (material->albedoTexture) {
+        auto vkTexture = std::static_pointer_cast<VulkanTexture2D>(material->albedoTexture);
+
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = vkTexture->getImageView();
+        imageInfo.sampler = vkTexture->getSampler();
+
+        std::vector<VkWriteDescriptorSet> descriptorWrites(m_maxFramesInFlight);
+        for (size_t i = 0; i < m_maxFramesInFlight; i++) {
+            descriptorWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[i].dstSet = newSets[i];
+            descriptorWrites[i].dstBinding = 0;
+            descriptorWrites[i].dstArrayElement = 0;
+            descriptorWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites[i].descriptorCount = 1;
+            descriptorWrites[i].pImageInfo = &imageInfo;
+        }
+        vkUpdateDescriptorSets(m_device.getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    }
+
+    m_materialSetsCache[material] = newSets;
+    return newSets[currentFrame];
 }
 
 } // namespace Acidum

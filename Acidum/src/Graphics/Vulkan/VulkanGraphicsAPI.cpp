@@ -95,10 +95,6 @@ std::shared_ptr<ITexture2D> VulkanGraphicsAPI::createTexture2D(const void* data,
     return std::make_shared<VulkanTexture2D>(*m_device, m_stagingManager.get(), data, width, height);
 }
 
-void VulkanGraphicsAPI::bindTexture(std::shared_ptr<ITexture2D> texture) {
-    m_renderer->bindTexture(texture);
-}
-
 void VulkanGraphicsAPI::beginUpload() {
     m_stagingManager->begin();
 }

@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "Acidum/Graphics/Interfaces/IMesh.hpp"
+#include "Acidum/Graphics/Material.hpp"
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
 #include "Graphics/Vulkan/VulkanStagingManager.hpp"
 
@@ -28,6 +29,9 @@ public:
     uint32_t getVertexCount() const override { return m_vertexCount; };
     uint32_t getIndexCount() const override { return m_indexCount; };
 
+    void setMaterial(std::shared_ptr<Material> material) override { m_material = std::move(material); };
+    std::shared_ptr<Material> getMaterial() const override { return m_material; };
+
     void bind(VkCommandBuffer commandBuffer) const;
     void draw(VkCommandBuffer commandBuffer) const;
 
@@ -38,6 +42,8 @@ private:
     std::unique_ptr<VulkanBuffer> m_indexBuffer;
     uint32_t m_vertexCount = 0;
     uint32_t m_indexCount = 0;
+
+    std::shared_ptr<Material> m_material;
 
     template<typename VertexType>
     void createVertexBuffer(const VulkanDevice& device, VulkanStagingManager* stagingManager, const std::vector<VertexType>& vertices);

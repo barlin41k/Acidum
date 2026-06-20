@@ -41,7 +41,7 @@ private:
     float m_fpsTimer = 0.0f;
     uint32_t m_frameCount = 0;
 
-    std::shared_ptr<Acidum::ITexture2D> m_garlicTexture;
+    std::shared_ptr<Acidum::Material> m_garlicMaterial;
     std::shared_ptr<Acidum::IMesh> m_garlicMesh;
     
     void updateWindowTitle(float deltaTime);
