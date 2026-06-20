@@ -7,12 +7,14 @@
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/PlatformUtils.hpp"
 #include "Acidum/Core/Resources/ImageLoader.hpp"
+#include "Acidum/Core/Resources/ModelLoader.hpp"
 
 namespace Acidum {
 
 IGraphicsAPI* ResourceManager::s_graphicsAPI;
 std::filesystem::path ResourceManager::s_assetsPath;
 std::unordered_map<std::string, std::shared_ptr<ITexture2D>> ResourceManager::s_textures;
+std::unordered_map<std::string, std::shared_ptr<IMesh>> ResourceManager::s_meshes;
 
 void ResourceManager::initialize() {
     std::filesystem::path executeDir = Platform::GetExecutableDir();
@@ -27,6 +29,8 @@ void ResourceManager::initialize() {
 
 void ResourceManager::shutdown() {
     s_textures.clear();
+    s_meshes.clear();
+    
     s_graphicsAPI = nullptr;
 
     ENGINE_INFO("ResourceManager shutdown successfully!");
@@ -65,6 +69,20 @@ std::shared_ptr<ITexture2D> ResourceManager::loadTexture(const std::string& rela
 
     s_textures[relativePath] = std::move(texture);
     return s_textures[relativePath];
+}
+
+std::shared_ptr<IMesh> ResourceManager::loadMesh(const std::string& relativePath) {
+    if (s_meshes.contains(relativePath))
+        return s_meshes[relativePath];
+
+    std::filesystem::path fullPath = s_assetsPath / relativePath;
+
+    MeshData data = ModelLoader::load(fullPath.string());
+
+    auto mesh = s_graphicsAPI->createMesh(data.vertices, data.indices);
+
+    s_meshes[relativePath] = std::move(mesh);
+    return s_meshes[relativePath];
 }
 
 } // namespace Acidum

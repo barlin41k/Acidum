@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 #include "Acidum/Core/Application.hpp"
 #include "Acidum/Scene/Camera.hpp"
@@ -40,8 +41,8 @@ private:
     float m_fpsTimer = 0.0f;
     uint32_t m_frameCount = 0;
 
-    std::shared_ptr<Acidum::ITexture2D> m_cubeTexture;
-    std::unique_ptr<Acidum::IMesh> m_cubeMesh;
+    std::shared_ptr<Acidum::ITexture2D> m_garlicTexture;
+    std::shared_ptr<Acidum::IMesh> m_garlicMesh;
     
     void updateWindowTitle(float deltaTime);
     void updateCamera(float deltaTime);

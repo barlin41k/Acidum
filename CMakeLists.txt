@@ -48,6 +48,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(stb)
 
+FetchContent_Declare(
+    tinyobjloader
+    GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
+    GIT_TAG        release
+)
+FetchContent_MakeAvailable(tinyobjloader)
+
 set(SPDLOG_INSTALL OFF CACHE INTERNAL "")
 FetchContent_Declare(
     spdlog

@@ -7,7 +7,9 @@ set(CORE_SOURCES
     src/Core/Platform/Window.cpp
     src/Core/Resources/ResourceManager.cpp
     src/Core/Resources/STBImage.cpp
+    src/Core/Resources/TinyObjLoader.cpp
     src/Core/Resources/ImageLoader.cpp
+    src/Core/Resources/ModelLoader.cpp
 
     src/Graphics/GraphicsFactory.cpp
     src/Graphics/Vulkan/VulkanBuffer.cpp
@@ -30,6 +32,8 @@ set(CORE_SOURCES
     src/Scene/Camera.cpp
 )
 
+set_source_files_properties(src/Core/Resources/TinyObjLoader.cpp PROPERTIES COMPILE_OPTIONS "-Wno-invalid-constexpr;-Wno-unused-function")
+
 if (WIN32)
     list(APPEND CORE_SOURCES src/Core/Platform/Windows/PlatformUtils.cpp)
 elseif (UNIX AND NOT APPLE)
@@ -44,7 +48,9 @@ add_library(AcidumCore ${CORE_SOURCES})
 target_include_directories(AcidumVMA SYSTEM PUBLIC ${vulkanmemoryallocator_SOURCE_DIR}/include)
 target_include_directories(AcidumCore
     PUBLIC include
-    SYSTEM PUBLIC ${stb_SOURCE_DIR}
+    SYSTEM PUBLIC
+        ${stb_SOURCE_DIR}
+        ${tinyobjloader_SOURCE_DIR}
     PRIVATE src
 )
 

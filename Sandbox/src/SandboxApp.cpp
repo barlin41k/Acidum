@@ -15,47 +15,6 @@ namespace Acidum {
     }
 }
 
-static const std::vector<Acidum::Vertex> VERTICES = {
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 0
-    {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // 1
-    {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.1f}}, // 2
-    {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.1f, 1.1f}, {0.0f, 1.0f}}, // 3
-
-    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // 4
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // 5
-    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.1f, 1.1f}, {1.0f, 1.1f}}, // 6
-    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // 7
-
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 8
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // 9
-    {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.1f, 1.1f}, {1.0f, 1.1f}}, // 10
-    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.1f, 1.1f}, {0.0f, 1.0f}}, // 11
-
-    {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, // 12
-    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // 13
-    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.1f}}, // 14
-    {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // 15
-
-    {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.1f, 1.1f}, {0.0f, 0.0f}}, // 16
-    {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}, // 17
-    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.1f}}, // 18
-    {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.1f, 1.1f}, {0.0f, 1.0f}}, // 19
-
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 20
-    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // 21
-    {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.1f}}, // 22
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}  // 23
-};
-
-static const std::vector<uint32_t> INDICES = {
-    0,  1,  2,  2,  3,  0,  // Front
-    4,  5,  6,  6,  7,  4,  // Back
-    8,  9,  10, 10, 11, 8,  // Left
-    12, 13, 14, 14, 15, 12, // Right
-    16, 17, 18, 18, 19, 16, // Top
-    20, 21, 22, 22, 23, 20  // Bottom
-};
-
 SandboxApp::SandboxApp(Acidum::APIType apiType) 
     : Acidum::Application(Acidum::AppConfig {
         {0, 1, 0},
@@ -70,8 +29,8 @@ void SandboxApp::OnInit() {
 
     GetGraphicsAPI()->beginUpload();
 
-    m_cubeTexture = Acidum::ResourceManager::loadTexture("textures/bricks.jpg");
-    m_cubeMesh = GetGraphicsAPI()->createMesh(VERTICES, INDICES);
+    m_garlicTexture = Acidum::ResourceManager::loadTexture("textures/Garlic_u1_v1.jpg");
+    m_garlicMesh = Acidum::ResourceManager::loadMesh("models/Garlic.obj");
 
     GetGraphicsAPI()->endUploadAndWait();
 }
@@ -85,10 +44,14 @@ void SandboxApp::OnUpdate(float deltaTime) {
 }
 
 void SandboxApp::OnRender() {
-    if (m_cubeMesh) {
-        glm::mat4 modelMatrix = glm::rotate(glm::mat4(1.0f), m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        GetGraphicsAPI()->bindTexture(m_cubeTexture);
-        GetGraphicsAPI()->drawMesh(m_cubeMesh.get(), modelMatrix);
+    if (m_garlicMesh) {
+        glm::mat4 modelMatrix = glm::mat4(1.0f);
+
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.01f)); 
+        modelMatrix = glm::rotate(modelMatrix, m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        GetGraphicsAPI()->bindTexture(m_garlicTexture);
+        GetGraphicsAPI()->drawMesh(m_garlicMesh.get(), modelMatrix);
     }
 }
 

@@ -19,6 +19,7 @@ public:
 
     static std::vector<char> loadBinaryFile(const std::string& relativePath);
     static std::shared_ptr<ITexture2D> loadTexture(const std::string& relativePath);
+    static std::shared_ptr<IMesh> loadMesh(const std::string& relativePath);
 
     static void setGraphicsAPI(IGraphicsAPI* api) { s_graphicsAPI = api; };
 private:
@@ -27,6 +28,7 @@ private:
     static std::filesystem::path s_assetsPath;
 
     static std::unordered_map<std::string, std::shared_ptr<ITexture2D>> s_textures;
+    static std::unordered_map<std::string, std::shared_ptr<IMesh>> s_meshes;
 };
 
 } // namespace Acidum
