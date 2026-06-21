@@ -20,7 +20,6 @@ class VulkanSurface;
 class VulkanDevice;
 class VulkanSwapChain;
 class VulkanPipeline;
-class VulkanCommandBufferManager;
 class VulkanSyncManager;
 class VulkanDescriptorManager;
 
