@@ -7,7 +7,6 @@
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
-#include "Acidum/Core/Resources/ResourceManager.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 #include "Graphics/Vulkan/VulkanInstance.hpp"
@@ -41,8 +40,6 @@ void VulkanGraphicsAPI::initialize() {
     auto appVersion = m_window->getVersion(); 
     uint32_t version = VK_MAKE_VERSION(appVersion.major, appVersion.minor, appVersion.patch);
 
-    auto vertCode = ResourceManager::loadBinaryFile("shaders/spirv/shader.vert.spv");
-    auto fragCode = ResourceManager::loadBinaryFile("shaders/spirv/shader.frag.spv");
     auto bindingDesc = VulkanMesh::getBindingDescription();
     auto attrDesc = VulkanMesh::getAttributeDescriptions();
 
@@ -58,8 +55,6 @@ void VulkanGraphicsAPI::initialize() {
     SwapChainConfig swapChainConfig;
 
     PipelineConfig pipelineConfig;
-    pipelineConfig.vertexShaderBytecode = vertCode;
-    pipelineConfig.fragmentShaderBytecode = fragCode;
     pipelineConfig.vertexBindingDescriptions = { bindingDesc };
     pipelineConfig.vertexAttributeDescriptions = { attrDesc.begin(), attrDesc.end() };
 

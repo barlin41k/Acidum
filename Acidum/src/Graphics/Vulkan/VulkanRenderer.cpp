@@ -5,6 +5,8 @@
 #include "Acidum/Core/Base/Consts.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
+#include "Acidum/Core/Resources/ResourceManager.hpp"
+#include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include "Graphics/Vulkan/VulkanImage.hpp"
@@ -35,8 +37,6 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
         m_descriptorManager->getGlobalDescriptorSetLayout(),
         m_descriptorManager->getMaterialDescriptorSetLayout()
     };
-
-    m_pipeline = std::make_unique<VulkanPipeline>(m_device, *m_renderPass, m_config.pipelineConfig, layouts);
 
     m_swapChain->createFramebuffers(m_renderPass->getRenderPass(), m_depthImage->getImageView());
 
@@ -171,8 +171,6 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipeline());
-
     VkViewport viewport {};
     viewport.x = 0.0f;
     viewport.y = static_cast<float>(m_swapChain->getExtent().height);
@@ -192,37 +190,45 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     ubo.proj = m_projectionMatrix;
     updateUniformBuffer(m_currentFrame, ubo);
 
-    VkDescriptorSet globalSet = m_descriptorManager->getGlobalDescriptorSet(m_currentFrame);
-    vkCmdBindDescriptorSets(
-        commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipeline->getLayout(), 0, 1, &globalSet, 0, nullptr
-    );
-
     std::sort(m_renderQueue.begin(), m_renderQueue.end(), [](const auto& a, const auto& b) {
         auto matA = a.mesh ? a.mesh->getMaterial() : nullptr;
         auto matB = b.mesh ? b.mesh->getMaterial() : nullptr;
         return matA < matB;
     });
 
-    void* currentMaterial = nullptr;
+    VulkanPipeline* currentPipeline = nullptr;
+    Material* currentMaterial = nullptr;
+
+    VkDescriptorSet globalSet = m_descriptorManager->getGlobalDescriptorSet(m_currentFrame);
 
     for (const auto& command : m_renderQueue) {
         if (command.mesh != nullptr) {
             auto material = command.mesh->getMaterial();
+            VulkanPipeline* pipeline = getOrCreatePipeline(material);
 
-            if (material && material != currentMaterial) {
+            if (pipeline != currentPipeline) {
+                vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
+
+                vkCmdBindDescriptorSets(
+                    commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    pipeline->getLayout(), 0, 1, &globalSet, 0, nullptr
+                );
+                currentPipeline = pipeline;
+            }
+
+            if (material != currentMaterial) {
                 VkDescriptorSet matSet = m_descriptorManager->getOrCreateMaterialDescriptor(material);
                 if (matSet != VK_NULL_HANDLE)
                     vkCmdBindDescriptorSets(
                         commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        m_pipeline->getLayout(), 1, 1, &matSet, 0, nullptr
+                        pipeline->getLayout(), 1, 1, &matSet, 0, nullptr
                     );
                 currentMaterial = material;
             }
 
             vkCmdPushConstants(
                 commandBuffer, 
-                m_pipeline->getLayout(), 
+                pipeline->getLayout(), 
                 VK_SHADER_STAGE_VERTEX_BIT, 
                 0, 
                 sizeof(glm::mat4), 
@@ -256,6 +262,29 @@ void VulkanRenderer::createDepthResources() {
 
 void VulkanRenderer::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
     m_descriptorManager->updateUniformBuffer(currentFrame, ubo);
+}
+
+VulkanPipeline* VulkanRenderer::getOrCreatePipeline(Material* material) {
+    std::string pipelineKey = material->vertShaderPath + "|" + material->fragShaderPath;
+
+    if (m_pipelineCache.find(pipelineKey) != m_pipelineCache.end())
+        return m_pipelineCache[pipelineKey].get();
+
+    auto vertShaderCode = ResourceManager::loadBinaryFile(material->vertShaderPath);
+    auto fragShaderCode = ResourceManager::loadBinaryFile(material->fragShaderPath);
+
+    PipelineConfig config = m_config.pipelineConfig;
+    config.vertexShaderBytecode = vertShaderCode;
+    config.fragmentShaderBytecode = fragShaderCode;
+
+    std::vector<VkDescriptorSetLayout> layouts = {
+        m_descriptorManager->getGlobalDescriptorSetLayout(),
+        m_descriptorManager->getMaterialDescriptorSetLayout()
+    };
+    
+    m_pipelineCache[pipelineKey] = std::make_unique<VulkanPipeline>(m_device, *m_renderPass, config, layouts);
+
+    return m_pipelineCache[pipelineKey].get();
 }
 
 } // namespace Acidum

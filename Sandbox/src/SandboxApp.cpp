@@ -29,7 +29,7 @@ void SandboxApp::OnInit() {
 
     GetGraphicsAPI()->beginUpload();
 
-    m_garlicMaterial = std::make_shared<Acidum::Material>();
+    m_garlicMaterial = std::make_shared<Acidum::Material>("shaders/spirv/shader.vert.spv", "shaders/spirv/shader.frag.spv");
     m_garlicMaterial->albedoTexture = Acidum::ResourceManager::loadTexture("textures/Garlic_u1_v1.jpg");
     
     m_garlicMesh = Acidum::ResourceManager::loadMesh("models/Garlic.obj");

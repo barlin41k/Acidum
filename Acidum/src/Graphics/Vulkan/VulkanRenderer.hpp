@@ -2,9 +2,11 @@
 
 #include <glm/glm.hpp>
 
+#include <unordered_map>
 #include <memory>
 #include <vector>
 
+#include "Acidum/Graphics/Material.hpp"
 #include "Graphics/Vulkan/VulkanTypes.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
@@ -53,7 +55,7 @@ private:
 
     std::unique_ptr<VulkanRenderPass> m_renderPass;
     std::unique_ptr<VulkanSwapChain> m_swapChain;
-    std::unique_ptr<VulkanPipeline> m_pipeline;
+    std::unordered_map<std::string, std::unique_ptr<VulkanPipeline>> m_pipelineCache;
     std::unique_ptr<VulkanCommandBufferManager> m_commandBufferManager;
     std::unique_ptr<VulkanSyncManager> m_syncManager;
     std::unique_ptr<VulkanDescriptorManager> m_descriptorManager;
@@ -71,6 +73,7 @@ private:
     void recreateSwapChain();
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
     void updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo);
+    VulkanPipeline* getOrCreatePipeline(Material* material);
 };
 
 } // namespace Acidum
