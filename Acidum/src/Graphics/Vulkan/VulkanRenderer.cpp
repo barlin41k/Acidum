@@ -1,5 +1,7 @@
 #include "Graphics/Vulkan/VulkanRenderer.hpp"
 
+#include <algorithm>
+
 #include "Acidum/Core/Base/Consts.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
@@ -196,16 +198,32 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     ubo.proj = m_projectionMatrix;
     updateUniformBuffer(m_currentFrame, ubo);
 
+    VkDescriptorSet globalSet = m_descriptorManager->getGlobalDescriptorSet(m_currentFrame);
+    vkCmdBindDescriptorSets(
+        commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_pipeline->getLayout(), 0, 1, &globalSet, 0, nullptr
+    );
+
+    std::sort(m_renderQueue.begin(), m_renderQueue.end(), [](const auto& a, const auto& b) {
+        auto matA = a.mesh ? a.mesh->getMaterial() : nullptr;
+        auto matB = b.mesh ? b.mesh->getMaterial() : nullptr;
+        return matA < matB;
+    });
+
+    void* currentMaterial = nullptr;
+
     for (const auto& command : m_renderQueue) {
         if (command.mesh != nullptr) {
-            VkDescriptorSet globalSet = m_descriptorManager->getGlobalDescriptorSet(m_currentFrame);
-            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getLayout(), 0, 1, &globalSet, 0, nullptr);
-
             auto material = command.mesh->getMaterial();
-            if (material) {
-                VkDescriptorSet matSet = m_descriptorManager->getMaterialDescriptorSet(material.get(), m_currentFrame);
+
+            if (material && material != currentMaterial) {
+                VkDescriptorSet matSet = m_descriptorManager->getOrCreateMaterialDescriptor(material);
                 if (matSet != VK_NULL_HANDLE)
-                    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getLayout(), 1, 1, &matSet, 0, nullptr);
+                    vkCmdBindDescriptorSets(
+                        commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        m_pipeline->getLayout(), 1, 1, &matSet, 0, nullptr
+                    );
+                currentMaterial = material;
             }
 
             vkCmdPushConstants(

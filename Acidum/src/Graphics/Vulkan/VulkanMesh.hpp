@@ -30,7 +30,7 @@ public:
     uint32_t getIndexCount() const override { return m_indexCount; };
 
     void setMaterial(std::shared_ptr<Material> material) override { m_material = std::move(material); };
-    std::shared_ptr<Material> getMaterial() const override { return m_material; };
+    Material* getMaterial() const override { return m_material.get(); };
 
     void bind(VkCommandBuffer commandBuffer) const;
     void draw(VkCommandBuffer commandBuffer) const;

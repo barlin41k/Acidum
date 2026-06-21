@@ -28,6 +28,7 @@ set(CORE_SOURCES
     src/Graphics/Vulkan/VulkanSyncManager.cpp
     src/Graphics/Vulkan/VulkanStagingManager.cpp
     src/Graphics/Vulkan/VulkanTexture2D.cpp
+    src/Graphics/Vulkan/VulkanDescriptorAllocator.cpp
     
     src/Scene/Camera.cpp
 )

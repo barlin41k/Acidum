@@ -12,17 +12,16 @@ VulkanDescriptorManager::VulkanDescriptorManager(
     VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout materialLayout
 )
     : m_device(device),
+      m_descriptorAllocator(device),
       m_materialLayout(materialLayout),
       m_maxFramesInFlight(maxFramesInFlight)
 {
     createUniformBuffers();
-    createDescriptorPool();
     createGlobalDescriptorSets(globalLayout);
 }
 
 VulkanDescriptorManager::~VulkanDescriptorManager() {
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_descriptorPool != VK_NULL_HANDLE)
-        vkDestroyDescriptorPool(m_device.getLogicalDevice(), m_descriptorPool, nullptr);
+    m_descriptorAllocator.cleanup();
 }
 
 void VulkanDescriptorManager::createUniformBuffers() {
@@ -45,46 +44,20 @@ void VulkanDescriptorManager::updateUniformBuffer(uint32_t currentFrame, const U
     m_uniformBuffers[currentFrame]->copyTo(&ubo, sizeof(ubo));
 }
 
-void VulkanDescriptorManager::createDescriptorPool() {
-    std::array<VkDescriptorPoolSize, 2> poolSizes {};
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight * 100); // TODO: DescriptorAllocator
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = static_cast<uint32_t>(m_maxFramesInFlight * 100); // TODO: DescriptorAllocator
-
-    VkDescriptorPoolCreateInfo poolInfo {};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 2;
-    poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(m_maxFramesInFlight * 100); // TODO: DescriptorAllocator
-
-    ENGINE_VERIFY(vkCreateDescriptorPool(
-        m_device.getLogicalDevice(), &poolInfo, nullptr, &m_descriptorPool) == VK_SUCCESS,
-        "Failed to create descriptor pool!"
-    );
-}
-
 void VulkanDescriptorManager::createGlobalDescriptorSets(VkDescriptorSetLayout globalLayout) {
-    std::vector<VkDescriptorSetLayout> globalLayouts(m_maxFramesInFlight, globalLayout);
-    VkDescriptorSetAllocateInfo globalAllocInfo {};
-    globalAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    globalAllocInfo.descriptorPool = m_descriptorPool;
-    globalAllocInfo.descriptorSetCount = m_maxFramesInFlight;
-    globalAllocInfo.pSetLayouts = globalLayouts.data();
-
     m_globalDescriptorSets.resize(m_maxFramesInFlight);
-    ENGINE_VERIFY(
-        vkAllocateDescriptorSets(m_device.getLogicalDevice(), &globalAllocInfo, m_globalDescriptorSets.data()) == VK_SUCCESS, 
-        "Failed to allocate global sets!"
-    );
-
     for (size_t i = 0; i < m_maxFramesInFlight; i++) {
-        VkDescriptorBufferInfo bufferInfo{};
+        ENGINE_VERIFY(
+            m_descriptorAllocator.allocate(globalLayout, &m_globalDescriptorSets[i]), 
+            "Failed to allocate global descriptor set!"
+        );
+
+        VkDescriptorBufferInfo bufferInfo {};
         bufferInfo.buffer = m_uniformBuffers[i]->getBuffer();
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(UniformBufferObject);
 
-        VkWriteDescriptorSet descriptorWrite{};
+        VkWriteDescriptorSet descriptorWrite {};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrite.dstSet = m_globalDescriptorSets[i];
         descriptorWrite.dstBinding = 0;
@@ -97,45 +70,46 @@ void VulkanDescriptorManager::createGlobalDescriptorSets(VkDescriptorSetLayout g
     }
 }
 
-VkDescriptorSet VulkanDescriptorManager::getMaterialDescriptorSet(Material* material, uint32_t currentFrame) {
-    if (!material) return VK_NULL_HANDLE;
+VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* material) {
+    if (!material || !material->albedoTexture) return VK_NULL_HANDLE;
 
-    if (m_materialSetsCache.find(material) != m_materialSetsCache.end())
-        return m_materialSetsCache[material][currentFrame];
+    VkDescriptorSet matSet;
+    ENGINE_VERIFY(
+        m_descriptorAllocator.allocate(m_materialLayout, &matSet),
+        "Failed to allocate material descriptor set!"
+    );
 
-    std::vector<VkDescriptorSetLayout> layouts(m_maxFramesInFlight, m_materialLayout);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = m_descriptorPool;
-    allocInfo.descriptorSetCount = m_maxFramesInFlight;
-    allocInfo.pSetLayouts = layouts.data();
+    auto vkTexture = std::static_pointer_cast<VulkanTexture2D>(material->albedoTexture);
 
-    std::vector<VkDescriptorSet> newSets(m_maxFramesInFlight);
-    vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, newSets.data());
+    VkDescriptorImageInfo imageInfo {};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = vkTexture->getImageView();
+    imageInfo.sampler = vkTexture->getSampler();
 
-    if (material->albedoTexture) {
-        auto vkTexture = std::static_pointer_cast<VulkanTexture2D>(material->albedoTexture);
+    VkWriteDescriptorSet descriptorWrite {};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = matSet;
+    descriptorWrite.dstBinding = 0;
+    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrite.descriptorCount = 1;
+    descriptorWrite.pImageInfo = &imageInfo;
 
-        VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = vkTexture->getImageView();
-        imageInfo.sampler = vkTexture->getSampler();
+    vkUpdateDescriptorSets(m_device.getLogicalDevice(), 1, &descriptorWrite, 0, nullptr);
 
-        std::vector<VkWriteDescriptorSet> descriptorWrites(m_maxFramesInFlight);
-        for (size_t i = 0; i < m_maxFramesInFlight; i++) {
-            descriptorWrites[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[i].dstSet = newSets[i];
-            descriptorWrites[i].dstBinding = 0;
-            descriptorWrites[i].dstArrayElement = 0;
-            descriptorWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            descriptorWrites[i].descriptorCount = 1;
-            descriptorWrites[i].pImageInfo = &imageInfo;
-        }
-        vkUpdateDescriptorSets(m_device.getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-    }
+    return matSet;
+}
 
-    m_materialSetsCache[material] = newSets;
-    return newSets[currentFrame];
+VkDescriptorSet VulkanDescriptorManager::getOrCreateMaterialDescriptor(Material* material) {
+    if (!material || !material->albedoTexture) return VK_NULL_HANDLE;
+
+    auto item = m_materialCache.find(material);
+    if (item != m_materialCache.end())
+        return item->second;
+
+    VkDescriptorSet matSet = buildMaterialDescriptor(material);
+    m_materialCache[material] = matSet;
+
+    return matSet;
 }
 
 } // namespace Acidum
