@@ -27,7 +27,7 @@ cd Acidum
 
 2. Generate the build files and compile the project *(Release mode is highly recommended for performance, but you can use Debug mode)*
 ```bash
-cmake -S . -G Ninja -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release -j
 ```
 
