@@ -28,8 +28,6 @@ VulkanPipeline::~VulkanPipeline() {
 
     if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_pipelineLayout != VK_NULL_HANDLE)
         vkDestroyPipelineLayout(m_device.getLogicalDevice(), m_pipelineLayout, nullptr);
-
-    
 }
 
 VkShaderModule VulkanPipeline::createShaderModule(const std::vector<char>& code) {
