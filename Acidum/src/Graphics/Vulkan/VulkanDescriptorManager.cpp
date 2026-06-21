@@ -17,7 +17,7 @@ VulkanDescriptorManager::VulkanDescriptorManager(
 {
     createUniformBuffers();
     createDescriptorPool();
-    createDescriptorSets(globalLayout);
+    createGlobalDescriptorSets(globalLayout);
 }
 
 VulkanDescriptorManager::~VulkanDescriptorManager() {
@@ -64,9 +64,9 @@ void VulkanDescriptorManager::createDescriptorPool() {
     );
 }
 
-void VulkanDescriptorManager::createDescriptorSets(VkDescriptorSetLayout globalLayout) { // rename
+void VulkanDescriptorManager::createGlobalDescriptorSets(VkDescriptorSetLayout globalLayout) {
     std::vector<VkDescriptorSetLayout> globalLayouts(m_maxFramesInFlight, globalLayout);
-    VkDescriptorSetAllocateInfo globalAllocInfo{};
+    VkDescriptorSetAllocateInfo globalAllocInfo {};
     globalAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     globalAllocInfo.descriptorPool = m_descriptorPool;
     globalAllocInfo.descriptorSetCount = m_maxFramesInFlight;

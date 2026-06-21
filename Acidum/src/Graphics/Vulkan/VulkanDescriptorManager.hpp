@@ -40,7 +40,7 @@ private:
     
     void createUniformBuffers();
     void createDescriptorPool();
-    void createDescriptorSets(VkDescriptorSetLayout globalLayout);
+    void createGlobalDescriptorSets(VkDescriptorSetLayout globalLayout);
 
     std::vector<std::unique_ptr<VulkanBuffer>> m_uniformBuffers;
 };
