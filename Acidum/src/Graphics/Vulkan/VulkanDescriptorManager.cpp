@@ -7,21 +7,61 @@
 
 namespace Acidum {
 
-VulkanDescriptorManager::VulkanDescriptorManager(
-    const VulkanDevice& device, uint32_t maxFramesInFlight,
-    VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout materialLayout
-)
+VulkanDescriptorManager::VulkanDescriptorManager(const VulkanDevice& device, uint32_t maxFramesInFlight)
     : m_device(device),
       m_descriptorAllocator(device),
-      m_materialLayout(materialLayout),
       m_maxFramesInFlight(maxFramesInFlight)
 {
+    createDescriptorSetLayouts();
     createUniformBuffers();
-    createGlobalDescriptorSets(globalLayout);
+    createGlobalDescriptorSets();
 }
 
 VulkanDescriptorManager::~VulkanDescriptorManager() {
     m_descriptorAllocator.cleanup();
+
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_globalDescriptorSetLayout != VK_NULL_HANDLE)
+        vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_globalDescriptorSetLayout, nullptr);
+    
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_materialDescriptorSetLayout != VK_NULL_HANDLE)
+        vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_materialDescriptorSetLayout, nullptr);
+}
+
+void VulkanDescriptorManager::createDescriptorSetLayouts() {
+    VkDescriptorSetLayoutBinding uboLayoutBinding {};
+    uboLayoutBinding.binding = 0;
+    uboLayoutBinding.descriptorCount = 1;
+    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBinding.pImmutableSamplers = nullptr;
+    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    VkDescriptorSetLayoutCreateInfo globalLayoutInfo {};
+    globalLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    globalLayoutInfo.bindingCount = 1;
+    globalLayoutInfo.pBindings = &uboLayoutBinding;
+
+    ENGINE_VERIFY(vkCreateDescriptorSetLayout(
+        m_device.getLogicalDevice(), &globalLayoutInfo, nullptr, &m_globalDescriptorSetLayout) == VK_SUCCESS,
+        "Failed to create global descriptor set layout!"
+    );
+
+
+    VkDescriptorSetLayoutBinding samplerLayoutBinding {};
+    samplerLayoutBinding.binding = 0;
+    samplerLayoutBinding.descriptorCount = 1;
+    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    samplerLayoutBinding.pImmutableSamplers = nullptr;
+    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    VkDescriptorSetLayoutCreateInfo materialLayoutInfo {};
+    materialLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    materialLayoutInfo.bindingCount = 1;
+    materialLayoutInfo.pBindings = &samplerLayoutBinding;
+
+    ENGINE_VERIFY(
+        vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &materialLayoutInfo, nullptr, &m_materialDescriptorSetLayout) == VK_SUCCESS,
+        "Failed to create material descriptor set layout!"
+    );
 }
 
 void VulkanDescriptorManager::createUniformBuffers() {
@@ -44,11 +84,11 @@ void VulkanDescriptorManager::updateUniformBuffer(uint32_t currentFrame, const U
     m_uniformBuffers[currentFrame]->copyTo(&ubo, sizeof(ubo));
 }
 
-void VulkanDescriptorManager::createGlobalDescriptorSets(VkDescriptorSetLayout globalLayout) {
+void VulkanDescriptorManager::createGlobalDescriptorSets() {
     m_globalDescriptorSets.resize(m_maxFramesInFlight);
     for (size_t i = 0; i < m_maxFramesInFlight; i++) {
         ENGINE_VERIFY(
-            m_descriptorAllocator.allocate(globalLayout, &m_globalDescriptorSets[i]), 
+            m_descriptorAllocator.allocate(m_globalDescriptorSetLayout, &m_globalDescriptorSets[i]), 
             "Failed to allocate global descriptor set!"
         );
 
@@ -75,7 +115,7 @@ VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* mater
 
     VkDescriptorSet matSet;
     ENGINE_VERIFY(
-        m_descriptorAllocator.allocate(m_materialLayout, &matSet),
+        m_descriptorAllocator.allocate(m_materialDescriptorSetLayout, &matSet),
         "Failed to allocate material descriptor set!"
     );
 

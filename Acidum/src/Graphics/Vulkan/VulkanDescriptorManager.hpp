@@ -18,7 +18,7 @@ class VulkanTexture2D;
 
 class VulkanDescriptorManager {
 public:
-    VulkanDescriptorManager(const VulkanDevice& device, uint32_t maxFramesInFlight, VkDescriptorSetLayout globalLayout, VkDescriptorSetLayout materialLayout);
+    VulkanDescriptorManager(const VulkanDevice& device, uint32_t maxFramesInFlight);
     ~VulkanDescriptorManager();
 
     VulkanDescriptorManager(const VulkanDescriptorManager&) = delete;
@@ -28,22 +28,27 @@ public:
     
     VkDescriptorSet getGlobalDescriptorSet(uint32_t currentFrame) const { return m_globalDescriptorSets[currentFrame]; }
     VkDescriptorSet getOrCreateMaterialDescriptor(Material* material);
+    VkDescriptorSetLayout getGlobalDescriptorSetLayout() const { return m_globalDescriptorSetLayout; }
+    VkDescriptorSetLayout getMaterialDescriptorSetLayout() const { return m_materialDescriptorSetLayout; }
 private:
     const VulkanDevice& m_device;
 
     VulkanDescriptorAllocator m_descriptorAllocator;
+
+    VkDescriptorSetLayout m_globalDescriptorSetLayout = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_materialDescriptorSetLayout = VK_NULL_HANDLE;
     
     std::vector<VkDescriptorSet> m_globalDescriptorSets;
 
-    VkDescriptorSetLayout m_materialLayout;
     std::unordered_map<Material*, VkDescriptorSet> m_materialCache;
 
     std::vector<std::unique_ptr<VulkanBuffer>> m_uniformBuffers;
 
     uint32_t m_maxFramesInFlight;
     
+    void createDescriptorSetLayouts();
     void createUniformBuffers();
-    void createGlobalDescriptorSets(VkDescriptorSetLayout globalLayout);
+    void createGlobalDescriptorSets();
     VkDescriptorSet buildMaterialDescriptor(Material* material);
 };
 

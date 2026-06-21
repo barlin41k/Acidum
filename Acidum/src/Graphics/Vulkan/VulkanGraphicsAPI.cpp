@@ -43,6 +43,8 @@ void VulkanGraphicsAPI::initialize() {
 
     auto vertCode = ResourceManager::loadBinaryFile("shaders/spirv/shader.vert.spv");
     auto fragCode = ResourceManager::loadBinaryFile("shaders/spirv/shader.frag.spv");
+    auto bindingDesc = VulkanMesh::getBindingDescription();
+    auto attrDesc = VulkanMesh::getAttributeDescriptions();
 
     
     InstanceConfig instanceConfig;
@@ -58,6 +60,8 @@ void VulkanGraphicsAPI::initialize() {
     PipelineConfig pipelineConfig;
     pipelineConfig.vertexShaderBytecode = vertCode;
     pipelineConfig.fragmentShaderBytecode = fragCode;
+    pipelineConfig.vertexBindingDescriptions = { bindingDesc };
+    pipelineConfig.vertexAttributeDescriptions = { attrDesc.begin(), attrDesc.end() };
 
     RendererConfig rendererConfig;
     rendererConfig.swapChainConfig = swapChainConfig;

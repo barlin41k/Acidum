@@ -30,7 +30,13 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
 
     m_renderPass = std::make_unique<VulkanRenderPass>(m_device, m_swapChain->getFormat(), m_depthFormat);
 
-    m_pipeline = std::make_unique<VulkanPipeline>(m_device, *m_renderPass, m_config.pipelineConfig);
+    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT);
+    std::vector<VkDescriptorSetLayout> layouts = {
+        m_descriptorManager->getGlobalDescriptorSetLayout(),
+        m_descriptorManager->getMaterialDescriptorSetLayout()
+    };
+
+    m_pipeline = std::make_unique<VulkanPipeline>(m_device, *m_renderPass, m_config.pipelineConfig, layouts);
 
     m_swapChain->createFramebuffers(m_renderPass->getRenderPass(), m_depthImage->getImageView());
 
@@ -39,11 +45,6 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
     m_syncManager = std::make_unique<VulkanSyncManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
 
-    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(
-        m_device, Consts::MAX_FRAMES_IN_FLIGHT,
-        m_pipeline->getGlobalDescriptorSetLayout(),
-        m_pipeline->getMaterialDescriptorSetLayout()
-    );
     ENGINE_INFO("Vulkan Renderer initialized!");
 }
 
@@ -142,13 +143,6 @@ void VulkanRenderer::recreateSwapChain() {
     
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
     m_syncManager->resizeImagesInFlight(imageCount);
-    
-    m_descriptorManager.reset();
-    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(
-        m_device, Consts::MAX_FRAMES_IN_FLIGHT,
-        m_pipeline->getGlobalDescriptorSetLayout(),
-        m_pipeline->getMaterialDescriptorSetLayout()
-    );
 }
 
 void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
