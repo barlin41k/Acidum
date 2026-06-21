@@ -29,16 +29,18 @@ VulkanSwapChain::~VulkanSwapChain() {
 
 void VulkanSwapChain::cleanupSwapChainDependencies() {
     for (auto framebuffer : m_swapChainFramebuffers)
-        vkDestroyFramebuffer(m_device.getLogicalDevice(), framebuffer, nullptr);
+        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && framebuffer != VK_NULL_HANDLE)
+            vkDestroyFramebuffer(m_device.getLogicalDevice(), framebuffer, nullptr);
     for (auto imageView : m_swapChainImageViews)
-        vkDestroyImageView(m_device.getLogicalDevice(), imageView, nullptr);
+        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && imageView != VK_NULL_HANDLE)
+            vkDestroyImageView(m_device.getLogicalDevice(), imageView, nullptr);
     
     m_swapChainFramebuffers.clear();
     m_swapChainImageViews.clear();
 }
 
 void VulkanSwapChain::cleanupSwapChain(VkSwapchainKHR swapChainToDestroy) {
-    if (m_swapChain != VK_NULL_HANDLE)
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_swapChain != VK_NULL_HANDLE)
         vkDestroySwapchainKHR(m_device.getLogicalDevice(), swapChainToDestroy, nullptr);
 }
 

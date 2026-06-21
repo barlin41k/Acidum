@@ -4,6 +4,7 @@
 
 #include <array>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
@@ -21,12 +22,17 @@ VulkanPipeline::VulkanPipeline(const VulkanDevice& device, const VulkanRenderPas
 }
 
 VulkanPipeline::~VulkanPipeline() {
-    vkDestroyPipeline(m_device.getLogicalDevice(), m_graphicsPipeline, nullptr);
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_graphicsPipeline != VK_NULL_HANDLE)
+        vkDestroyPipeline(m_device.getLogicalDevice(), m_graphicsPipeline, nullptr);
 
-    vkDestroyPipelineLayout(m_device.getLogicalDevice(), m_pipelineLayout, nullptr);
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_pipelineLayout != VK_NULL_HANDLE)
+        vkDestroyPipelineLayout(m_device.getLogicalDevice(), m_pipelineLayout, nullptr);
 
-    vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_globalDescriptorSetLayout, nullptr);
-    vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_materialDescriptorSetLayout, nullptr);
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_globalDescriptorSetLayout != VK_NULL_HANDLE)
+        vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_globalDescriptorSetLayout, nullptr);
+    
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_materialDescriptorSetLayout != VK_NULL_HANDLE)
+        vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_materialDescriptorSetLayout, nullptr);
 }
 
 VkShaderModule VulkanPipeline::createShaderModule(const std::vector<char>& code) {

@@ -21,7 +21,8 @@ VulkanDescriptorManager::VulkanDescriptorManager(
 }
 
 VulkanDescriptorManager::~VulkanDescriptorManager() {
-    vkDestroyDescriptorPool(m_device.getLogicalDevice(), m_descriptorPool, nullptr);
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_descriptorPool != VK_NULL_HANDLE)
+        vkDestroyDescriptorPool(m_device.getLogicalDevice(), m_descriptorPool, nullptr);
 }
 
 void VulkanDescriptorManager::createUniformBuffers() {

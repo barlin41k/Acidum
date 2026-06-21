@@ -20,7 +20,8 @@ VulkanTexture2D::VulkanTexture2D(const VulkanDevice& device, VulkanStagingManage
 }
 
 VulkanTexture2D::~VulkanTexture2D() {
-    vkDestroySampler(m_device.getLogicalDevice(), m_sampler, nullptr);
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_sampler != VK_NULL_HANDLE)
+        vkDestroySampler(m_device.getLogicalDevice(), m_sampler, nullptr);
 }
 
 void VulkanTexture2D::createTextureImage(const void* data, uint32_t width, uint32_t height) {

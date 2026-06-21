@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include <cstring>
+#include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Base/Consts.hpp"
@@ -18,9 +19,11 @@ VulkanInstance::VulkanInstance(const InstanceConfig& config)
 }
 
 VulkanInstance::~VulkanInstance() {
-    if (m_debugMessenger != VK_NULL_HANDLE)
+    if (m_instance != VK_NULL_HANDLE && m_debugMessenger != VK_NULL_HANDLE)
         DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
-    vkDestroyInstance(m_instance, nullptr);
+    
+    if (m_instance != VK_NULL_HANDLE)
+        vkDestroyInstance(m_instance, nullptr);
 }
 
 void VulkanInstance::createInstance(const InstanceConfig& config) {

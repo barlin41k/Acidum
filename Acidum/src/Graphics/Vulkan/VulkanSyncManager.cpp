@@ -41,13 +41,16 @@ VulkanSyncManager::VulkanSyncManager(const VulkanDevice& device, uint32_t maxFra
 
 VulkanSyncManager::~VulkanSyncManager() {
     for (auto semaphore : m_renderFinishedSemaphores)
-        vkDestroySemaphore(m_device.getLogicalDevice(), semaphore, nullptr);
+        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && semaphore != VK_NULL_HANDLE)
+            vkDestroySemaphore(m_device.getLogicalDevice(), semaphore, nullptr);
 
     for (auto semaphore : m_imageAvailableSemaphores)
-        vkDestroySemaphore(m_device.getLogicalDevice(), semaphore, nullptr);
+        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && semaphore != VK_NULL_HANDLE)
+            vkDestroySemaphore(m_device.getLogicalDevice(), semaphore, nullptr);
 
     for (auto fence : m_inFlightFences)
-        vkDestroyFence(m_device.getLogicalDevice(), fence, nullptr);
+        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && fence != VK_NULL_HANDLE)
+            vkDestroyFence(m_device.getLogicalDevice(), fence, nullptr);
 }
 
 void VulkanSyncManager::resizeImagesInFlight(uint32_t newImageCount) {

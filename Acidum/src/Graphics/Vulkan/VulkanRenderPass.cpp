@@ -14,7 +14,8 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& device, VkFormat colorFor
 }
 
 VulkanRenderPass::~VulkanRenderPass() {
-    vkDestroyRenderPass(m_device.getLogicalDevice(), m_renderPass, nullptr);
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_renderPass != VK_NULL_HANDLE)
+        vkDestroyRenderPass(m_device.getLogicalDevice(), m_renderPass, nullptr);
 }
 
 void VulkanRenderPass::createRenderPass(VkFormat colorFormat, VkFormat depthFormat) {

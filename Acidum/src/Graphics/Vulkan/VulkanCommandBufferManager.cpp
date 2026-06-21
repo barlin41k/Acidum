@@ -3,6 +3,7 @@
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 #include <cstdint>
+#include <vulkan/vulkan_core.h>
 
 namespace Acidum {
 
@@ -14,7 +15,8 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(const VulkanDevice& devic
 }
 
 VulkanCommandBufferManager::~VulkanCommandBufferManager() {
-    vkDestroyCommandPool(m_device.getLogicalDevice(), m_commandPool, nullptr);
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_commandPool != VK_NULL_HANDLE)
+        vkDestroyCommandPool(m_device.getLogicalDevice(), m_commandPool, nullptr);
 }
 
 void VulkanCommandBufferManager::createCommandPool() {

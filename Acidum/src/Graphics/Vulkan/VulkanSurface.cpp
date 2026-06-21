@@ -16,7 +16,8 @@ VulkanSurface::VulkanSurface(const VulkanInstance& instance, Window* window)
 }
 
 VulkanSurface::~VulkanSurface() {
-    vkDestroySurfaceKHR(m_instance.getInstance(), m_surface, nullptr);
+    if (m_instance.getInstance() != VK_NULL_HANDLE && m_surface != VK_NULL_HANDLE)
+        vkDestroySurfaceKHR(m_instance.getInstance(), m_surface, nullptr);
 }
 
 } // namespace Acidum

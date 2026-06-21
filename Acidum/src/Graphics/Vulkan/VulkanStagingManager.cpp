@@ -22,8 +22,11 @@ VulkanStagingManager::VulkanStagingManager(const VulkanDevice& device)
 }
 
 VulkanStagingManager::~VulkanStagingManager() {
-    vkDestroyFence(m_device.getLogicalDevice(), m_uploadFence, nullptr);
-    vkDestroyCommandPool(m_device.getLogicalDevice(), m_commandPool, nullptr);
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_uploadFence != VK_NULL_HANDLE)
+        vkDestroyFence(m_device.getLogicalDevice(), m_uploadFence, nullptr);
+    
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_commandPool != VK_NULL_HANDLE)
+        vkDestroyCommandPool(m_device.getLogicalDevice(), m_commandPool, nullptr);
 }
 
 void VulkanStagingManager::createCommandPool() {

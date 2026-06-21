@@ -16,9 +16,10 @@ VulkanImage::VulkanImage(const VulkanDevice& device, uint32_t width, uint32_t he
 }
 
 VulkanImage::~VulkanImage() {
-    if (m_imageView != VK_NULL_HANDLE)
+    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_imageView != VK_NULL_HANDLE)
         vkDestroyImageView(m_device.getLogicalDevice(), m_imageView, nullptr);
-    if (m_image != VK_NULL_HANDLE && m_allocation != VK_NULL_HANDLE)
+    
+    if (m_device.getAllocator() != VK_NULL_HANDLE && m_image != VK_NULL_HANDLE && m_allocation != VK_NULL_HANDLE)
         vmaDestroyImage(m_device.getAllocator(), m_image, m_allocation);
 }
 
