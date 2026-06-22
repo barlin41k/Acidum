@@ -24,7 +24,7 @@ namespace Sandbox {
 
 Application::Application(Acidum::APIType apiType) 
     : Acidum::Application({
-        { 0, 1, 0 },
+        Consts::APPLICATION_VERSION,
         Consts::WINDOW_TITLE,
         Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT,
         apiType
