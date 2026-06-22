@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 
 #include "Acidum/Core/Application.hpp"
 #include "Acidum/Scene/Camera.hpp"
+#include "Acidum/Scene/Entity.hpp"
 
 namespace SandboxConsts {
     inline constexpr float CAMERA_FOV = 45.0f;
@@ -41,8 +41,7 @@ private:
     float m_fpsTimer = 0.0f;
     uint32_t m_frameCount = 0;
 
-    std::shared_ptr<Acidum::Material> m_garlicMaterial;
-    std::shared_ptr<Acidum::IMesh> m_garlicMesh;
+    std::vector<Acidum::Entity> m_entities;
     
     void updateWindowTitle(float deltaTime);
     void updateCamera(float deltaTime);

@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <memory>
 
 #include "Acidum/Core/Platform/KeyboardCode.hpp"
@@ -29,11 +30,21 @@ void SandboxApp::OnInit() {
 
     GetGraphicsAPI()->beginUpload();
 
-    m_garlicMaterial = std::make_shared<Acidum::Material>("shaders/spirv/shader.vert.spv", "shaders/spirv/shader.frag.spv");
-    m_garlicMaterial->albedoTexture = Acidum::ResourceManager::loadTexture("textures/Garlic_u1_v1.jpg");
+    auto mat1 = std::make_shared<Acidum::Material>("shaders/spirv/shader.vert.spv", "shaders/spirv/shader.frag.spv");
+    mat1->albedoTexture = Acidum::ResourceManager::loadTexture("textures/Garlic_u1_v1.jpg");
     
-    m_garlicMesh = Acidum::ResourceManager::loadMesh("models/Garlic.obj");
-    m_garlicMesh->setMaterial(m_garlicMaterial);
+    auto mesh1 = Acidum::ResourceManager::loadMesh("models/Garlic.obj");
+    mesh1->setMaterial(mat1);
+
+    Acidum::Entity garlic1;
+    garlic1.mesh = mesh1;
+    garlic1.transform = glm::mat4(1.0f);
+    m_entities.push_back(garlic1);
+
+    Acidum::Entity garlic2;
+    garlic2.mesh = mesh1;
+    garlic2.transform = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f));
+    m_entities.push_back(garlic2);
 
     GetGraphicsAPI()->endUploadAndWait();
 }
@@ -47,13 +58,12 @@ void SandboxApp::OnUpdate(float deltaTime) {
 }
 
 void SandboxApp::OnRender() {
-    if (m_garlicMesh) {
-        glm::mat4 modelMatrix = glm::mat4(1.0f);
+    for (auto& entity : m_entities) {
+        glm::mat4 finalMatrix = entity.transform;
+        finalMatrix = glm::scale(finalMatrix, glm::vec3(0.01f)); 
+        finalMatrix = glm::rotate(finalMatrix, m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.01f)); 
-        modelMatrix = glm::rotate(modelMatrix, m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        GetGraphicsAPI()->drawMesh(m_garlicMesh.get(), modelMatrix);
+        GetGraphicsAPI()->drawMesh(entity.mesh.get(), finalMatrix);
     }
 }
 
