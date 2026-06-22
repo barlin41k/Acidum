@@ -38,12 +38,14 @@ void SandboxApp::OnInit() {
 
     Acidum::Entity garlic1;
     garlic1.mesh = mesh1;
-    garlic1.transform = glm::mat4(1.0f);
+    garlic1.position = glm::vec3(0.0f);
+    garlic1.scale = glm::vec3(0.01f);
     m_entities.push_back(garlic1);
 
     Acidum::Entity garlic2;
     garlic2.mesh = mesh1;
-    garlic2.transform = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f));
+    garlic2.position = glm::vec3(0.0f, 0.2f, 0.0f);
+    garlic2.scale = glm::vec3(0.03f);
     m_entities.push_back(garlic2);
 
     GetGraphicsAPI()->endUploadAndWait();
@@ -54,17 +56,15 @@ void SandboxApp::OnUpdate(float deltaTime) {
 
     updateWindowTitle(deltaTime);
     updateCamera(deltaTime);
-    updateShaderMatrices();
+    updateViewProjMatrices();
+
+    if (!m_entities.empty())
+        m_entities[0].rotation.y = m_totalTime * glm::radians(90.0f);
 }
 
 void SandboxApp::OnRender() {
-    for (auto& entity : m_entities) {
-        glm::mat4 finalMatrix = entity.transform;
-        finalMatrix = glm::scale(finalMatrix, glm::vec3(0.01f)); 
-        finalMatrix = glm::rotate(finalMatrix, m_totalTime * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        GetGraphicsAPI()->drawMesh(entity.mesh.get(), finalMatrix);
-    }
+    for (auto& entity : m_entities)
+        GetGraphicsAPI()->drawMesh(entity.mesh.get(), entity.getTransformMatrix());
 }
 
 void SandboxApp::updateWindowTitle(float deltaTime) {
@@ -118,10 +118,11 @@ void SandboxApp::updateCamera(float deltaTime) {
     m_camera.setPosition(m_cameraPos);
 }
 
-void SandboxApp::updateShaderMatrices() {
+void SandboxApp::updateViewProjMatrices() {
     float aspect = 1.0f;
     int width = 0, height = 0;
     GetWindow()->getFramebufferSize(&width, &height);
+
     if (width > 0 && height > 0) {
         aspect = static_cast<float>(width) / static_cast<float>(height);
         m_camera.setAspectRatio(aspect);

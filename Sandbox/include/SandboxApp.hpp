@@ -45,5 +45,5 @@ private:
     
     void updateWindowTitle(float deltaTime);
     void updateCamera(float deltaTime);
-    void updateShaderMatrices();
+    void updateViewProjMatrices();
 };
