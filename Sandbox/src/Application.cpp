@@ -1,31 +1,42 @@
-#include "SandboxApp.hpp"
+#include "Sandbox/Application.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <memory>
 
-#include "Acidum/Core/Platform/KeyboardCode.hpp"
 #include "Acidum/Core/Platform/Input.hpp"
 #include "Acidum/Core/Application.hpp"
 #include "Acidum/Core/Resources/ResourceManager.hpp"
 
+#include "Sandbox/Core/Base/Consts.hpp"
+
 namespace Acidum {
-    std::unique_ptr<Acidum::Application> CreateApplication() {
-        return std::make_unique<SandboxApp>(Consts::ENGINE_DEFAULT_API);
-    }
+
+std::unique_ptr<Acidum::Application> CreateApplication() {
+    return std::make_unique<Sandbox::Application>(Consts::ENGINE_DEFAULT_API);
 }
 
-SandboxApp::SandboxApp(Acidum::APIType apiType) 
-    : Acidum::Application(Acidum::AppConfig {
-        {0, 1, 0},
-        SandboxConsts::WINDOW_TITLE,
-        SandboxConsts::WINDOW_WIDTH, SandboxConsts::WINDOW_HEIGHT,
+} // namespace Acidum
+
+
+namespace Sandbox {
+
+Application::Application(Acidum::APIType apiType) 
+    : Acidum::Application({
+        { 0, 1, 0 },
+        Consts::WINDOW_TITLE,
+        Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT,
         apiType
     }),
-      m_totalTime(0.0f) {}
+      m_camera(
+        Consts::CAMERA_FOV,
+        static_cast<float>(Consts::WINDOW_WIDTH) / static_cast<float>(Consts::WINDOW_HEIGHT),
+        Consts::CAMERA_NEAR_CLIP, Consts::CAMERA_FAR_CLIP
+    ),
+      m_cameraController(m_camera) {}
 
-void SandboxApp::OnInit() {
+void Application::OnInit() {
     Acidum::Input::SetCursorMode(Acidum::CursorMode::Locked);
 
     GetGraphicsAPI()->beginUpload();
@@ -51,23 +62,23 @@ void SandboxApp::OnInit() {
     GetGraphicsAPI()->endUploadAndWait();
 }
 
-void SandboxApp::OnUpdate(float deltaTime) {
+void Application::OnUpdate(float deltaTime) {
     m_totalTime += deltaTime;
 
     updateWindowTitle(deltaTime);
-    updateCamera(deltaTime);
+    m_cameraController.onUpdate(deltaTime);
     updateViewProjMatrices();
 
     if (!m_entities.empty())
         m_entities[0].rotation.y = m_totalTime * glm::radians(90.0f);
 }
 
-void SandboxApp::OnRender() {
+void Application::OnRender() {
     for (auto& entity : m_entities)
         GetGraphicsAPI()->drawMesh(entity.mesh.get(), entity.getTransformMatrix());
 }
 
-void SandboxApp::updateWindowTitle(float deltaTime) {
+void Application::updateWindowTitle(float deltaTime) {
     m_fpsTimer += deltaTime;
     m_frameCount++;
 
@@ -82,43 +93,7 @@ void SandboxApp::updateWindowTitle(float deltaTime) {
     }
 }
 
-void SandboxApp::updateCamera(float deltaTime) {
-    glm::vec2 currentMousePos = Acidum::Input::GetMousePosition();
-    if (m_firstMouse) {
-        m_lastMousePos = currentMousePos;
-        m_firstMouse = false;
-    }
-
-    float xoffset = currentMousePos.x - m_lastMousePos.x;
-    float yoffset = m_lastMousePos.y - currentMousePos.y;
-    m_lastMousePos = currentMousePos;
-
-    float sensitivity = 0.1f;
-    m_yaw += xoffset * sensitivity;
-    m_pitch += yoffset * sensitivity;
-
-    if (m_pitch > 89.0f) m_pitch = 89.0f;
-    if (m_pitch < -89.0f) m_pitch = -89.0f;
-
-    float cameraSpeed = SandboxConsts::CAMERA_SPEED * deltaTime;
-    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::W))
-        m_cameraPos += m_camera.getFront() * cameraSpeed;
-    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::S))
-        m_cameraPos -= m_camera.getFront() * cameraSpeed;
-    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::A))
-        m_cameraPos -= m_camera.getRight() * cameraSpeed;
-    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::D))
-        m_cameraPos += m_camera.getRight() * cameraSpeed;
-    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::SPACE))
-        m_cameraPos.y += cameraSpeed;
-    if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::L_CTRL))
-        m_cameraPos.y -= cameraSpeed;
-
-    m_camera.setRotation(m_pitch, m_yaw);
-    m_camera.setPosition(m_cameraPos);
-}
-
-void SandboxApp::updateViewProjMatrices() {
+void Application::updateViewProjMatrices() {
     float aspect = 1.0f;
     int width = 0, height = 0;
     GetWindow()->getFramebufferSize(&width, &height);
@@ -131,3 +106,5 @@ void SandboxApp::updateViewProjMatrices() {
         GetGraphicsAPI()->setProjectionMatrix(m_camera.getProjectionMatrix());
     }
 }
+
+} // namespace Sandbox

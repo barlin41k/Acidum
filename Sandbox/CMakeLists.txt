@@ -1,7 +1,9 @@
 find_program(GLSLC_COMPILER glslc REQUIRED)
 
 set(SANDBOX_SOURCES
-    src/SandboxApp.cpp
+    src/Application.cpp
+
+    src/Scene/Controllers/CameraController.cpp
 )
 
 set(SHADER_SOURCES
