@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
+#include "Acidum/Core/Platform/Input.hpp"
 
 namespace Acidum {
 
@@ -30,6 +31,7 @@ void Window::initWindow() {
     
     glfwSetWindowUserPointer(m_window, this);
     glfwSetFramebufferSizeCallback(m_window, internalResizeCallback);
+    glfwSetWindowFocusCallback(m_window, windowFocusCallback);
 }
 
 void Window::getFramebufferSize(int* width, int* height) const noexcept {
@@ -44,6 +46,13 @@ void Window::internalResizeCallback(GLFWwindow* glfwWindow, int width, int heigh
     auto windowInstance = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     if (windowInstance && windowInstance->m_resizeCallback)
         windowInstance->m_resizeCallback(width, height);
+}
+
+void Window::windowFocusCallback([[maybe_unused]] GLFWwindow* glfwWindow, int focused) {
+    if (focused)
+        Input::SetCursorMode(CursorMode::Locked);
+    else
+        Input::SetCursorMode(CursorMode::Normal);
 }
 
 bool Window::shouldClose() const noexcept {

@@ -45,5 +45,7 @@ private:
 
     void initWindow();
     static void internalResizeCallback(GLFWwindow* glfwWindow, int width, int height);
+    static void windowFocusCallback(GLFWwindow* glfwWindow, int focused);
 };
+
 } // namespace Acidum
