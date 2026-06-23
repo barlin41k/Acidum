@@ -62,21 +62,27 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
 
             if (primitive.material >= 0) {
                 const tinygltf::Material& mat = model.materials[static_cast<size_t>(primitive.material)];
+
+                if (mat.alphaMode == "BLEND")
+                    meshData.isTransparent = true;
+
                 int texIndex = mat.pbrMetallicRoughness.baseColorTexture.index;
-
                 if (texIndex >= 0) {
-                    const tinygltf::Image& image = model.images[static_cast<size_t>(model.textures[static_cast<size_t>(texIndex)].source)];
-                    
-                    if (!image.uri.empty())
-                        meshData.textureName = image.uri;
-                    else if (image.bufferView >= 0) {
-                        const tinygltf::BufferView& bv = model.bufferViews[static_cast<size_t>(image.bufferView)];
-                        const tinygltf::Buffer& buffer = model.buffers[static_cast<size_t>(bv.buffer)];
+                    int source = model.textures[static_cast<size_t>(texIndex)].source;
+                    if (source >= 0) {
+                        const tinygltf::Image& image = model.images[static_cast<size_t>(source)];
 
-                        meshData.embeddedImage.assign(
-                        buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset), 
-                        buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset) + static_cast<ptrdiff_t>(bv.byteLength)
-                        );
+                        if (!image.uri.empty())
+                            meshData.textureName = image.uri;
+                        else if (image.bufferView >= 0) {
+                            const tinygltf::BufferView& bv = model.bufferViews[static_cast<size_t>(image.bufferView)];
+                            const tinygltf::Buffer& buffer = model.buffers[static_cast<size_t>(bv.buffer)];
+
+                            meshData.embeddedImage.assign(
+                            buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset), 
+                            buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset) + static_cast<ptrdiff_t>(bv.byteLength)
+                            );
+                        }
                     }
                 }
             }
@@ -87,7 +93,9 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
             const uint8_t* indexData = indexBuffer.data.data() + indexBufferView.byteOffset + indexAccessor.byteOffset;
 
             for (size_t i = 0; i < indexAccessor.count; i++) {
-                if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+                if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
+                    meshData.indices.push_back(reinterpret_cast<const uint8_t*>(indexData)[i]);
+                else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
                     meshData.indices.push_back(reinterpret_cast<const uint16_t*>(indexData)[i]);
                 else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
                     meshData.indices.push_back(reinterpret_cast<const uint32_t*>(indexData)[i]);
@@ -99,20 +107,25 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
             const tinygltf::Accessor& posAccessor = model.accessors[static_cast<size_t>(posIt->second)];
             const tinygltf::BufferView& posBufferView = model.bufferViews[static_cast<size_t>(posAccessor.bufferView)];
             const tinygltf::Buffer& posBuffer = model.buffers[static_cast<size_t>(posBufferView.buffer)];
-            const float* posData = reinterpret_cast<const float*>(posBuffer.data.data() + posBufferView.byteOffset + posAccessor.byteOffset);
+            const uint8_t* posData = posBuffer.data.data() + posBufferView.byteOffset + posAccessor.byteOffset;
+            const size_t posStride = static_cast<size_t>(posAccessor.ByteStride(posBufferView));
 
-            const float* normData = nullptr;
+            size_t normStride = 0;
+            const uint8_t* normData = nullptr;
             if (primitive.attributes.contains("NORMAL")) {
                 const auto& normAcc = model.accessors[static_cast<size_t>(primitive.attributes.at("NORMAL"))];
                 const auto& normView = model.bufferViews[static_cast<size_t>(normAcc.bufferView)];
-                normData = reinterpret_cast<const float*>(model.buffers[static_cast<size_t>(normView.buffer)].data.data() + normView.byteOffset + normAcc.byteOffset);
+                normData = model.buffers[static_cast<size_t>(normView.buffer)].data.data() + normView.byteOffset + normAcc.byteOffset;
+                normStride = static_cast<size_t>(normAcc.ByteStride(normView));
             }
 
-            const float* texData = nullptr;
+            size_t texStride = 0;
+            const uint8_t* texData = nullptr;
             if (primitive.attributes.contains("TEXCOORD_0")) {
                 const auto& texAcc = model.accessors[static_cast<size_t>(primitive.attributes.at("TEXCOORD_0"))];
                 const auto& texView = model.bufferViews[static_cast<size_t>(texAcc.bufferView)];
-                texData = reinterpret_cast<const float*>(model.buffers[static_cast<size_t>(texView.buffer)].data.data() + texView.byteOffset + texAcc.byteOffset);
+                texData = model.buffers[static_cast<size_t>(texView.buffer)].data.data() + texView.byteOffset + texAcc.byteOffset;
+                texStride = static_cast<size_t>(texAcc.ByteStride(texView));
             }
 
             
@@ -120,10 +133,22 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
             for (size_t i = 0; i < posAccessor.count; i++) {
                 Vertex& vertex = meshData.vertices[i];
 
-                vertex.pos = glm::make_vec3(&posData[i * 3]);
+                const auto* pPos = reinterpret_cast<const float*>(posData + (i * posStride));
+                vertex.pos = glm::make_vec3(pPos);
+
                 vertex.color = glm::vec3(1.0f);
-                vertex.normal = normData ? glm::make_vec3(&normData[i * 3]) : glm::vec3(0.0f, 1.0f, 0.0f);
-                vertex.texCoord = texData ? glm::make_vec2(&texData[i * 2]) : glm::vec2(0.0f);
+
+                if (normData) {
+                    const auto* pNorm = reinterpret_cast<const float*>(normData + (i * normStride));
+                    vertex.normal = glm::make_vec3(pNorm);
+                } else
+                    vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+
+                if (texData) {
+                    const auto* pTex = reinterpret_cast<const float*>(texData + (i * texStride));
+                    vertex.texCoord = glm::make_vec2(pTex);
+                } else
+                    vertex.texCoord = glm::vec2(0.0f);
             }
 
             allMeshes.push_back(meshData);

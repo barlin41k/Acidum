@@ -6,6 +6,7 @@
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/PlatformUtils.hpp"
+#include "Acidum/Core/Resources/MaterialSystem.hpp"
 #include "Acidum/Core/Resources/ImageLoader.hpp"
 #include "Acidum/Core/Resources/ModelLoader.hpp"
 
@@ -78,7 +79,7 @@ std::shared_ptr<ITexture2D> ResourceManager::loadTextureFromMemory(const std::ve
     return s_graphicsAPI->createTexture2D(data.pixels.data(), static_cast<uint32_t>(data.width), static_cast<uint32_t>(data.height));
 }
 
-std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePath, const std::string& vertShaderPath, const std::string& fragShaderPath) {
+std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePath) {
     if (s_models.contains(relativePath))
         return s_models[relativePath];
 
@@ -88,7 +89,7 @@ std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePat
     auto model = std::make_shared<Model>();
     for (const auto& data : subMeshesData) {
         auto mesh = s_graphicsAPI->createMesh(data.vertices, data.indices);
-        auto material = std::make_shared<Material>(vertShaderPath, fragShaderPath);
+        auto material = MaterialSystem::CreateMaterial(data);
 
         if (!data.embeddedImage.empty())
             material->albedoTexture = loadTextureFromMemory(data.embeddedImage);

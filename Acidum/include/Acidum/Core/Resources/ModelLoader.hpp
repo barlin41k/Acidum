@@ -13,6 +13,8 @@ struct MeshData {
     std::vector<uint32_t> indices;
     std::string textureName;
     std::vector<uint8_t> embeddedImage;
+
+    bool isTransparent = false;
 };
     
 class ModelLoader {

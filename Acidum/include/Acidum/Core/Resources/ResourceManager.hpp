@@ -20,7 +20,7 @@ public:
     static std::vector<char> loadBinaryFile(const std::string& relativePath);
     static std::shared_ptr<ITexture2D> loadTexture(const std::string& relativePath);
     static std::shared_ptr<ITexture2D> loadTextureFromMemory(const std::vector<uint8_t>& memory);
-    static std::shared_ptr<Model> loadModel(const std::string& relativePath, const std::string& vertShaderPath, const std::string& fragShaderPath);
+    static std::shared_ptr<Model> loadModel(const std::string& relativePath);
 
     static void setGraphicsAPI(IGraphicsAPI* api) { s_graphicsAPI = api; };
 private:
