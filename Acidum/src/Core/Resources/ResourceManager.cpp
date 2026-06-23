@@ -73,6 +73,11 @@ std::shared_ptr<ITexture2D> ResourceManager::loadTexture(const std::string& rela
     return s_textures[relativePath];
 }
 
+std::shared_ptr<ITexture2D> ResourceManager::loadTextureFromMemory(const std::vector<uint8_t>& memory) {
+    ImageData data = ImageLoader::loadFromMemory(memory);
+    return s_graphicsAPI->createTexture2D(data.pixels.data(), static_cast<uint32_t>(data.width), static_cast<uint32_t>(data.height));
+}
+
 std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePath, const std::string& vertShaderPath, const std::string& fragShaderPath) {
     if (s_models.contains(relativePath))
         return s_models[relativePath];
@@ -85,7 +90,9 @@ std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePat
         auto mesh = s_graphicsAPI->createMesh(data.vertices, data.indices);
         auto material = std::make_shared<Material>(vertShaderPath, fragShaderPath);
 
-        if (!data.textureName.empty()) {
+        if (!data.embeddedImage.empty())
+            material->albedoTexture = loadTextureFromMemory(data.embeddedImage);
+        else if (!data.textureName.empty()) {
             std::filesystem::path relTexPath = std::filesystem::path(relativePath).parent_path() / data.textureName;
             material->albedoTexture = loadTexture(relTexPath.string());
         }

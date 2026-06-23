@@ -34,11 +34,17 @@
 #include "Acidum/Core/Base/Logger.hpp"
 
 namespace Acidum {
+
+bool DummyImageLoader(tinygltf::Image*, const int, std::string*, std::string*, int, int, const unsigned char*, int, void*) {
+    return true;
+}
     
 std::vector<MeshData> ModelLoader::load(const std::string& path) {
     tinygltf::Model model;
     tinygltf::TinyGLTF loader;
     std::string error, warn;
+
+    loader.SetImageLoader(DummyImageLoader, nullptr);
     
     bool result = false;
     if (path.ends_with(".glb"))
@@ -59,9 +65,19 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
                 int texIndex = mat.pbrMetallicRoughness.baseColorTexture.index;
 
                 if (texIndex >= 0) {
-                    const tinygltf::Texture& tex = model.textures[static_cast<size_t>(texIndex)];
-                    if (tex.source >= 0)
-                        meshData.textureName = model.images[static_cast<size_t>(tex.source)].uri;
+                    const tinygltf::Image& image = model.images[static_cast<size_t>(model.textures[static_cast<size_t>(texIndex)].source)];
+                    
+                    if (!image.uri.empty())
+                        meshData.textureName = image.uri;
+                    else if (image.bufferView >= 0) {
+                        const tinygltf::BufferView& bv = model.bufferViews[static_cast<size_t>(image.bufferView)];
+                        const tinygltf::Buffer& buffer = model.buffers[static_cast<size_t>(bv.buffer)];
+
+                        meshData.embeddedImage.assign(
+                        buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset), 
+                        buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset) + static_cast<ptrdiff_t>(bv.byteLength)
+                        );
+                    }
                 }
             }
 

@@ -12,6 +12,7 @@ struct MeshData {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
     std::string textureName;
+    std::vector<uint8_t> embeddedImage;
 };
     
 class ModelLoader {

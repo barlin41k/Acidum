@@ -16,6 +16,7 @@ struct ImageData {
 class ImageLoader {
 public:
     static ImageData load(const std::string& path);
+    static ImageData loadFromMemory(const std::vector<uint8_t>& memory);
 };
 
 } // namespace Acidum

@@ -23,5 +23,28 @@ ImageData ImageLoader::load(const std::string& path) {
 
     return data;
 }
+
+ImageData ImageLoader::loadFromMemory(const std::vector<uint8_t>& memory) {
+    int texWidth, texHeight, texChannels;
+    stbi_uc* pixels = stbi_load_from_memory(
+        memory.data(), static_cast<int>(memory.size()),
+        &texWidth, &texHeight, &texChannels,
+        STBI_rgb_alpha
+    );
+
+    ENGINE_VERIFY(pixels, "Failed to load embedded texture from memory!");
+
+    size_t imageSize = static_cast<size_t>(texWidth) * static_cast<size_t>(texHeight) * 4;
+
+    ImageData data {};
+    data.pixels.assign(pixels, pixels + imageSize);
+    data.width = texWidth;
+    data.height = texHeight;
+    data.channels = 4;
+
+    stbi_image_free(pixels);
+
+    return data;
+}
     
 } // namespace Acidum
