@@ -4,12 +4,12 @@
 
 #include <memory>
 
-#include "Acidum/Graphics/Interfaces/IMesh.hpp"
+#include "Acidum/Core/Base/Types.hpp"
 
 namespace Acidum {
     
 struct Entity {
-    std::shared_ptr<IMesh> mesh = nullptr;
+    std::shared_ptr<Model> model = nullptr;
 
     glm::vec3 position { 0.0f };
     glm::vec3 rotation { 0.0f };

@@ -41,23 +41,17 @@ void Application::OnInit() {
 
     GetGraphicsAPI()->beginUpload();
 
-    auto mat1 = std::make_shared<Acidum::Material>("shaders/spirv/shader.vert.spv", "shaders/spirv/shader.frag.spv");
-    mat1->albedoTexture = Acidum::ResourceManager::loadTexture("textures/Garlic_u1_v1.jpg");
-    
-    auto mesh1 = Acidum::ResourceManager::loadMesh("models/Garlic.obj");
-    mesh1->setMaterial(mat1);
+    auto ak12Model = Acidum::ResourceManager::loadModel(
+        "models/ak12/scene.gltf",
+        "shaders/spirv/shader.vert.spv",
+        "shaders/spirv/shader.frag.spv"
+    );
 
-    Acidum::Entity garlic1;
-    garlic1.mesh = mesh1;
-    garlic1.position = glm::vec3(0.0f);
-    garlic1.scale = glm::vec3(0.01f);
-    m_entities.push_back(garlic1);
-
-    Acidum::Entity garlic2;
-    garlic2.mesh = mesh1;
-    garlic2.position = glm::vec3(0.0f, 0.2f, 0.0f);
-    garlic2.scale = glm::vec3(0.03f);
-    m_entities.push_back(garlic2);
+    Acidum::Entity ak12;
+    ak12.model = ak12Model;
+    ak12.position = glm::vec3(0.0f);
+    ak12.scale = glm::vec3(1.0f);
+    m_entities.push_back(ak12);
 
     GetGraphicsAPI()->endUploadAndWait();
 }
@@ -69,9 +63,6 @@ void Application::OnUpdate(float deltaTime) {
     m_cameraController.onUpdate(deltaTime);
     updateViewProjMatrices();
 
-    if (!m_entities.empty())
-        m_entities[0].rotation.y = m_totalTime * glm::radians(90.0f);
-
     glm::vec3 movingSun = glm::vec3(
         std::sin(m_totalTime),
         1.0f,
@@ -82,7 +73,9 @@ void Application::OnUpdate(float deltaTime) {
 
 void Application::OnRender() {
     for (auto& entity : m_entities)
-        GetGraphicsAPI()->drawMesh(entity.mesh.get(), entity.getTransformMatrix());
+        if (entity.model)
+            for (auto& subMesh : entity.model->subMeshes)
+                GetGraphicsAPI()->drawMesh(subMesh.get(), entity.getTransformMatrix());
 }
 
 void Application::updateWindowTitle(float deltaTime) {

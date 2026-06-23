@@ -2,6 +2,10 @@
 
 #include <glm/glm.hpp>
 
+#include <memory>
+
+#include "Acidum/Graphics/Interfaces/IMesh.hpp"
+
 namespace Acidum {
 
 struct Version {
@@ -19,6 +23,10 @@ struct Vertex {
     glm::vec3 color;
     glm::vec2 texCoord;
     glm::vec3 normal;
+};
+
+struct Model {
+    std::vector<std::shared_ptr<IMesh>> subMeshes;
 };
 
 } // namespace Acidum

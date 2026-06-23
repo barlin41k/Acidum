@@ -7,7 +7,6 @@ set(CORE_SOURCES
     src/Core/Platform/Window.cpp
     src/Core/Resources/ResourceManager.cpp
     src/Core/Resources/STBImage.cpp
-    src/Core/Resources/TinyObjLoader.cpp
     src/Core/Resources/ImageLoader.cpp
     src/Core/Resources/ModelLoader.cpp
 
@@ -51,7 +50,7 @@ target_include_directories(AcidumCore
     PUBLIC include
     SYSTEM PUBLIC
         ${stb_SOURCE_DIR}
-        ${tinyobjloader_SOURCE_DIR}
+        ${tinygltf_SOURCE_DIR}
     PRIVATE src
 )
 

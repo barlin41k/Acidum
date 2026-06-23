@@ -14,7 +14,7 @@ namespace Acidum {
 IGraphicsAPI* ResourceManager::s_graphicsAPI;
 std::filesystem::path ResourceManager::s_assetsPath;
 std::unordered_map<std::string, std::shared_ptr<ITexture2D>> ResourceManager::s_textures;
-std::unordered_map<std::string, std::shared_ptr<IMesh>> ResourceManager::s_meshes;
+std::unordered_map<std::string, std::shared_ptr<Model>> ResourceManager::s_models;
 
 void ResourceManager::initialize() {
     std::filesystem::path executeDir = Platform::GetExecutableDir();
@@ -29,7 +29,7 @@ void ResourceManager::initialize() {
 
 void ResourceManager::shutdown() {
     s_textures.clear();
-    s_meshes.clear();
+    s_models.clear();
     
     s_graphicsAPI = nullptr;
 
@@ -73,18 +73,29 @@ std::shared_ptr<ITexture2D> ResourceManager::loadTexture(const std::string& rela
     return s_textures[relativePath];
 }
 
-std::shared_ptr<IMesh> ResourceManager::loadMesh(const std::string& relativePath) {
-    if (s_meshes.contains(relativePath))
-        return s_meshes[relativePath];
+std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePath, const std::string& vertShaderPath, const std::string& fragShaderPath) {
+    if (s_models.contains(relativePath))
+        return s_models[relativePath];
 
     std::filesystem::path fullPath = s_assetsPath / relativePath;
+    std::vector<MeshData> subMeshesData = ModelLoader::load(fullPath.string());
 
-    MeshData data = ModelLoader::load(fullPath.string());
+    auto model = std::make_shared<Model>();
+    for (const auto& data : subMeshesData) {
+        auto mesh = s_graphicsAPI->createMesh(data.vertices, data.indices);
+        auto material = std::make_shared<Material>(vertShaderPath, fragShaderPath);
 
-    auto mesh = s_graphicsAPI->createMesh(data.vertices, data.indices);
+        if (!data.textureName.empty()) {
+            std::filesystem::path relTexPath = std::filesystem::path(relativePath).parent_path() / data.textureName;
+            material->albedoTexture = loadTexture(relTexPath.string());
+        }
 
-    s_meshes[relativePath] = std::move(mesh);
-    return s_meshes[relativePath];
+        mesh->setMaterial(material);
+        model->subMeshes.push_back(std::move(mesh));
+    }
+
+    s_models[relativePath] = model;
+    return model;
 }
 
 } // namespace Acidum

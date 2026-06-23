@@ -27,7 +27,7 @@ message(STATUS "===========================================")
 set(GLFW_VERSION 3.4)
 set(GLM_VERSION 1.0.3)
 set(STB_VERSION 31c1ad37456438565541f4919958214b6e762fb4)
-set(TINYOBJLOADER_VERSION 45636bdcef1a4fec140346b90c0b50bf0bc3e23b)
+set(TINYGLTF_VERSION v3.0.0)
 set(SPDLOG_VERSION v1.17.0)
 set(VMA_VERSION v3.4.0)
 
@@ -57,11 +57,11 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(stb)
 
 FetchContent_Declare(
-    tinyobjloader
-    GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
-    GIT_TAG        ${TINYOBJLOADER_VERSION}
+    tinygltf
+    GIT_REPOSITORY https://github.com/syoyo/tinygltf
+    GIT_TAG        ${TINYGLTF_VERSION}
 )
-FetchContent_MakeAvailable(tinyobjloader)
+FetchContent_MakeAvailable(tinygltf)
 
 set(SPDLOG_INSTALL OFF CACHE INTERNAL "")
 FetchContent_Declare(
