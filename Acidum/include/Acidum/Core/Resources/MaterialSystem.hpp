@@ -15,13 +15,16 @@ enum class RenderMode {
 
 class MaterialSystem {
 public:
-    static void RegisterTemplate(RenderMode mode, const std::string& vertPath, const std::string& fragPath);
+    static void RegisterTemplate(RenderMode mode, const std::string& vertPath, const std::string& fragPath, bool blend=false, bool depthWrite=true);
 
     static std::shared_ptr<Material> CreateMaterial(const MeshData& meshData);
 private:
     struct TemplateData {
         std::string vertShaderPath;
         std::string fragShaderPath;
+        
+        bool enableBlending = false;
+        bool depthWrite = true;
     };
 
     static std::unordered_map<RenderMode, TemplateData> m_templates;

@@ -16,9 +16,14 @@ struct Material {
 
     glm::vec3 baseColor { 1.0f, 1.0f, 1.0f };
 
-    Material(const std::string& vert, const std::string& frag)
+    bool enableBlending = false;
+    bool depthWrite = true;
+
+    Material(const std::string& vert, const std::string& frag, bool inEnableBlending, bool inDepthWrite)
         : vertShaderPath(vert),
-          fragShaderPath(frag) {}
+          fragShaderPath(frag),
+          enableBlending(inEnableBlending),
+          depthWrite(inDepthWrite) {}
 };
 
 } // namespace Acidum

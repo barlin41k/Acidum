@@ -266,7 +266,7 @@ void VulkanRenderer::updateUniformBuffer(uint32_t currentFrame, const UniformBuf
 }
 
 VulkanPipeline* VulkanRenderer::getOrCreatePipeline(Material* material) {
-    std::string pipelineKey = material->vertShaderPath + "|" + material->fragShaderPath;
+    std::string pipelineKey = material->vertShaderPath + "|" + material->fragShaderPath + "|" + std::to_string(material->enableBlending);
 
     if (m_pipelineCache.find(pipelineKey) != m_pipelineCache.end())
         return m_pipelineCache[pipelineKey].get();
@@ -277,6 +277,8 @@ VulkanPipeline* VulkanRenderer::getOrCreatePipeline(Material* material) {
     PipelineConfig config = m_config.pipelineConfig;
     config.vertexShaderBytecode = vertShaderCode;
     config.fragmentShaderBytecode = fragShaderCode;
+    config.enableAlphaBlending = material->enableBlending;
+    config.enableDepthWrite = material->depthWrite;
 
     std::vector<VkDescriptorSetLayout> layouts = {
         m_descriptorManager->getGlobalDescriptorSetLayout(),
