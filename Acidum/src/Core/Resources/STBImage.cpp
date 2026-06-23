@@ -7,6 +7,7 @@
     #pragma GCC diagnostic ignored "-Wpedantic"
     #pragma GCC diagnostic ignored "-Wconversion"
     #pragma GCC diagnostic ignored "-Wshadow"
+    #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
 #if defined(_MSC_VER)
