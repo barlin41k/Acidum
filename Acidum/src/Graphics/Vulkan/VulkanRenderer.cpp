@@ -188,6 +188,7 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     UniformBufferObject ubo {};
     ubo.view = m_viewMatrix;
     ubo.proj = m_projectionMatrix;
+    ubo.lightDir = m_lightDirection;
     updateUniformBuffer(m_currentFrame, ubo);
 
     std::sort(m_renderQueue.begin(), m_renderQueue.end(), [](const auto& a, const auto& b) {

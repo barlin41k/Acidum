@@ -24,6 +24,7 @@ public:
 
     virtual void setViewMatrix(const glm::mat4& view) = 0;
     virtual void setProjectionMatrix(const glm::mat4& proj) = 0;
+    virtual void setLightDirection(const glm::vec3& dir) = 0;
 
     virtual void renderFrame() = 0;
 

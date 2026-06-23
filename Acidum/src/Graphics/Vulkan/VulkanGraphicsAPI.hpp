@@ -34,6 +34,7 @@ public:
 
     void setViewMatrix(const glm::mat4& view) override;
     void setProjectionMatrix(const glm::mat4& proj) override;
+    void setLightDirection(const glm::vec3& dir) override;
 
     void renderFrame() override;
 

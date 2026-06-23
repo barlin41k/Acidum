@@ -90,6 +90,11 @@ void VulkanGraphicsAPI::setViewMatrix(const glm::mat4& view) {
     m_renderer->setViewMatrix(view);
 }
 
+void VulkanGraphicsAPI::setLightDirection(const glm::vec3& dir) {
+    ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    m_renderer->setLightDirection(dir);
+}
+
 std::shared_ptr<ITexture2D> VulkanGraphicsAPI::createTexture2D(const void* data, uint32_t width, uint32_t height) {
     return std::make_shared<VulkanTexture2D>(*m_device, m_stagingManager.get(), data, width, height);
 }

@@ -43,6 +43,7 @@ public:
 
     void setViewMatrix(const glm::mat4& view) { m_viewMatrix = view; }
     void setProjectionMatrix(const glm::mat4& proj) { m_projectionMatrix = proj; }
+    void setLightDirection(const glm::vec3& direction) { m_lightDirection = direction; }
     void setFramebufferResized(bool resized) { m_framebufferResized = resized; }
 
     VkCommandPool getCommandPool() const { return m_commandBufferManager->getCommandPool(); }
@@ -65,6 +66,7 @@ private:
     std::vector<RenderCommand> m_renderQueue;
     glm::mat4 m_viewMatrix = glm::mat4(1.0f);
     glm::mat4 m_projectionMatrix = glm::mat4(1.0f);
+    glm::vec3 m_lightDirection = glm::vec3(1.0f, 1.0f, 1.0f);
 
     uint32_t m_currentFrame = 0;
     bool m_framebufferResized = false;

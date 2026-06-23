@@ -71,6 +71,13 @@ void Application::OnUpdate(float deltaTime) {
 
     if (!m_entities.empty())
         m_entities[0].rotation.y = m_totalTime * glm::radians(90.0f);
+
+    glm::vec3 movingSun = glm::vec3(
+        std::sin(m_totalTime),
+        1.0f,
+        std::cos(m_totalTime)
+    );
+    GetGraphicsAPI()->setLightDirection(movingSun);
 }
 
 void Application::OnRender() {
