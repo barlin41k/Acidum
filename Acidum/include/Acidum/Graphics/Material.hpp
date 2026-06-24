@@ -13,6 +13,7 @@ struct Material {
     const std::string fragShaderPath;
 
     std::shared_ptr<ITexture2D> albedoTexture = nullptr;
+    std::shared_ptr<ITexture2D> metallicRoughnessTexture = nullptr;
 
     glm::vec4 baseColor = glm::vec4(1.0f);
     float roughness = 0.5f;

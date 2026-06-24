@@ -46,17 +46,24 @@ void VulkanDescriptorManager::createDescriptorSetLayouts() {
     );
 
 
-    VkDescriptorSetLayoutBinding samplerLayoutBinding {};
-    samplerLayoutBinding.binding = 0;
-    samplerLayoutBinding.descriptorCount = 1;
-    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    samplerLayoutBinding.pImmutableSamplers = nullptr;
-    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    std::array<VkDescriptorSetLayoutBinding, 2> bindings {};
+
+    bindings[0].binding = 0;
+    bindings[0].descriptorCount = 1;
+    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    bindings[0].pImmutableSamplers = nullptr;
+    bindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    bindings[1].binding = 1;
+    bindings[1].descriptorCount = 1;
+    bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    bindings[1].pImmutableSamplers = nullptr;
+    bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     VkDescriptorSetLayoutCreateInfo materialLayoutInfo {};
     materialLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    materialLayoutInfo.bindingCount = 1;
-    materialLayoutInfo.pBindings = &samplerLayoutBinding;
+    materialLayoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    materialLayoutInfo.pBindings = bindings.data();
 
     ENGINE_VERIFY(
         vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &materialLayoutInfo, nullptr, &m_materialDescriptorSetLayout) == VK_SUCCESS,
@@ -111,7 +118,7 @@ void VulkanDescriptorManager::createGlobalDescriptorSets() {
 }
 
 VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* material) {
-    if (!material || !material->albedoTexture) return VK_NULL_HANDLE;
+    if (!material || !material->albedoTexture || !material->metallicRoughnessTexture) return VK_NULL_HANDLE;
 
     VkDescriptorSet matSet;
     ENGINE_VERIFY(
@@ -119,22 +126,36 @@ VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* mater
         "Failed to allocate material descriptor set!"
     );
 
-    auto vkTexture = std::static_pointer_cast<VulkanTexture2D>(material->albedoTexture);
+    auto vkAlbedo = std::static_pointer_cast<VulkanTexture2D>(material->albedoTexture);
+    auto vkPBR = std::static_pointer_cast<VulkanTexture2D>(material->metallicRoughnessTexture);
 
-    VkDescriptorImageInfo imageInfo {};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = vkTexture->getImageView();
-    imageInfo.sampler = vkTexture->getSampler();
+    VkDescriptorImageInfo albedoInfo {};
+    albedoInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    albedoInfo.imageView = vkAlbedo->getImageView();
+    albedoInfo.sampler = vkAlbedo->getSampler();
 
-    VkWriteDescriptorSet descriptorWrite {};
-    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrite.dstSet = matSet;
-    descriptorWrite.dstBinding = 0;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrite.descriptorCount = 1;
-    descriptorWrite.pImageInfo = &imageInfo;
+    VkDescriptorImageInfo PBRInfo {};
+    PBRInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    PBRInfo.imageView = vkPBR->getImageView();
+    PBRInfo.sampler = vkPBR->getSampler();
 
-    vkUpdateDescriptorSets(m_device.getLogicalDevice(), 1, &descriptorWrite, 0, nullptr);
+    std::array<VkWriteDescriptorSet, 2> descriptorWrites {};
+
+    descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[0].dstSet = matSet;
+    descriptorWrites[0].dstBinding = 0;
+    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[0].descriptorCount = 1;
+    descriptorWrites[0].pImageInfo = &albedoInfo;
+
+    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[1].dstSet = matSet;
+    descriptorWrites[1].dstBinding = 1;
+    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[1].descriptorCount = 1;
+    descriptorWrites[1].pImageInfo = &PBRInfo;
+
+    vkUpdateDescriptorSets(m_device.getLogicalDevice(), 2, descriptorWrites.data(), 0, nullptr);
 
     return matSet;
 }

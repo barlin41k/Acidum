@@ -17,12 +17,15 @@ namespace Acidum {
 struct MeshData {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
+    
     std::string textureName;
     std::vector<uint8_t> embeddedImage;
 
     glm::vec4 baseColorFactor = glm::vec4(1.0f);
     float roughness = 0.5f;
     float metallic = 0.0f;
+    std::string metallicRoughnessTextureName;
+    std::vector<uint8_t> embeddedMetallicRoughnessImage;
 
     bool isTransparent = false;
 };

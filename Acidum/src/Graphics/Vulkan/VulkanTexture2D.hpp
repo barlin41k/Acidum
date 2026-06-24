@@ -14,7 +14,7 @@ class VulkanStagingManager;
     
 class VulkanTexture2D : public ITexture2D {
 public:
-    VulkanTexture2D(const VulkanDevice& device, VulkanStagingManager* stagingManager, const void* data, uint32_t width, uint32_t height);
+    VulkanTexture2D(const VulkanDevice& device, VulkanStagingManager* stagingManager, const void* data, uint32_t width, uint32_t height, bool isSRGB);
     ~VulkanTexture2D();
 
     uint32_t getWidth() const override { return m_width; }
@@ -31,7 +31,7 @@ private:
 
     uint32_t m_width = 0, m_height = 0;
 
-    void createTextureImage(const void* data, uint32_t width, uint32_t height);
+    void createTextureImage(const void* data, uint32_t width, uint32_t height, bool isSRGB);
     void createSampler();
 };
 

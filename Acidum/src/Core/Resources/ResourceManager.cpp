@@ -42,11 +42,8 @@ void ResourceManager::shutdown() {
 
 std::shared_ptr<ITexture2D> ResourceManager::getMissingTexture() {
     if (!s_missingTexture) {
-        uint8_t pixels[4 * 4] = {
-            255, 0, 255, 255,  0, 0, 0, 255,
-            0, 0, 0, 255,  255, 0, 255, 255
-        };
-        s_missingTexture = s_graphicsAPI->createTexture2D(pixels, 2, 2);
+        uint8_t pixels[4] = { 255, 255, 255, 255 }; 
+        s_missingTexture = s_graphicsAPI->createTexture2D(pixels, 1, 1);
     }
 
     return s_missingTexture;
@@ -71,7 +68,7 @@ std::vector<char> ResourceManager::loadBinaryFile(const std::string& relativePat
     return buffer;
 }
 
-std::shared_ptr<ITexture2D> ResourceManager::loadTexture(const std::string& relativePath) {
+std::shared_ptr<ITexture2D> ResourceManager::loadTexture(const std::string& relativePath, bool isSRGB) {
     if (s_textures.contains(relativePath))
         return s_textures[relativePath];
 
@@ -82,16 +79,22 @@ std::shared_ptr<ITexture2D> ResourceManager::loadTexture(const std::string& rela
     auto texture = s_graphicsAPI->createTexture2D(
         data.pixels.data(),
         static_cast<uint32_t>(data.width),
-        static_cast<uint32_t>(data.height)
+        static_cast<uint32_t>(data.height),
+        isSRGB
     );
 
     s_textures[relativePath] = std::move(texture);
     return s_textures[relativePath];
 }
 
-std::shared_ptr<ITexture2D> ResourceManager::loadTextureFromMemory(const std::vector<uint8_t>& memory) {
+std::shared_ptr<ITexture2D> ResourceManager::loadTextureFromMemory(const std::vector<uint8_t>& memory, bool isSRGB) {
     ImageData data = ImageLoader::loadFromMemory(memory);
-    return s_graphicsAPI->createTexture2D(data.pixels.data(), static_cast<uint32_t>(data.width), static_cast<uint32_t>(data.height));
+    return s_graphicsAPI->createTexture2D(
+        data.pixels.data(),
+        static_cast<uint32_t>(data.width),
+        static_cast<uint32_t>(data.height),
+        isSRGB
+    );
 }
 
 std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePath) {
@@ -113,6 +116,14 @@ std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePat
             material->albedoTexture = loadTexture(relTexPath.string());
         } else 
             material->albedoTexture = getMissingTexture();
+        
+        if (!data.embeddedMetallicRoughnessImage.empty())
+            material->metallicRoughnessTexture = loadTextureFromMemory(data.embeddedMetallicRoughnessImage, false);
+        else if (!data.metallicRoughnessTextureName.empty()) {
+            std::filesystem::path relTexPath = std::filesystem::path(relativePath).parent_path() / data.metallicRoughnessTextureName;
+            material->metallicRoughnessTexture = loadTexture(relTexPath.string(), false);
+        } else
+            material->metallicRoughnessTexture = getMissingTexture();
 
         mesh->setMaterial(material);
         model->subMeshes.push_back(std::move(mesh));

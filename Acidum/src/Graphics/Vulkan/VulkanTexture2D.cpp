@@ -9,13 +9,13 @@
 
 namespace Acidum {
     
-VulkanTexture2D::VulkanTexture2D(const VulkanDevice& device, VulkanStagingManager* stagingManager, const void* data, uint32_t width, uint32_t height)
+VulkanTexture2D::VulkanTexture2D(const VulkanDevice& device, VulkanStagingManager* stagingManager, const void* data, uint32_t width, uint32_t height, bool isSRGB)
     : m_device(device),
       m_stagingManager(stagingManager),
       m_width(width),
       m_height(height)
 {
-    createTextureImage(data, width, height);
+    createTextureImage(data, width, height, isSRGB);
     createSampler();
 }
 
@@ -24,7 +24,7 @@ VulkanTexture2D::~VulkanTexture2D() {
         vkDestroySampler(m_device.getLogicalDevice(), m_sampler, nullptr);
 }
 
-void VulkanTexture2D::createTextureImage(const void* data, uint32_t width, uint32_t height) {
+void VulkanTexture2D::createTextureImage(const void* data, uint32_t width, uint32_t height, bool isSRGB) {
     VkDeviceSize bufferSize = width * height * 4;
 
     auto stagingBuffer = std::make_unique<VulkanBuffer>(
@@ -39,7 +39,8 @@ void VulkanTexture2D::createTextureImage(const void* data, uint32_t width, uint3
 
     m_image = std::make_unique<VulkanImage>(
         m_device, width, height,
-        VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
+        isSRGB ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT
     );

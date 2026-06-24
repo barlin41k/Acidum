@@ -20,6 +20,7 @@ layout(location = 2) in vec3 fragNormal;
 layout(location = 3) in vec3 fragPos;
 
 layout(set = 1, binding = 0) uniform sampler2D texSampler;
+layout(set = 1, binding = 1) uniform sampler2D PBRSampler;
 
 layout(location = 0) out vec4 outColor;
 
@@ -67,6 +68,10 @@ void main() {
     vec4 texColor = texture(texSampler, fragTexCoord) * pc.baseColor;
     vec3 albedo = texColor.rgb;
 
+    vec4 PBRSample = texture(PBRSampler, fragTexCoord);
+    float finalRoughness = PBRSample.g * pc.roughness;
+    float finalMetallic = PBRSample.b * pc.metallic;
+
     vec3 N = normalize(fragNormal); // normal vector
     vec3 V = normalize(ubo.viewPos - fragPos); // vector from a point on an object to the camera (viewing direction)
     vec3 L = normalize(ubo.lightDir); // vector from a point to a light source
@@ -74,11 +79,11 @@ void main() {
 
     // we determine the material type.
     vec3 F0 = vec3(0.04); // dielectrics highlights are always white.
-    F0 = mix(F0, albedo, pc.metallic); // if it's metal its F0 becomes equal to the albedo color.
+    F0 = mix(F0, albedo, finalMetallic); // if it's metal its F0 becomes equal to the albedo color.
 
     // roughness determines the chaos and scatter of these vectors m relative to N
-    float NDF = DistributionGGX(N, H, pc.roughness); // the function returns the fraction of micromirrors rotated in the H direction, and the magnitude of this fraction depends on how far H has moved from N and how rough the surface is.
-    float G = GeometrySmith(N, V, L, pc.roughness); // describes the loss of light due to microscopic relief
+    float NDF = DistributionGGX(N, H, finalRoughness); // the function returns the fraction of micromirrors rotated in the H direction, and the magnitude of this fraction depends on how far H has moved from N and how rough the surface is.
+    float G = GeometrySmith(N, V, L, finalRoughness); // describes the loss of light due to microscopic relief
     vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0); // calculates the percentage of reflected light depending on the viewing angle
 
     vec3 numerator = NDF * G * F; // total amount of reflected energy
@@ -87,14 +92,21 @@ void main() {
 
     vec3 kS = F; // the specular reflection coefficient kS is equal to the Fresnel value F (after all, Fresnel calculates how much is reflected)
     vec3 kD = vec3(1.0) - kS; // light cannot come from nowhere and cannot disappear into nowhere
-    kD *= 1.0 - pc.metallic; // since metals completely absorb light passing through the surface and convert it into heat, they have no diffuse scattering
+    kD *= 1.0 - finalMetallic; // since metals completely absorb light passing through the surface and convert it into heat, they have no diffuse scattering
 
     float NdotL = max(dot(N, L), 0.0); // cos of the angle of incidence of light
-    vec3 lightColor = vec3(10.0); // light color (strength)
+    vec3 lightColor = vec3(3.0); // light color (strength)
 
     vec3 Lo = (kD * albedo / PI + specular) * lightColor * NdotL; // light outgoing
 
-    vec3 ambient = vec3(0.03) * albedo;
+    // imitation of light from the sky and earth
+    vec3 skyColor = vec3(0.6, 0.8, 1.0) * 0.5;
+    vec3 groundColor = vec3(0.2, 0.2, 0.2);
+
+    float hemisphereMix = N.y * 0.5 + 0.5;
+    vec3 ambientLight = mix(groundColor, skyColor, hemisphereMix);
+
+    vec3 ambient = ambientLight * albedo;
 
     vec3 color = ambient + Lo;
     color = color / (color + vec3(1.0)); // this formula mathematically compresses the infinite range of brightness into the interval [0.0, 1.0]

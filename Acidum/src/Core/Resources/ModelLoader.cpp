@@ -107,6 +107,26 @@ void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model&
                         }
                     }
                 }
+
+                int pbrTexIndex = mat.pbrMetallicRoughness.metallicRoughnessTexture.index;
+                if (pbrTexIndex >= 0) {
+                    int source = model.textures[static_cast<size_t>(pbrTexIndex)].source;
+                    if (source >= 0) {
+                        const tinygltf::Image& image = model.images[static_cast<size_t>(source)];
+
+                        if (!image.uri.empty())
+                            meshData.metallicRoughnessTextureName = image.uri; 
+                        else if (image.bufferView >= 0) {
+                            const tinygltf::BufferView& bv = model.bufferViews[static_cast<size_t>(image.bufferView)];
+                            const tinygltf::Buffer& buffer = model.buffers[static_cast<size_t>(bv.buffer)];
+
+                            meshData.embeddedMetallicRoughnessImage.assign(
+                                buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset), 
+                                buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset) + static_cast<ptrdiff_t>(bv.byteLength)
+                            );
+                        }
+                    }
+                }
             }
 
             const tinygltf::Accessor& indexAccessor = model.accessors[static_cast<size_t>(primitive.indices)];
