@@ -80,7 +80,7 @@ void VulkanRenderer::drawFrame() {
     vkResetCommandBuffer(m_commandBufferManager->getCommandBuffer(m_currentFrame), 0);
     recordCommandBuffer(m_commandBufferManager->getCommandBuffer(m_currentFrame), imageIndex);
 
-    VkSubmitInfo submitInfo{};
+    VkSubmitInfo submitInfo {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     VkSemaphore waitSemaphores[] = { m_syncManager->getAvailableSemaphore(m_currentFrame) };
@@ -104,7 +104,7 @@ void VulkanRenderer::drawFrame() {
         "Failed to submit draw command buffer!"
     );
 
-    VkPresentInfoKHR presentInfo{};
+    VkPresentInfoKHR presentInfo {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
@@ -191,9 +191,17 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     ubo.lightDir = m_lightDirection;
     updateUniformBuffer(m_currentFrame, ubo);
 
-    std::sort(m_renderQueue.begin(), m_renderQueue.end(), [](const auto& a, const auto& b) {
+    std::sort(m_renderQueue.begin(), m_renderQueue.end(), [](const RenderCommand& a, const RenderCommand& b) {
         auto matA = a.mesh ? a.mesh->getMaterial() : nullptr;
         auto matB = b.mesh ? b.mesh->getMaterial() : nullptr;
+
+        if (!matA || !matB) return matA < matB;
+
+        bool blendA = matA->enableBlending;
+        bool blendB = matB->enableBlending;
+
+        if (blendA != blendB) return blendA < blendB;
+        
         return matA < matB;
     });
 
