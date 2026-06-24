@@ -81,6 +81,8 @@ void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model&
 
                 if (mat.alphaMode == "BLEND")
                     meshData.isTransparent = true;
+                meshData.roughness = static_cast<float>(mat.pbrMetallicRoughness.roughnessFactor);
+                meshData.metallic = static_cast<float>(mat.pbrMetallicRoughness.metallicFactor);
 
                 std::vector<double> factor = mat.pbrMetallicRoughness.baseColorFactor;
                 if (factor.size() == 4)

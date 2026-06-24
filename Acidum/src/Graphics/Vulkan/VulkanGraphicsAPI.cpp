@@ -95,6 +95,10 @@ void VulkanGraphicsAPI::setLightDirection(const glm::vec3& dir) {
     m_renderer->setLightDirection(dir);
 }
 
+void VulkanGraphicsAPI::setCameraPosition(const glm::vec3& pos) {
+    m_renderer->setCameraPosition(pos);
+}
+
 std::shared_ptr<ITexture2D> VulkanGraphicsAPI::createTexture2D(const void* data, uint32_t width, uint32_t height) {
     return std::make_shared<VulkanTexture2D>(*m_device, m_stagingManager.get(), data, width, height);
 }

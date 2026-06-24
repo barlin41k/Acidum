@@ -6,6 +6,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanTypes.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
@@ -148,7 +149,7 @@ void VulkanPipeline::createGraphicsPipeline(const PipelineConfig& config, const 
     VkPushConstantRange pushConstantRange {};
     pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pushConstantRange.offset = 0;
-    pushConstantRange.size = sizeof(glm::mat4) + sizeof(glm::vec4);
+    pushConstantRange.size = sizeof(PushContants);
 
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;

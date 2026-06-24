@@ -21,6 +21,9 @@ struct MeshData {
     std::vector<uint8_t> embeddedImage;
 
     glm::vec4 baseColorFactor = glm::vec4(1.0f);
+    float roughness = 0.5f;
+    float metallic = 0.0f;
+
     bool isTransparent = false;
 };
     

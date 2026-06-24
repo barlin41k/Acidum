@@ -56,19 +56,12 @@ void Application::OnInit() {
     );
 
     auto ak12Model = Acidum::ResourceManager::loadModel("models/ak12/scene.gltf");
-    auto windowModel = Acidum::ResourceManager::loadModel("models/window_notexture/window.glb");
 
     Acidum::Entity ak12;
     ak12.model = ak12Model;
     ak12.position = glm::vec3(0.0f);
     ak12.scale = glm::vec3(1.0f);
     m_entities.push_back(ak12);
-
-    Acidum::Entity window;
-    window.model = windowModel;
-    window.position = glm::vec3(0.0f, 0.0f, 1.0f);
-    window.scale = glm::vec3(1.0f);
-    m_entities.push_back(window);
 
     GetGraphicsAPI()->endUploadAndWait();
 }
@@ -82,8 +75,8 @@ void Application::OnUpdate(float deltaTime) {
 
     glm::vec3 movingSun = glm::vec3(
         std::sin(m_totalTime),
-        1.0f,
-        std::cos(m_totalTime)
+        std::cos(m_totalTime),
+        0.0f
     );
     GetGraphicsAPI()->setLightDirection(movingSun);
 }
@@ -111,6 +104,8 @@ void Application::updateWindowTitle(float deltaTime) {
 }
 
 void Application::updateViewProjMatrices() {
+    GetGraphicsAPI()->setCameraPosition(m_camera.getPosition());
+
     float aspect = 1.0f;
     int width = 0, height = 0;
     GetWindow()->getFramebufferSize(&width, &height);

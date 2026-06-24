@@ -280,6 +280,8 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
             PushContants pc {};
             pc.model = command.modelMatrix;
             pc.baseColor = material->baseColor;
+            pc.roughness = material->roughness;
+            pc.metallic = material->metallic;
 
             vkCmdPushConstants(
                 commandBuffer, 

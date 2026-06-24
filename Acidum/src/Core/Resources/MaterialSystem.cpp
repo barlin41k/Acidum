@@ -28,6 +28,7 @@ std::shared_ptr<Material> MaterialSystem::CreateMaterial(const MeshData& meshDat
     return std::make_shared<Material>(
         templ.vertShaderPath, templ.fragShaderPath,
         meshData.baseColorFactor,
+        meshData.roughness, meshData.metallic,
         templ.enableBlending,
         templ.depthWrite
     );
