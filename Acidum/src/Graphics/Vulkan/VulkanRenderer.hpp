@@ -29,6 +29,11 @@ struct RenderCommand {
     glm::mat4 modelMatrix;
 };
 
+struct PushContants {
+    glm::mat4 model;
+    glm::vec4 baseColor;
+};
+
 class VulkanRenderer {
 public:
     VulkanRenderer(const VulkanDevice& device, const VulkanSurface& surface, Window* window, const RendererConfig& config);

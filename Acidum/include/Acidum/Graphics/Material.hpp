@@ -14,14 +14,15 @@ struct Material {
 
     std::shared_ptr<ITexture2D> albedoTexture = nullptr;
 
-    glm::vec3 baseColor { 1.0f, 1.0f, 1.0f };
+    glm::vec4 baseColor = glm::vec4(1.0f);
 
     bool enableBlending = false;
     bool depthWrite = true;
 
-    Material(const std::string& vert, const std::string& frag, bool inEnableBlending, bool inDepthWrite)
+    Material(const std::string& vert, const std::string& frag, const glm::vec4& inBaseColor, bool inEnableBlending, bool inDepthWrite)
         : vertShaderPath(vert),
           fragShaderPath(frag),
+          baseColor(inBaseColor),
           enableBlending(inEnableBlending),
           depthWrite(inDepthWrite) {}
 };

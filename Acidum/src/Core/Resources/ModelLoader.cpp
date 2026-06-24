@@ -38,25 +38,41 @@ namespace Acidum {
 bool DummyImageLoader(tinygltf::Image*, const int, std::string*, std::string*, int, int, const unsigned char*, int, void*) {
     return true;
 }
+
+void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model& model, const glm::mat4& parentMatrix, std::vector<MeshData>& allMeshes) {
+    glm::mat4 localMatrix = glm::mat4(1.0f);
+
+    if (node.matrix.size() == 16)
+        localMatrix = glm::make_mat4(node.matrix.data());
+    else {
+        glm::mat4 translation = glm::mat4(1.0f);
+        glm::mat4 rotation = glm::mat4(1.0f);
+        glm::mat4 scale = glm::mat4(1.0f);
+
+        if (node.translation.size() == 3)
+            translation = glm::translate(glm::mat4(1.0f), glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+
+        if (node.rotation.size() == 4) {
+            glm::quat q(
+                static_cast<float>(node.rotation[3]),
+                static_cast<float>(node.rotation[0]),
+                static_cast<float>(node.rotation[1]),
+                static_cast<float>(node.rotation[2])
+            );
+
+            rotation = glm::mat4_cast(q);
+        }
+
+        if (node.scale.size() == 3)
+            scale = glm::scale(glm::mat4(1.0f), glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
+
+        localMatrix = translation * rotation * scale;
+    }
+
+    glm::mat4 globalMatrix = parentMatrix * localMatrix;
     
-std::vector<MeshData> ModelLoader::load(const std::string& path) {
-    tinygltf::Model model;
-    tinygltf::TinyGLTF loader;
-    std::string error, warn;
-
-    loader.SetImageLoader(DummyImageLoader, nullptr);
-    
-    bool result = false;
-    if (path.ends_with(".glb"))
-        result = loader.LoadBinaryFromFile(&model, &error, &warn, path);
-    else
-        result = loader.LoadASCIIFromFile(&model, &error, &warn, path);
-
-    if (!warn.empty()) ENGINE_WARN("TinyGLTF warning: {}", warn);
-    ENGINE_VERIFY(result, "Failed to load model {} via tinyGLTF: {}", path, error);
-
-    std::vector<MeshData> allMeshes;
-    for (const auto& mesh : model.meshes) {
+    if (node.mesh >= 0) {
+        const tinygltf::Mesh& mesh = model.meshes[static_cast<size_t>(node.mesh)];
         for (const auto& primitive : mesh.primitives) {
             MeshData meshData {};
 
@@ -65,6 +81,10 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
 
                 if (mat.alphaMode == "BLEND")
                     meshData.isTransparent = true;
+
+                std::vector<double> factor = mat.pbrMetallicRoughness.baseColorFactor;
+                if (factor.size() == 4)
+                    meshData.baseColorFactor = glm::vec4(factor[0], factor[1], factor[2], factor[3]);
 
                 int texIndex = mat.pbrMetallicRoughness.baseColorTexture.index;
                 if (texIndex >= 0) {
@@ -102,8 +122,6 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
             }
 
             auto posIt = primitive.attributes.find("POSITION");
-            ENGINE_VERIFY(posIt != primitive.attributes.end(), "Model {} has no positions!", path);
-
             const tinygltf::Accessor& posAccessor = model.accessors[static_cast<size_t>(posIt->second)];
             const tinygltf::BufferView& posBufferView = model.bufferViews[static_cast<size_t>(posAccessor.bufferView)];
             const tinygltf::Buffer& posBuffer = model.buffers[static_cast<size_t>(posBufferView.buffer)];
@@ -134,13 +152,16 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
                 Vertex& vertex = meshData.vertices[i];
 
                 const auto* pPos = reinterpret_cast<const float*>(posData + (i * posStride));
-                vertex.pos = glm::make_vec3(pPos);
+                glm::vec3 localPos = glm::make_vec3(pPos);
+                vertex.pos = glm::vec3(globalMatrix * glm::vec4(localPos, 1.0f));
 
                 vertex.color = glm::vec3(1.0f);
 
                 if (normData) {
                     const auto* pNorm = reinterpret_cast<const float*>(normData + (i * normStride));
-                    vertex.normal = glm::make_vec3(pNorm);
+                    glm::vec3 localNorm = glm::make_vec3(pNorm);
+                    glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(globalMatrix)));
+                    vertex.normal = glm::normalize(normalMatrix * localNorm);
                 } else
                     vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -154,6 +175,34 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
             allMeshes.push_back(meshData);
         }
     }
+
+    for (int childIndex : node.children)
+        processNode(model.nodes[static_cast<size_t>(childIndex)], model, globalMatrix, allMeshes);
+}
+    
+std::vector<MeshData> ModelLoader::load(const std::string& path) {
+    tinygltf::Model model;
+    tinygltf::TinyGLTF loader;
+    std::string error, warn;
+
+    loader.SetImageLoader(DummyImageLoader, nullptr);
+    
+    bool result = false;
+    if (path.ends_with(".glb"))
+        result = loader.LoadBinaryFromFile(&model, &error, &warn, path);
+    else
+        result = loader.LoadASCIIFromFile(&model, &error, &warn, path);
+
+    if (!warn.empty()) ENGINE_WARN("TinyGLTF warning: {}", warn);
+    ENGINE_VERIFY(result, "Failed to load model {} via tinyGLTF: {}", path, error);
+
+    std::vector<MeshData> allMeshes;
+
+    int sceneIndex = model.defaultScene > -1 ? model.defaultScene : 0;
+    const tinygltf::Scene& scene = model.scenes[static_cast<size_t>(sceneIndex)];
+
+    for (int nodeIndex : scene.nodes)
+        processNode(model.nodes[static_cast<size_t>(nodeIndex)], model, glm::mat4(1.0f), allMeshes);
 
     return allMeshes;
 }

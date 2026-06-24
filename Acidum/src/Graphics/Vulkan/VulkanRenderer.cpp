@@ -277,13 +277,17 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
                 currentMaterial = material;
             }
 
+            PushContants pc {};
+            pc.model = command.modelMatrix;
+            pc.baseColor = material->baseColor;
+
             vkCmdPushConstants(
                 commandBuffer, 
                 pipeline->getLayout(), 
-                VK_SHADER_STAGE_VERTEX_BIT, 
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
                 0, 
-                sizeof(glm::mat4), 
-                &command.modelMatrix
+                sizeof(PushContants), 
+                &pc
             );
 
             command.mesh->bind(commandBuffer);

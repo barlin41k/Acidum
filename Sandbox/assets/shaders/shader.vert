@@ -1,6 +1,10 @@
 #version 450
 
-layout(push_constant) uniform PushConstants { mat4 model; } pc; 
+layout(push_constant) uniform PushConstants {
+    mat4 model;
+    vec4 baseColor;
+} pc;
+
 layout(set = 0, binding = 0) uniform UniformBufferObject {
     mat4 view;
     mat4 proj;

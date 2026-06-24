@@ -56,20 +56,19 @@ void Application::OnInit() {
     );
 
     auto ak12Model = Acidum::ResourceManager::loadModel("models/ak12/scene.gltf");
-    auto steampunkwindowModel = Acidum::ResourceManager::loadModel("models/steampunkwindow/steampunk_window.glb");
+    auto windowModel = Acidum::ResourceManager::loadModel("models/window/window.glb");
 
     Acidum::Entity ak12;
     ak12.model = ak12Model;
     ak12.position = glm::vec3(0.0f);
     ak12.scale = glm::vec3(1.0f);
-    ak12.rotation = glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f);
     m_entities.push_back(ak12);
 
-    Acidum::Entity steampunkwindow;
-    steampunkwindow.model = steampunkwindowModel;
-    steampunkwindow.position = glm::vec3(0.0f, 0.0f, 1.0f);
-    steampunkwindow.scale = glm::vec3(0.001f);
-    m_entities.push_back(steampunkwindow);
+    Acidum::Entity window;
+    window.model = windowModel;
+    window.position = glm::vec3(0.0f, 0.0f, 1.0f);
+    window.scale = glm::vec3(1.0f);
+    m_entities.push_back(window);
 
     GetGraphicsAPI()->endUploadAndWait();
 }

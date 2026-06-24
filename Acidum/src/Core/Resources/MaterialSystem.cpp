@@ -25,7 +25,12 @@ std::shared_ptr<Material> MaterialSystem::CreateMaterial(const MeshData& meshDat
     ENGINE_VERIFY(it != m_templates.end(), "MaterialSystem: Template for requested RenderMode not found!");
 
     const auto& templ = it->second;
-    return std::make_shared<Material>(templ.vertShaderPath, templ.fragShaderPath, templ.enableBlending, templ.depthWrite);
+    return std::make_shared<Material>(
+        templ.vertShaderPath, templ.fragShaderPath,
+        meshData.baseColorFactor,
+        templ.enableBlending,
+        templ.depthWrite
+    );
 }
 
 } // namespace Acidum

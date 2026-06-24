@@ -6,6 +6,12 @@
 
 #include "Acidum/Core/Base/Types.hpp"
 
+// forward-declaration
+namespace tinygltf {
+    class Node;
+    class Model;
+}
+
 namespace Acidum {
 
 struct MeshData {
@@ -14,12 +20,15 @@ struct MeshData {
     std::string textureName;
     std::vector<uint8_t> embeddedImage;
 
+    glm::vec4 baseColorFactor = glm::vec4(1.0f);
     bool isTransparent = false;
 };
     
 class ModelLoader {
 public:
     static std::vector<MeshData> load(const std::string& path);
+private:
+    static void processNode(const tinygltf::Node& node, const tinygltf::Model& model, const glm::mat4& parentMatrix, std::vector<MeshData>& allMeshes);
 };
 
 } // namespace Acidum
