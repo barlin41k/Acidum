@@ -56,7 +56,7 @@ void Application::OnInit() {
     );
 
     auto ak12Model = Acidum::ResourceManager::loadModel("models/ak12/scene.gltf");
-    auto windowModel = Acidum::ResourceManager::loadModel("models/window/window.glb");
+    auto windowModel = Acidum::ResourceManager::loadModel("models/window_notexture/window.glb");
 
     Acidum::Entity ak12;
     ak12.model = ak12Model;
