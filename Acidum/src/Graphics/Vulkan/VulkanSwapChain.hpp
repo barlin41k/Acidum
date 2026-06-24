@@ -21,17 +21,16 @@ public:
     VulkanSwapChain(const VulkanSwapChain&) = delete;
     VulkanSwapChain& operator=(const VulkanSwapChain&) = delete;
 
+    void recreate();
+
     VkSwapchainKHR getSwapChain() const { return m_swapChain; }
     VkFormat getFormat() const { return m_swapChainImageFormat; }
     VkExtent2D getExtent() const { return m_swapChainExtent; }
 
+    const std::vector<VkImage>& getImages() const { return m_swapChainImages; }
     const std::vector<VkImageView>& getImageViews() const { return m_swapChainImageViews; }
-    const std::vector<VkFramebuffer>& getFramebuffers() const { return m_swapChainFramebuffers; }
-
-    void createFramebuffers(VkRenderPass renderPass, VkImageView depthImageView); 
-    
-    void recreate();
 private:
+    const SwapChainConfig m_config; // because swapchain can be recreated
     const VulkanDevice& m_device;
     const VulkanSurface& m_surface;
     Window* m_window;
@@ -41,9 +40,6 @@ private:
     VkFormat m_swapChainImageFormat;
     VkExtent2D m_swapChainExtent;
     std::vector<VkImageView> m_swapChainImageViews;
-    std::vector<VkFramebuffer> m_swapChainFramebuffers;
-
-    const SwapChainConfig m_config; // because swapchain can be recreated
 
     void createSwapChain(VkSwapchainKHR oldSwapChain=VK_NULL_HANDLE);
     void createImageViews();

@@ -9,17 +9,13 @@
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
-#include "Graphics/Vulkan/VulkanRenderPass.hpp"
 
 namespace Acidum {
 
-VulkanPipeline::VulkanPipeline(
-    const VulkanDevice& device, const VulkanRenderPass& renderPass, const PipelineConfig& config,
-    const std::vector<VkDescriptorSetLayout>& layouts
-)
+VulkanPipeline::VulkanPipeline(const VulkanDevice& device, const PipelineConfig& config, const std::vector<VkDescriptorSetLayout>& layouts)
     : m_device(device)
 {
-    createGraphicsPipeline(renderPass, config, layouts);
+    createGraphicsPipeline(config, layouts);
 }
 
 VulkanPipeline::~VulkanPipeline() {
@@ -45,10 +41,7 @@ VkShaderModule VulkanPipeline::createShaderModule(const std::vector<char>& code)
     return shaderModule;
 }
 
-void VulkanPipeline::createGraphicsPipeline(
-    const VulkanRenderPass& renderPass, const PipelineConfig& config,
-    const std::vector<VkDescriptorSetLayout>& layouts
-) {
+void VulkanPipeline::createGraphicsPipeline(const PipelineConfig& config, const std::vector<VkDescriptorSetLayout>& layouts) {
     VkShaderModule vertShaderModule = createShaderModule(config.vertexShaderBytecode);
     VkShaderModule fragShaderModule = createShaderModule(config.fragmentShaderBytecode);
 
@@ -162,8 +155,15 @@ void VulkanPipeline::createGraphicsPipeline(
 
     ENGINE_VERIFY(vkCreatePipelineLayout(m_device.getLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) == VK_SUCCESS, "Failed to create pipeline layout!");
 
+    VkPipelineRenderingCreateInfo pipelineRenderingInfo {};
+    pipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    pipelineRenderingInfo.colorAttachmentCount = 1;
+    pipelineRenderingInfo.pColorAttachmentFormats = &config.colorFormat;
+    pipelineRenderingInfo.depthAttachmentFormat = config.depthFormat;
+
     VkGraphicsPipelineCreateInfo pipelineInfo {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.pNext = &pipelineRenderingInfo;
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStages;
     pipelineInfo.pVertexInputState = &vertexInputInfo;
@@ -175,7 +175,7 @@ void VulkanPipeline::createGraphicsPipeline(
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = m_pipelineLayout;
-    pipelineInfo.renderPass = renderPass.getRenderPass();
+    pipelineInfo.renderPass = VK_NULL_HANDLE;
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;

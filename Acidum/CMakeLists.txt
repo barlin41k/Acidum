@@ -21,7 +21,6 @@ set(CORE_SOURCES
     src/Graphics/Vulkan/VulkanInstance.cpp
     src/Graphics/Vulkan/VulkanMesh.cpp
     src/Graphics/Vulkan/VulkanPipeline.cpp
-    src/Graphics/Vulkan/VulkanRenderPass.cpp
     src/Graphics/Vulkan/VulkanRenderer.cpp
     src/Graphics/Vulkan/VulkanSurface.cpp
     src/Graphics/Vulkan/VulkanSwapChain.cpp

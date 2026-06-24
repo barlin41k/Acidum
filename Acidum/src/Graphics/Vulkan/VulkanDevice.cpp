@@ -187,8 +187,13 @@ void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    VkDeviceCreateInfo createInfo{};
+    VkPhysicalDeviceVulkan13Features versionFeatures13 {};
+    versionFeatures13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+    versionFeatures13.dynamicRendering = VK_TRUE;
+
+    VkDeviceCreateInfo createInfo {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pNext = &versionFeatures13;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
     createInfo.pEnabledFeatures = &config.requiredFeatures;
@@ -207,7 +212,7 @@ void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
 }
 
 void VulkanDevice::createVmaAllocator() {
-    VmaAllocatorCreateInfo allocatorInfo = {};
+    VmaAllocatorCreateInfo allocatorInfo {};
     allocatorInfo.physicalDevice = m_physicalDevice;
     allocatorInfo.device = m_device;
     allocatorInfo.instance = m_instance.getInstance();

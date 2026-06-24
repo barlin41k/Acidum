@@ -17,7 +17,6 @@ namespace Acidum {
 class Window;
 class VulkanImage;
 class VulkanMesh;
-class VulkanRenderPass;
 class VulkanSurface;
 class VulkanDevice;
 class VulkanSwapChain;
@@ -54,7 +53,6 @@ private:
 
     RendererConfig m_config;
 
-    std::unique_ptr<VulkanRenderPass> m_renderPass;
     std::unique_ptr<VulkanSwapChain> m_swapChain;
     std::unordered_map<std::string, std::unique_ptr<VulkanPipeline>> m_pipelineCache;
     std::unique_ptr<VulkanCommandBufferManager> m_commandBufferManager;

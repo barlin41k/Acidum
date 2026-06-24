@@ -8,15 +8,11 @@ namespace Acidum {
 
 // forward-declaration
 class VulkanDevice;
-class VulkanRenderPass;
 struct PipelineConfig;
 
 class VulkanPipeline {
 public:
-    VulkanPipeline(
-        const VulkanDevice& device, const VulkanRenderPass& renderPass,
-        const PipelineConfig& config, const std::vector<VkDescriptorSetLayout>& layouts
-    );
+    VulkanPipeline(const VulkanDevice& device, const PipelineConfig& config, const std::vector<VkDescriptorSetLayout>& layouts);
     ~VulkanPipeline();
 
     VulkanPipeline(const VulkanPipeline&) = delete;
@@ -29,12 +25,8 @@ private:
     VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
     VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
 
-    void createGraphicsPipeline(
-        const VulkanRenderPass& renderPass, const PipelineConfig& config,
-        const std::vector<VkDescriptorSetLayout>& layouts
-    );
-
     VkShaderModule createShaderModule(const std::vector<char>& code);
+    void createGraphicsPipeline(const PipelineConfig& config, const std::vector<VkDescriptorSetLayout>& layouts);
 };
 
 } // namespace Acidum

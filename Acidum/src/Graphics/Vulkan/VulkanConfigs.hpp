@@ -11,7 +11,7 @@ namespace Acidum {
 struct InstanceConfig {
     std::string appName = Consts::ENGINE_NAME;
     uint32_t appVersion = VK_MAKE_VERSION(1, 0, 0);
-    uint32_t apiVersion = VK_API_VERSION_1_2;
+    uint32_t apiVersion = VK_API_VERSION_1_3;
 
     std::vector<const char*> windowExtensions;
     std::vector<const char*> additionalExtensions;
@@ -35,6 +35,9 @@ struct PipelineConfig {
 
     std::vector<VkVertexInputBindingDescription> vertexBindingDescriptions;
     std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions;
+
+    VkFormat colorFormat = VK_FORMAT_UNDEFINED;
+    VkFormat depthFormat = VK_FORMAT_UNDEFINED;
 
     VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
     VkCullModeFlags cullMode = VK_CULL_MODE_BACK_BIT;

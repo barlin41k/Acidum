@@ -13,10 +13,10 @@
 namespace Acidum {
 
 VulkanSwapChain::VulkanSwapChain(const VulkanDevice& device, const VulkanSurface& surface, Window* window, const SwapChainConfig& config)
-    : m_device(device),
+    : m_config(config),
+      m_device(device),
       m_surface(surface),
-      m_window(window),
-      m_config(config)
+      m_window(window)
 {
     createSwapChain();
     createImageViews();
@@ -28,14 +28,9 @@ VulkanSwapChain::~VulkanSwapChain() {
 }
 
 void VulkanSwapChain::cleanupSwapChainDependencies() {
-    for (auto framebuffer : m_swapChainFramebuffers)
-        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && framebuffer != VK_NULL_HANDLE)
-            vkDestroyFramebuffer(m_device.getLogicalDevice(), framebuffer, nullptr);
     for (auto imageView : m_swapChainImageViews)
         if (m_device.getLogicalDevice() != VK_NULL_HANDLE && imageView != VK_NULL_HANDLE)
             vkDestroyImageView(m_device.getLogicalDevice(), imageView, nullptr);
-    
-    m_swapChainFramebuffers.clear();
     m_swapChainImageViews.clear();
 }
 
@@ -196,28 +191,6 @@ void VulkanSwapChain::createImageViews() {
         createInfo.subresourceRange.layerCount = 1;
 
         ENGINE_VERIFY(vkCreateImageView(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) == VK_SUCCESS, "Failed to create image views!");
-    }
-}
-
-void VulkanSwapChain::createFramebuffers(VkRenderPass renderPass, VkImageView depthImageView) {
-    m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
-
-    for (size_t i = 0; i < m_swapChainImageViews.size(); i++) {
-        std::array<VkImageView, 2> attachments = {
-            m_swapChainImageViews[i],
-            depthImageView
-        };
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-        framebufferInfo.pAttachments = attachments.data();
-        framebufferInfo.width = m_swapChainExtent.width;
-        framebufferInfo.height = m_swapChainExtent.height;
-        framebufferInfo.layers = 1;
-
-        ENGINE_VERIFY(vkCreateFramebuffer(m_device.getLogicalDevice(), &framebufferInfo, nullptr, &m_swapChainFramebuffers[i]) == VK_SUCCESS, "Failed to create framebuffer!");
     }
 }
 
