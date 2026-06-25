@@ -46,7 +46,7 @@ void VulkanDescriptorManager::createDescriptorSetLayouts() {
     );
 
 
-    std::array<VkDescriptorSetLayoutBinding, 2> bindings {};
+    std::array<VkDescriptorSetLayoutBinding, 3> bindings {};
 
     bindings[0].binding = 0;
     bindings[0].descriptorCount = 1;
@@ -59,6 +59,12 @@ void VulkanDescriptorManager::createDescriptorSetLayouts() {
     bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     bindings[1].pImmutableSamplers = nullptr;
     bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    bindings[2].binding = 2;
+    bindings[2].descriptorCount = 1;
+    bindings[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    bindings[2].pImmutableSamplers = nullptr;
+    bindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     VkDescriptorSetLayoutCreateInfo materialLayoutInfo {};
     materialLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -118,7 +124,7 @@ void VulkanDescriptorManager::createGlobalDescriptorSets() {
 }
 
 VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* material) {
-    if (!material || !material->albedoTexture || !material->metallicRoughnessTexture) return VK_NULL_HANDLE;
+    if (!material || !material->albedoTexture || !material->metallicRoughnessTexture || !material->normalTexture) return VK_NULL_HANDLE;
 
     VkDescriptorSet matSet;
     ENGINE_VERIFY(
@@ -128,6 +134,7 @@ VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* mater
 
     auto vkAlbedo = std::static_pointer_cast<VulkanTexture2D>(material->albedoTexture);
     auto vkPBR = std::static_pointer_cast<VulkanTexture2D>(material->metallicRoughnessTexture);
+    auto vkNorm = std::static_pointer_cast<VulkanTexture2D>(material->normalTexture);
 
     VkDescriptorImageInfo albedoInfo {};
     albedoInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -139,7 +146,12 @@ VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* mater
     PBRInfo.imageView = vkPBR->getImageView();
     PBRInfo.sampler = vkPBR->getSampler();
 
-    std::array<VkWriteDescriptorSet, 2> descriptorWrites {};
+    VkDescriptorImageInfo normInfo {};
+    normInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    normInfo.imageView = vkNorm->getImageView();
+    normInfo.sampler = vkNorm->getSampler();
+
+    std::array<VkWriteDescriptorSet, 3> descriptorWrites {};
 
     descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[0].dstSet = matSet;
@@ -155,7 +167,14 @@ VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* mater
     descriptorWrites[1].descriptorCount = 1;
     descriptorWrites[1].pImageInfo = &PBRInfo;
 
-    vkUpdateDescriptorSets(m_device.getLogicalDevice(), 2, descriptorWrites.data(), 0, nullptr);
+    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[2].dstSet = matSet;
+    descriptorWrites[2].dstBinding = 2;
+    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[2].descriptorCount = 1;
+    descriptorWrites[2].pImageInfo = &normInfo;
+
+    vkUpdateDescriptorSets(m_device.getLogicalDevice(), 3, descriptorWrites.data(), 0, nullptr);
 
     return matSet;
 }

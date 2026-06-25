@@ -36,7 +36,7 @@ public:
     void draw(VkCommandBuffer commandBuffer) const;
 
     static VkVertexInputBindingDescription getBindingDescription();
-    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions();
+    static std::array<VkVertexInputAttributeDescription, 5> getAttributeDescriptions();
 private:
     std::unique_ptr<VulkanBuffer> m_vertexBuffer;
     std::unique_ptr<VulkanBuffer> m_indexBuffer;

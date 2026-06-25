@@ -14,6 +14,7 @@ struct Material {
 
     std::shared_ptr<ITexture2D> albedoTexture = nullptr;
     std::shared_ptr<ITexture2D> metallicRoughnessTexture = nullptr;
+    std::shared_ptr<ITexture2D> normalTexture = nullptr;
 
     glm::vec4 baseColor = glm::vec4(1.0f);
     float roughness = 0.5f;

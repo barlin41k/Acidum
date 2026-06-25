@@ -21,11 +21,15 @@ struct MeshData {
     std::string textureName;
     std::vector<uint8_t> embeddedImage;
 
+    std::string metallicRoughnessTextureName;
+    std::vector<uint8_t> embeddedMetallicRoughnessImage;
+
+    std::string normalTextureName;
+    std::vector<uint8_t> embeddedNormalImage;
+
     glm::vec4 baseColorFactor = glm::vec4(1.0f);
     float roughness = 0.5f;
     float metallic = 0.0f;
-    std::string metallicRoughnessTextureName;
-    std::vector<uint8_t> embeddedMetallicRoughnessImage;
 
     bool isTransparent = false;
 };

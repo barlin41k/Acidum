@@ -15,6 +15,7 @@ namespace Acidum {
 IGraphicsAPI* ResourceManager::s_graphicsAPI;
 std::filesystem::path ResourceManager::s_assetsPath;
 std::shared_ptr<ITexture2D> ResourceManager::s_missingTexture = nullptr;
+std::shared_ptr<ITexture2D> ResourceManager::s_missingNormalTexture = nullptr;
 std::unordered_map<std::string, std::shared_ptr<ITexture2D>> ResourceManager::s_textures;
 std::unordered_map<std::string, std::shared_ptr<Model>> ResourceManager::s_models;
 
@@ -34,6 +35,7 @@ void ResourceManager::shutdown() {
     s_models.clear();
 
     s_missingTexture.reset();
+    s_missingNormalTexture.reset();
     
     s_graphicsAPI = nullptr;
 
@@ -47,6 +49,15 @@ std::shared_ptr<ITexture2D> ResourceManager::getMissingTexture() {
     }
 
     return s_missingTexture;
+}
+
+std::shared_ptr<ITexture2D> ResourceManager::getMissingNormalTexture() {
+    if (!s_missingNormalTexture) {
+        uint8_t pixels[4] = { 128, 128, 255, 255 };
+        s_missingNormalTexture = s_graphicsAPI->createTexture2D(pixels, 1, 1);
+    }
+
+    return s_missingNormalTexture;
 }
 
 std::vector<char> ResourceManager::loadBinaryFile(const std::string& relativePath) {
@@ -124,6 +135,14 @@ std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePat
             material->metallicRoughnessTexture = loadTexture(relTexPath.string(), false);
         } else
             material->metallicRoughnessTexture = getMissingTexture();
+        
+        if (!data.embeddedNormalImage.empty())
+            material->normalTexture = loadTextureFromMemory(data.embeddedNormalImage, false);
+        else if (!data.normalTextureName.empty()) {
+            std::filesystem::path relTexPath = std::filesystem::path(relativePath).parent_path() / data.normalTextureName;
+            material->normalTexture = loadTexture(relTexPath.string(), false);
+        } else
+            material->normalTexture = getMissingNormalTexture();
 
         mesh->setMaterial(material);
         model->subMeshes.push_back(std::move(mesh));

@@ -127,6 +127,26 @@ void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model&
                         }
                     }
                 }
+
+                int normTexIndex = mat.normalTexture.index;
+                if (normTexIndex >= 0) {
+                    int source = model.textures[static_cast<size_t>(normTexIndex)].source;
+                    if (source >= 0) {
+                        const tinygltf::Image& image = model.images[static_cast<size_t>(source)];
+
+                        if (!image.uri.empty())
+                            meshData.normalTextureName = image.uri; 
+                        else if (image.bufferView >= 0) {
+                            const tinygltf::BufferView& bv = model.bufferViews[static_cast<size_t>(image.bufferView)];
+                            const tinygltf::Buffer& buffer = model.buffers[static_cast<size_t>(bv.buffer)];
+
+                            meshData.embeddedNormalImage.assign(
+                                buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset), 
+                                buffer.data.begin() + static_cast<ptrdiff_t>(bv.byteOffset) + static_cast<ptrdiff_t>(bv.byteLength)
+                            );
+                        }
+                    }
+                }
             }
 
             const tinygltf::Accessor& indexAccessor = model.accessors[static_cast<size_t>(primitive.indices)];
@@ -168,6 +188,15 @@ void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model&
                 texStride = static_cast<size_t>(texAcc.ByteStride(texView));
             }
 
+            size_t tanStride = 0;
+            const uint8_t* tanData = nullptr;
+            if (primitive.attributes.contains("TANGENT")) {
+                const auto& tanAcc = model.accessors[static_cast<size_t>(primitive.attributes.at("TANGENT"))];
+                const auto& tanView = model.bufferViews[static_cast<size_t>(tanAcc.bufferView)];
+                tanData = model.buffers[static_cast<size_t>(tanView.buffer)].data.data() + tanView.byteOffset + tanAcc.byteOffset;
+                tanStride = static_cast<size_t>(tanAcc.ByteStride(tanView));
+            }
+
             
             meshData.vertices.resize(posAccessor.count);
             for (size_t i = 0; i < posAccessor.count; i++) {
@@ -192,6 +221,14 @@ void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model&
                     vertex.texCoord = glm::make_vec2(pTex);
                 } else
                     vertex.texCoord = glm::vec2(0.0f);
+
+                if (tanData) {
+                    const auto* pTan = reinterpret_cast<const float*>(tanData + (i * tanStride));
+                    glm::vec4 localTan = glm::make_vec4(pTan);
+                    glm::vec3 rotatedTan = glm::normalize(glm::mat3(globalMatrix) * glm::vec3(localTan));
+                    vertex.tangent = glm::vec4(rotatedTan, localTan.w);
+                } else
+                    vertex.tangent = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
 
             allMeshes.push_back(meshData);
