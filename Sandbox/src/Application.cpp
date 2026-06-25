@@ -55,13 +55,20 @@ void Application::OnInit() {
         true, false
     );
 
-    auto ak12Model = Acidum::ResourceManager::loadModel("models/ak12/scene.gltf");
+    auto ak12Model = Acidum::ResourceManager::loadModel("models/ak12/ak-12.glb");
+    auto ak74Model = Acidum::ResourceManager::loadModel("models/ak74/ak74_tuning.glb");
 
     Acidum::Entity ak12;
     ak12.model = ak12Model;
     ak12.position = glm::vec3(0.0f);
-    ak12.scale = glm::vec3(1.0f);
+    ak12.scale = glm::vec3(2.0f);
     m_entities.push_back(ak12);
+
+    Acidum::Entity ak74;
+    ak74.model = ak74Model;
+    ak74.position = glm::vec3(0.0f, 0.0f, 1.0f);
+    ak74.scale = glm::vec3(0.35f);
+    m_entities.push_back(ak74);
 
     GetGraphicsAPI()->endUploadAndWait();
 }
