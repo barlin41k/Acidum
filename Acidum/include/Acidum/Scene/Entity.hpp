@@ -10,6 +10,7 @@ namespace Acidum {
     
 struct Entity {
     std::shared_ptr<Model> model = nullptr;
+    std::vector<glm::mat4> nodeOverrides;
 
     glm::vec3 position { 0.0f };
     glm::vec3 rotation { 0.0f };
@@ -26,6 +27,11 @@ struct Entity {
         matrix = glm::scale(matrix, scale);
 
         return matrix;
+    }
+
+    void initPose() {
+        if (!model) return;
+        nodeOverrides.assign(model->nodes.size(), glm::mat4(1.0f));
     }
 };
 

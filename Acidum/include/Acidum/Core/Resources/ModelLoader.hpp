@@ -15,8 +15,10 @@ namespace tinygltf {
 namespace Acidum {
 
 struct MeshData {
+    std::string name;
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
+    glm::mat4 transform { 1.0f };
     
     std::string textureName;
     std::vector<uint8_t> embeddedImage;

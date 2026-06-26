@@ -75,6 +75,7 @@ void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model&
         const tinygltf::Mesh& mesh = model.meshes[static_cast<size_t>(node.mesh)];
         for (const auto& primitive : mesh.primitives) {
             MeshData meshData {};
+            meshData.name = node.name;
 
             if (primitive.material >= 0) {
                 const tinygltf::Material& mat = model.materials[static_cast<size_t>(primitive.material)];
@@ -197,22 +198,19 @@ void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model&
                 tanStride = static_cast<size_t>(tanAcc.ByteStride(tanView));
             }
 
-            
+            meshData.transform = globalMatrix;
             meshData.vertices.resize(posAccessor.count);
             for (size_t i = 0; i < posAccessor.count; i++) {
                 Vertex& vertex = meshData.vertices[i];
 
                 const auto* pPos = reinterpret_cast<const float*>(posData + (i * posStride));
-                glm::vec3 localPos = glm::make_vec3(pPos);
-                vertex.pos = glm::vec3(globalMatrix * glm::vec4(localPos, 1.0f));
+                vertex.pos = glm::make_vec3(pPos);
 
                 vertex.color = glm::vec3(1.0f);
 
                 if (normData) {
                     const auto* pNorm = reinterpret_cast<const float*>(normData + (i * normStride));
-                    glm::vec3 localNorm = glm::make_vec3(pNorm);
-                    glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(globalMatrix)));
-                    vertex.normal = glm::normalize(normalMatrix * localNorm);
+                    vertex.normal = glm::make_vec3(pNorm);
                 } else
                     vertex.normal = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -224,9 +222,7 @@ void ModelLoader::processNode(const tinygltf::Node& node, const tinygltf::Model&
 
                 if (tanData) {
                     const auto* pTan = reinterpret_cast<const float*>(tanData + (i * tanStride));
-                    glm::vec4 localTan = glm::make_vec4(pTan);
-                    glm::vec3 rotatedTan = glm::normalize(glm::mat3(globalMatrix) * glm::vec3(localTan));
-                    vertex.tangent = glm::vec4(rotatedTan, localTan.w);
+                    vertex.tangent = glm::make_vec4(pTan);
                 } else
                     vertex.tangent = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }

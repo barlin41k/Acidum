@@ -26,8 +26,22 @@ struct Vertex {
     glm::vec4 tangent;
 };
 
+struct MeshNode {
+    std::shared_ptr<IMesh> mesh;
+    glm::mat4 localTransform { 1.0f };
+    std::string name;
+};
+
 struct Model {
-    std::vector<std::shared_ptr<IMesh>> subMeshes;
+    std::vector<MeshNode> nodes;
+
+    int findNodeIndex(const std::string& name) const {
+        for (size_t i = 0; i < nodes.size(); ++i) {
+            if (nodes[i].name == name)
+                return static_cast<int>(i);
+        }
+        return -1;
+    }
 };
 
 } // namespace Acidum

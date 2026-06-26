@@ -58,7 +58,7 @@ constexpr const char* GetShortFileName(const char* path) {
             } \
         } while (false)
 #else
-   #define ENGINE_TRACE(...) do { } while (false)
+    #define ENGINE_TRACE(...) do { } while (false)
     #define ENGINE_DEBUG(...) do { } while (false)
 
     #define ENGINE_ASSERT(condition, msg, ...) do { } while (false)

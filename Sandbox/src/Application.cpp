@@ -55,20 +55,16 @@ void Application::OnInit() {
         true, false
     );
 
-    auto ak12Model = Acidum::ResourceManager::loadModel("models/ak12/ak-12.glb");
-    auto ak74Model = Acidum::ResourceManager::loadModel("models/ak74/ak74_tuning.glb");
-
-    Acidum::Entity ak12;
-    ak12.model = ak12Model;
-    ak12.position = glm::vec3(0.0f);
-    ak12.scale = glm::vec3(2.0f);
-    m_entities.push_back(ak12);
+    auto ak74Model = Acidum::ResourceManager::loadModel("models/ak74/ak74_acidum.glb");
 
     Acidum::Entity ak74;
     ak74.model = ak74Model;
     ak74.position = glm::vec3(0.0f, 0.0f, 1.0f);
     ak74.scale = glm::vec3(0.35f);
+    ak74.initPose();
     m_entities.push_back(ak74);
+
+    m_akMagIndex = ak74Model->findNodeIndex("magazine");
 
     GetGraphicsAPI()->endUploadAndWait();
 }
@@ -86,14 +82,22 @@ void Application::OnUpdate(float deltaTime) {
         0.0f
     );
     GetGraphicsAPI()->setLightDirection(movingSun);
+
+    if (m_akMagIndex >= 0 && !m_entities.empty()) {
+        m_entities[0].nodeOverrides[m_akMagIndex] = glm::rotate(glm::mat4(1.0f), m_totalTime * 3.0f, glm::vec3(1, 0, 0));
+    }
 }
 
 void Application::OnRender() {
-    for (auto& entity : m_entities)
-        if (entity.model)
-            for (auto& subMesh : entity.model->subMeshes)
-                GetGraphicsAPI()->drawMesh(subMesh.get(), entity.getTransformMatrix());
-}
+        for (auto& entity : m_entities) {
+            if (!entity.model) continue;
+            for (size_t i = 0; i < entity.model->nodes.size(); ++i) {
+                const auto& node = entity.model->nodes[i];
+                glm::mat4 finalMatrix = entity.getTransformMatrix() * node.localTransform * entity.nodeOverrides[i];
+                GetGraphicsAPI()->drawMesh(node.mesh.get(), finalMatrix);
+            }
+        }
+    }
 
 void Application::updateWindowTitle(float deltaTime) {
     m_fpsTimer += deltaTime;

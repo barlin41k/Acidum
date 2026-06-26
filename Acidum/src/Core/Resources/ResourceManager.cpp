@@ -120,6 +120,8 @@ std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePat
         auto mesh = s_graphicsAPI->createMesh(data.vertices, data.indices);
         auto material = MaterialSystem::CreateMaterial(data);
 
+        
+
         if (!data.embeddedImage.empty())
             material->albedoTexture = loadTextureFromMemory(data.embeddedImage);
         else if (!data.textureName.empty()) {
@@ -145,7 +147,13 @@ std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePat
             material->normalTexture = getMissingNormalTexture();
 
         mesh->setMaterial(material);
-        model->subMeshes.push_back(std::move(mesh));
+
+        MeshNode node;
+        node.name = data.name;
+        node.mesh = std::move(mesh);
+        node.localTransform = data.transform;
+
+        model->nodes.push_back(std::move(node));
     }
 
     s_models[relativePath] = model;
