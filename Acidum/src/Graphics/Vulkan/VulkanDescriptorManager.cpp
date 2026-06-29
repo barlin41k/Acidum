@@ -18,16 +18,16 @@ VulkanDescriptorManager::VulkanDescriptorManager(const VulkanDevice& device, uin
 }
 
 VulkanDescriptorManager::~VulkanDescriptorManager() {
-    m_descriptorAllocator.cleanup();
+    VkDevice device = m_device.getLogicalDevice();
 
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_globalDescriptorSetLayout != VK_NULL_HANDLE)
-        vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_globalDescriptorSetLayout, nullptr);
-    
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_materialDescriptorSetLayout != VK_NULL_HANDLE)
-        vkDestroyDescriptorSetLayout(m_device.getLogicalDevice(), m_materialDescriptorSetLayout, nullptr);
+    m_descriptorAllocator.cleanup();
+    vkDestroyDescriptorSetLayout(device, m_globalDescriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(device, m_materialDescriptorSetLayout, nullptr);
 }
 
 void VulkanDescriptorManager::createDescriptorSetLayouts() {
+    VkDevice device = m_device.getLogicalDevice();
+
     VkDescriptorSetLayoutBinding uboLayoutBinding {};
     uboLayoutBinding.binding = 0;
     uboLayoutBinding.descriptorCount = 1;
@@ -40,8 +40,8 @@ void VulkanDescriptorManager::createDescriptorSetLayouts() {
     globalLayoutInfo.bindingCount = 1;
     globalLayoutInfo.pBindings = &uboLayoutBinding;
 
-    ENGINE_VERIFY(vkCreateDescriptorSetLayout(
-        m_device.getLogicalDevice(), &globalLayoutInfo, nullptr, &m_globalDescriptorSetLayout) == VK_SUCCESS,
+    ACIDUM_ASSERT(vkCreateDescriptorSetLayout(
+        device, &globalLayoutInfo, nullptr, &m_globalDescriptorSetLayout) == VK_SUCCESS,
         "Failed to create global descriptor set layout!"
     );
 
@@ -71,15 +71,14 @@ void VulkanDescriptorManager::createDescriptorSetLayouts() {
     materialLayoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     materialLayoutInfo.pBindings = bindings.data();
 
-    ENGINE_VERIFY(
-        vkCreateDescriptorSetLayout(m_device.getLogicalDevice(), &materialLayoutInfo, nullptr, &m_materialDescriptorSetLayout) == VK_SUCCESS,
+    ACIDUM_ASSERT(
+        vkCreateDescriptorSetLayout(device, &materialLayoutInfo, nullptr, &m_materialDescriptorSetLayout) == VK_SUCCESS,
         "Failed to create material descriptor set layout!"
     );
 }
 
 void VulkanDescriptorManager::createUniformBuffers() {
     m_uniformBuffers.resize(m_maxFramesInFlight);
-
     for (uint32_t i = 0; i < m_maxFramesInFlight; i++) {
         m_uniformBuffers[i] = std::make_unique<VulkanBuffer>(
             m_device,
@@ -93,14 +92,14 @@ void VulkanDescriptorManager::createUniformBuffers() {
 }
 
 void VulkanDescriptorManager::updateUniformBuffer(uint32_t currentFrame, const UniformBufferObject& ubo) {
-    ENGINE_VERIFY(currentFrame < m_maxFramesInFlight, "currentFrame({}) is out of bounds! Max frames in flight is {}.", currentFrame, m_maxFramesInFlight);
+    ACIDUM_ASSERT(currentFrame < m_maxFramesInFlight, "currentFrame({}) is out of bounds! Max frames in flight is {}.", currentFrame, m_maxFramesInFlight);
     m_uniformBuffers[currentFrame]->copyTo(&ubo, sizeof(ubo));
 }
 
 void VulkanDescriptorManager::createGlobalDescriptorSets() {
     m_globalDescriptorSets.resize(m_maxFramesInFlight);
     for (size_t i = 0; i < m_maxFramesInFlight; i++) {
-        ENGINE_VERIFY(
+        ACIDUM_ASSERT(
             m_descriptorAllocator.allocate(m_globalDescriptorSetLayout, &m_globalDescriptorSets[i]), 
             "Failed to allocate global descriptor set!"
         );
@@ -127,7 +126,7 @@ VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* mater
     if (!material || !material->albedoTexture || !material->metallicRoughnessTexture || !material->normalTexture) return VK_NULL_HANDLE;
 
     VkDescriptorSet matSet;
-    ENGINE_VERIFY(
+    ACIDUM_ASSERT(
         m_descriptorAllocator.allocate(m_materialDescriptorSetLayout, &matSet),
         "Failed to allocate material descriptor set!"
     );

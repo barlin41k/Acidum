@@ -248,8 +248,8 @@ std::vector<MeshData> ModelLoader::load(const std::string& path) {
     else
         result = loader.LoadASCIIFromFile(&model, &error, &warn, path);
 
-    if (!warn.empty()) ENGINE_WARN("TinyGLTF warning: {}", warn);
-    ENGINE_VERIFY(result, "Failed to load model {} via tinyGLTF: {}", path, error);
+    if (!warn.empty()) ACIDUM_WARN("TinyGLTF warning: {}", warn);
+    ACIDUM_ASSERT(result, "Failed to load model {} via tinyGLTF: {}", path, error);
 
     std::vector<MeshData> allMeshes;
 

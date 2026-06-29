@@ -27,7 +27,7 @@ void Window::initWindow() {
         nullptr, nullptr
     );
 
-    ENGINE_VERIFY(m_window, "Failed to create GLFW window!");
+    ACIDUM_ASSERT(m_window, "Failed to create GLFW window!");
     
     glfwSetWindowUserPointer(m_window, this);
     glfwSetFramebufferSizeCallback(m_window, internalResizeCallback);

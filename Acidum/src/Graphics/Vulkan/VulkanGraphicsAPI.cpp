@@ -26,7 +26,7 @@ VulkanGraphicsAPI::~VulkanGraphicsAPI() {
 }
 
 void VulkanGraphicsAPI::initialize() {
-    ENGINE_INFO("Initializing Vulkan...");
+    ACIDUM_INFO("Initializing Vulkan...");
 
     m_window->setResizeCallback([this](int /*width*/, int /*height*/) {
         if (m_renderer) m_renderer->setFramebufferResized(true);
@@ -73,7 +73,7 @@ void VulkanGraphicsAPI::initialize() {
 
     m_renderer = std::make_unique<VulkanRenderer>(*m_device, *m_surface, m_window, rendererConfig);
 
-    ENGINE_INFO("Vulkan initialized!");
+    ACIDUM_INFO("Vulkan initialized!");
 }
 
 void VulkanGraphicsAPI::waitIdle() const {
@@ -81,17 +81,17 @@ void VulkanGraphicsAPI::waitIdle() const {
 }
 
 void VulkanGraphicsAPI::setProjectionMatrix(const glm::mat4& proj) {
-    ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
     m_renderer->setProjectionMatrix(CLIP_CORRECTION * proj);
 }
 
 void VulkanGraphicsAPI::setViewMatrix(const glm::mat4& view) {
-    ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
     m_renderer->setViewMatrix(view);
 }
 
 void VulkanGraphicsAPI::setLightDirection(const glm::vec3& dir) {
-    ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
     m_renderer->setLightDirection(dir);
 }
 
@@ -108,7 +108,7 @@ void VulkanGraphicsAPI::beginUpload() {
 }
 
 std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
-    ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
     return std::make_unique<VulkanMesh>(*m_device, m_stagingManager.get(), vertices, indices);
 }
 
@@ -119,16 +119,16 @@ void VulkanGraphicsAPI::endUploadAndWait() {
 
 void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
     if (mesh == nullptr) return;
-    ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
 
     if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
         m_renderer->submitMesh(vulkanMesh, modelMatrix);
     else
-        ENGINE_WARN("Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI class!");
+        ACIDUM_WARN("Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI class!");
 }
 
 void VulkanGraphicsAPI::renderFrame() {
-    ENGINE_VERIFY(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
     m_renderer->drawFrame();
 }
 

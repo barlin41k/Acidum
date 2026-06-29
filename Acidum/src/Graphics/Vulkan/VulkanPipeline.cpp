@@ -20,11 +20,9 @@ VulkanPipeline::VulkanPipeline(const VulkanDevice& device, const PipelineConfig&
 }
 
 VulkanPipeline::~VulkanPipeline() {
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_graphicsPipeline != VK_NULL_HANDLE)
-        vkDestroyPipeline(m_device.getLogicalDevice(), m_graphicsPipeline, nullptr);
-
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_pipelineLayout != VK_NULL_HANDLE)
-        vkDestroyPipelineLayout(m_device.getLogicalDevice(), m_pipelineLayout, nullptr);
+    VkDevice device = m_device.getLogicalDevice();
+    vkDestroyPipeline(device, m_graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
 }
 
 VkShaderModule VulkanPipeline::createShaderModule(const std::vector<char>& code) {
@@ -34,7 +32,7 @@ VkShaderModule VulkanPipeline::createShaderModule(const std::vector<char>& code)
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    ENGINE_VERIFY(
+    ACIDUM_ASSERT(
         vkCreateShaderModule(m_device.getLogicalDevice(), &createInfo, nullptr, &shaderModule) == VK_SUCCESS,
         "Failed to create shader module!"
     );
@@ -154,7 +152,10 @@ void VulkanPipeline::createGraphicsPipeline(const PipelineConfig& config, const 
     pipelineLayoutInfo.pushConstantRangeCount = 1;
     pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-    ENGINE_VERIFY(vkCreatePipelineLayout(m_device.getLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) == VK_SUCCESS, "Failed to create pipeline layout!");
+    ACIDUM_ASSERT(
+        vkCreatePipelineLayout(m_device.getLogicalDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) == VK_SUCCESS,
+        "Failed to create pipeline layout!"
+    );
 
     VkPipelineRenderingCreateInfo pipelineRenderingInfo {};
     pipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
@@ -181,7 +182,10 @@ void VulkanPipeline::createGraphicsPipeline(const PipelineConfig& config, const 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;
 
-    ENGINE_VERIFY(vkCreateGraphicsPipelines(m_device.getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) == VK_SUCCESS, "Failed to create graphics pipeline!");
+    ACIDUM_ASSERT(
+        vkCreateGraphicsPipelines(m_device.getLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) == VK_SUCCESS,
+        "Failed to create graphics pipeline!"
+    );
 
     vkDestroyShaderModule(m_device.getLogicalDevice(), fragShaderModule, nullptr);
     vkDestroyShaderModule(m_device.getLogicalDevice(), vertShaderModule, nullptr);

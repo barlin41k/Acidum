@@ -16,7 +16,7 @@ struct InstanceConfig {
     std::vector<const char*> windowExtensions;
     std::vector<const char*> additionalExtensions;
     std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-#ifdef ACIDUM_DEBUG
+#ifdef ACIDUM_DEBUG_BUILD
     bool enableValidationLayers = true;
 #else
     bool enableValidationLayers = false;

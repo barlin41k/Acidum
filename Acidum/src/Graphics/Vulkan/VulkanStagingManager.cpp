@@ -14,42 +14,47 @@ VulkanStagingManager::VulkanStagingManager(const VulkanDevice& device)
 
     VkFenceCreateInfo fenceInfo {};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.pNext = nullptr;
 
-    ENGINE_VERIFY(
+    ACIDUM_ASSERT(
         vkCreateFence(m_device.getLogicalDevice(), &fenceInfo, nullptr, &m_uploadFence) == VK_SUCCESS,
         "Failed to create uploadFence!"
     );
 }
 
 VulkanStagingManager::~VulkanStagingManager() {
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_uploadFence != VK_NULL_HANDLE)
-        vkDestroyFence(m_device.getLogicalDevice(), m_uploadFence, nullptr);
-    
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_commandPool != VK_NULL_HANDLE)
-        vkDestroyCommandPool(m_device.getLogicalDevice(), m_commandPool, nullptr);
+    VkDevice device = m_device.getLogicalDevice();
+    vkDestroyFence(device, m_uploadFence, nullptr);
+    vkDestroyCommandPool(device, m_commandPool, nullptr);
 }
 
 void VulkanStagingManager::createCommandPool() {
     QueueFamilyIndices queueFamilyIndices = m_device.getQueueFamilies();
 
-    VkCommandPoolCreateInfo poolInfo{};
+    VkCommandPoolCreateInfo poolInfo {};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    ENGINE_VERIFY(vkCreateCommandPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_commandPool) == VK_SUCCESS, "Failed to create command pool!");
+    ACIDUM_ASSERT(
+        vkCreateCommandPool(m_device.getLogicalDevice(), &poolInfo, nullptr, &m_commandPool) == VK_SUCCESS,
+        "Failed to create command pool!"
+    );
 }
 
 void VulkanStagingManager::allocateCommandBuffers(uint32_t bufferCount) {
     m_commandBuffers.resize(bufferCount);
 
-    VkCommandBufferAllocateInfo allocInfo{};
+    VkCommandBufferAllocateInfo allocInfo {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = m_commandPool;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = bufferCount;
 
-    ENGINE_VERIFY(vkAllocateCommandBuffers(m_device.getLogicalDevice(), &allocInfo, m_commandBuffers.data()) == VK_SUCCESS, "Failed to allocate command buffers!");
+    ACIDUM_ASSERT(
+        vkAllocateCommandBuffers(m_device.getLogicalDevice(), &allocInfo, m_commandBuffers.data()) == VK_SUCCESS,
+        "Failed to allocate command buffers!"
+    );
 }
 
 void VulkanStagingManager::begin() {

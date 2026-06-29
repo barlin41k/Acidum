@@ -12,12 +12,14 @@ namespace Acidum {
 VulkanSurface::VulkanSurface(const VulkanInstance& instance, Window* window) 
     : m_instance(instance)
 {
-    ENGINE_VERIFY(glfwCreateWindowSurface(m_instance.getInstance(), window->getWindow(), nullptr, &m_surface) == VK_SUCCESS, "Failed to create window surface!");
+    ACIDUM_ASSERT(
+        glfwCreateWindowSurface(m_instance.getInstance(), window->getWindow(), nullptr, &m_surface) == VK_SUCCESS,
+        "Failed to create GLFW window surface!"
+    );
 }
 
 VulkanSurface::~VulkanSurface() {
-    if (m_instance.getInstance() != VK_NULL_HANDLE && m_surface != VK_NULL_HANDLE)
-        vkDestroySurfaceKHR(m_instance.getInstance(), m_surface, nullptr);
+    vkDestroySurfaceKHR(m_instance.getInstance(), m_surface, nullptr);
 }
 
 } // namespace Acidum

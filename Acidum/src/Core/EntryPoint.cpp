@@ -2,12 +2,14 @@
 
 #include "Acidum/Core/Base/Consts.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
-#include "Acidum/Core/Application.hpp"
 #include "Acidum/Core/Platform/SystemInfo.hpp"
+#include "Acidum/Core/Application.hpp"
 
 namespace Acidum {
-    extern std::unique_ptr<Application> CreateApplication();
-}
+
+extern std::unique_ptr<Application> CreateApplication();
+
+} // namespace Acidum
 
 namespace {
 
@@ -19,14 +21,14 @@ void startupLog() {
         Acidum::Consts::ENGINE_VERSION.minor,
         Acidum::Consts::ENGINE_VERSION.patch);
 
-    ENGINE_INFO("============================================");
-    ENGINE_INFO("           Acidum Engine {}", version);
-    ENGINE_INFO("============================================");
-    ENGINE_INFO("OS         : {}", Acidum::SystemInfo::GetOS());
-    ENGINE_INFO("Compiler   : {}", Acidum::SystemInfo::GetCompiler());
-    ENGINE_INFO("Arch       : {}", Acidum::SystemInfo::GetArchitecture());
-    ENGINE_INFO("Build Type : {}", Acidum::SystemInfo::GetBuildType());
-    ENGINE_INFO("============================================");
+    ACIDUM_INFO("============================================");
+    ACIDUM_INFO("           Acidum Engine {}", version);
+    ACIDUM_INFO("============================================");
+    ACIDUM_INFO("OS         : {}", Acidum::SystemInfo::GetOS());
+    ACIDUM_INFO("Compiler   : {}", Acidum::SystemInfo::GetCompiler());
+    ACIDUM_INFO("Arch       : {}", Acidum::SystemInfo::GetArchitecture());
+    ACIDUM_INFO("Build Type : {}", Acidum::SystemInfo::GetBuildType());
+    ACIDUM_INFO("============================================");
 }
 
 void shutdownLog(Clock::time_point startTime, Clock::time_point endTime) {
@@ -43,17 +45,14 @@ void shutdownLog(Clock::time_point startTime, Clock::time_point endTime) {
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed - seconds);
 
     if (hours.count() > 0)
-        ENGINE_INFO("Acidum Engine shutdown successfully! Total runtime: {}h {}m {}s", 
-                    hours.count(), minutes.count(), seconds.count());
+        ACIDUM_INFO("Acidum Engine shutdown successfully! Total runtime: {}h {}m {}s", hours.count(), minutes.count(), seconds.count());
     else if (minutes.count() > 0)
-        ENGINE_INFO("Acidum Engine shutdown successfully! Total runtime: {}m {}.{}s", 
-                    minutes.count(), seconds.count(), milliseconds.count());
+        ACIDUM_INFO("Acidum Engine shutdown successfully! Total runtime: {}m {}.{}s", minutes.count(), seconds.count(), milliseconds.count());
     else
-        ENGINE_INFO("Acidum Engine shutdown successfully! Total runtime: {}.{}s", 
-                    seconds.count(), milliseconds.count());
+        ACIDUM_INFO("Acidum Engine shutdown successfully! Total runtime: {}.{}s", seconds.count(), milliseconds.count());
 }
 
-} // namespace
+} // anonymous namespace
 
 int main() {
     auto startTime = Clock::now();
@@ -68,8 +67,7 @@ int main() {
         } catch (const std::exception& error) {
             Acidum::Logger::PrintCrashBanner("Unhandled Exception", error.what());
             return EXIT_FAILURE;
-        } 
-        catch (...) {
+        } catch (...) {
             Acidum::Logger::PrintCrashBanner("Unhandled Exception", "Unknown unhandled exception!");
             return EXIT_FAILURE;
         }

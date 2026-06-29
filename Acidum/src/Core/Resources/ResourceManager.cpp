@@ -22,12 +22,11 @@ std::unordered_map<std::string, std::shared_ptr<Model>> ResourceManager::s_model
 void ResourceManager::initialize() {
     std::filesystem::path executeDir = Platform::GetExecutableDir();
 
-    if (executeDir.empty())
-        ENGINE_FATAL("Failed to determine executable directory!");
+    ACIDUM_ASSERT(!executeDir.empty(), "Failed to determine executable directory!");
 
     s_assetsPath = executeDir / "assets";
 
-    ENGINE_INFO("ResourceManager initialized with base path: {}", s_assetsPath.string());
+    ACIDUM_INFO("ResourceManager initialized with base path: {}", s_assetsPath.string());
 }
 
 void ResourceManager::shutdown() {
@@ -39,7 +38,7 @@ void ResourceManager::shutdown() {
     
     s_graphicsAPI = nullptr;
 
-    ENGINE_INFO("ResourceManager shutdown successfully!");
+    ACIDUM_INFO("ResourceManager shutdown successfully!");
 }
 
 std::shared_ptr<ITexture2D> ResourceManager::getMissingTexture() {
@@ -65,10 +64,10 @@ std::vector<char> ResourceManager::loadBinaryFile(const std::string& relativePat
     
     std::ifstream file(fullPath, std::ios::ate | std::ios::binary);
 
-    ENGINE_VERIFY(file.is_open(), "Failed to open file: {}", fullPath.string());
+    ACIDUM_ASSERT(file.is_open(), "Failed to open file: {}", fullPath.string());
     
     std::streampos pos = file.tellg();
-    ENGINE_VERIFY(pos != -1, "Failed to get file size for: {}", fullPath.string());
+    ACIDUM_ASSERT(pos != -1, "Failed to get file size for: {}", fullPath.string());
     size_t fileSize = static_cast<size_t>(pos);
     std::vector<char> buffer(fileSize);
 

@@ -9,7 +9,7 @@ ImageData ImageLoader::load(const std::string& path) {
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
-    ENGINE_VERIFY(pixels, "Failed to load texture: ", path);
+    ACIDUM_ASSERT(pixels, "Failed to load texture: ", path);
 
     size_t imageSize = static_cast<size_t>(texWidth) * static_cast<size_t>(texHeight) * 4;
 
@@ -32,7 +32,7 @@ ImageData ImageLoader::loadFromMemory(const std::vector<uint8_t>& memory) {
         STBI_rgb_alpha
     );
 
-    ENGINE_VERIFY(pixels, "Failed to load embedded texture from memory!");
+    ACIDUM_ASSERT(pixels, "Failed to load embedded texture from memory!");
 
     size_t imageSize = static_cast<size_t>(texWidth) * static_cast<size_t>(texHeight) * 4;
 

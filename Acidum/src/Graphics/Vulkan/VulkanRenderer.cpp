@@ -24,7 +24,7 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
       m_window(window),
       m_config(config)
 {
-    ENGINE_INFO("Initializing Vulkan Renderer...");
+    ACIDUM_INFO("Initializing Vulkan Renderer...");
 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, m_config.swapChainConfig);
     createDepthResources();
@@ -40,7 +40,7 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
     m_syncManager = std::make_unique<VulkanSyncManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
 
-    ENGINE_INFO("Vulkan Renderer initialized!");
+    ACIDUM_INFO("Vulkan Renderer initialized!");
 }
 
 VulkanRenderer::~VulkanRenderer() {
@@ -61,7 +61,7 @@ void VulkanRenderer::drawFrame() {
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         recreateSwapChain();
         return;
-    } else ENGINE_VERIFY(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swap chain image!");
+    } else ACIDUM_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swap chain image!");
 
     if (m_syncManager->getImageInFlightFence(imageIndex) != VK_NULL_HANDLE) {
         VkFence fence = m_syncManager->getImageInFlightFence(imageIndex);
@@ -92,7 +92,7 @@ void VulkanRenderer::drawFrame() {
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    ENGINE_VERIFY(
+    ACIDUM_ASSERT(
         vkQueueSubmit(
             m_device.getGraphicsQueue(), 1, &submitInfo, m_syncManager->getInFlightFence(m_currentFrame)
         ) == VK_SUCCESS,
@@ -114,7 +114,7 @@ void VulkanRenderer::drawFrame() {
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_framebufferResized) {
         m_framebufferResized = false;
         recreateSwapChain();
-    } else ENGINE_VERIFY(result == VK_SUCCESS, "Failed to present swap chain image!");
+    } else ACIDUM_ASSERT(result == VK_SUCCESS, "Failed to present swap chain image!");
 
     m_currentFrame = (m_currentFrame + 1) % Consts::MAX_FRAMES_IN_FLIGHT;
     
@@ -144,7 +144,10 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     beginInfo.flags = 0;
     beginInfo.pInheritanceInfo = nullptr;
 
-    ENGINE_VERIFY(vkBeginCommandBuffer(commandBuffer, &beginInfo) == VK_SUCCESS, "Failed to begin recording command buffer!");
+    ACIDUM_ASSERT(
+        vkBeginCommandBuffer(commandBuffer, &beginInfo) == VK_SUCCESS,
+        "Failed to begin recording command buffer!"
+    );
 
     VkImageMemoryBarrier barriers[2] {};
 
@@ -314,7 +317,10 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
         &barriers[0]
     );
 
-    ENGINE_VERIFY(vkEndCommandBuffer(commandBuffer) == VK_SUCCESS, "Failed to record command buffer!");
+    ACIDUM_ASSERT(
+        vkEndCommandBuffer(commandBuffer) == VK_SUCCESS,
+        "Failed to record command buffer!"
+    );
 }
 
 void VulkanRenderer::createDepthResources() {

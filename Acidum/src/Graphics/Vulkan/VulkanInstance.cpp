@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 
 #include <cstring>
-#include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Base/Consts.hpp"
@@ -21,15 +20,17 @@ VulkanInstance::VulkanInstance(const InstanceConfig& config)
 VulkanInstance::~VulkanInstance() {
     if (m_instance != VK_NULL_HANDLE && m_debugMessenger != VK_NULL_HANDLE)
         DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
-    
     if (m_instance != VK_NULL_HANDLE)
         vkDestroyInstance(m_instance, nullptr);
 }
 
 void VulkanInstance::createInstance(const InstanceConfig& config) {
-    ENGINE_VERIFY(!config.enableValidationLayers || checkValidationLayerSupport(config), "Validation layers requested, but not available!");
+    ACIDUM_ASSERT(
+        !config.enableValidationLayers || checkValidationLayerSupport(config),
+        "Validation layers requested, but not available!"
+    );
 
-    VkApplicationInfo appInfo{};
+    VkApplicationInfo appInfo {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = config.appName.c_str();
     appInfo.applicationVersion = config.appVersion;
@@ -41,7 +42,7 @@ void VulkanInstance::createInstance(const InstanceConfig& config) {
     );
     appInfo.apiVersion = config.apiVersion;
 
-    VkInstanceCreateInfo createInfo{};
+    VkInstanceCreateInfo createInfo {};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
 
@@ -52,11 +53,10 @@ void VulkanInstance::createInstance(const InstanceConfig& config) {
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     createInfo.ppEnabledExtensionNames = extensions.data();
     
-    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo {};
     if (config.enableValidationLayers) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(config.validationLayers.size());
         createInfo.ppEnabledLayerNames = config.validationLayers.data();
-
         populateDebugMessengerCreateInfo(debugCreateInfo);
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
     } else {
@@ -64,7 +64,10 @@ void VulkanInstance::createInstance(const InstanceConfig& config) {
         createInfo.pNext = nullptr;
     }
 
-    ENGINE_VERIFY(vkCreateInstance(&createInfo, nullptr, &m_instance) == VK_SUCCESS, "Failed to create instance!");
+    ACIDUM_ASSERT(
+        vkCreateInstance(&createInfo, nullptr, &m_instance) == VK_SUCCESS,
+        "Failed to create instance!"
+    );
 }
 
 void VulkanInstance::setupDebugMessenger(const InstanceConfig& config) {
@@ -73,7 +76,10 @@ void VulkanInstance::setupDebugMessenger(const InstanceConfig& config) {
     VkDebugUtilsMessengerCreateInfoEXT createInfo;
     populateDebugMessengerCreateInfo(createInfo);
 
-    ENGINE_VERIFY(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) == VK_SUCCESS, "Failed to set up debug messenger!");
+    ACIDUM_ASSERT(
+        CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) == VK_SUCCESS,
+        "Failed to set up debug messenger!"
+    );
 }
 
 bool VulkanInstance::checkValidationLayerSupport(const InstanceConfig& config) const {
@@ -112,25 +118,43 @@ std::vector<const char*> VulkanInstance::getRequiredExtensions(const InstanceCon
 void VulkanInstance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) const {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+                               | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
+                               | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+                               | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+                           | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    //                       | VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT; // a lot of spam
+
     createInfo.pfnUserCallback = debugCallback;
 }
 
 VkBool32 VulkanInstance::debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
     void* /*pUserData*/) {
 
+    std::string type;
+    if (messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT)
+        type = "[GENERAL] Vulkan";
+    if (messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT)
+        type = "[VALIDATION] Vulkan";
+    if (messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
+        type = "[PERFORMANCE] Vulkan";
+    if (type.empty())
+        type = "[UNKNOWN] Vulkan";
+
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-        ENGINE_ERROR("Vulkan Validation: {}", pCallbackData->pMessage);
+        ACIDUM_ERROR("{}: {}", type, pCallbackData->pMessage);
     else if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-        ENGINE_WARN("Vulkan Validation: {}", pCallbackData->pMessage);
+        ACIDUM_WARN("{}: {}", type, pCallbackData->pMessage);
     else if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
-        ENGINE_DEBUG("Vulkan Validation: {}", pCallbackData->pMessage);
+        ACIDUM_DEBUG("{}: {}", type, pCallbackData->pMessage);
     else
-        ENGINE_TRACE("Vulkan Validation: {}", pCallbackData->pMessage); 
+        ACIDUM_TRACE("{}: {}", type, pCallbackData->pMessage); 
 
     return VK_FALSE;
 }
@@ -146,12 +170,9 @@ VkResult VulkanInstance::CreateDebugUtilsMessengerEXT(
         return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
-void VulkanInstance::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-    const VkAllocationCallbacks* pAllocator) const {
-
+void VulkanInstance::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) const {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-    if (func != nullptr)
-        func(instance, debugMessenger, pAllocator);
+    if (func != nullptr) func(instance, debugMessenger, pAllocator);
 }
 
 } // namespace Acidum

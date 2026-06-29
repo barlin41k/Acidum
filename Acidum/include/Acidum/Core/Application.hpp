@@ -28,7 +28,7 @@ public:
 
     void run();
 
-    inline static Application& Get() { ENGINE_ASSERT(s_Instance, "Application instance is null!"); return *s_Instance; }
+    inline static Application& Get() { ACIDUM_ASSERT(s_Instance, "Application instance is null!"); return *s_Instance; }
     Window* GetWindow() { return m_window.get(); }
 protected:
     virtual void OnInit() {}

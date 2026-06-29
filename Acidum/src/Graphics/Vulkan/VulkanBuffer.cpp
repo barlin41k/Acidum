@@ -11,19 +11,19 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& device, VkDeviceSize size, VkBuff
     : m_device(device),
       m_size(size)
 {    
-    VkBufferCreateInfo bufferInfo{};
+    VkBufferCreateInfo bufferInfo {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    VmaAllocationCreateInfo allocInfo = {};
+    VmaAllocationCreateInfo allocInfo {};
     allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
     
     if (properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
         allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-    ENGINE_VERIFY(
+    ACIDUM_ASSERT(
         vmaCreateBuffer(m_device.getAllocator(), &bufferInfo, &allocInfo, &m_buffer, &m_allocation, nullptr) == VK_SUCCESS, 
         "Failed to create buffer via VMA!"
     );
@@ -31,8 +31,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& device, VkDeviceSize size, VkBuff
 
 VulkanBuffer::~VulkanBuffer() {
     unmap();
-    if (m_buffer != VK_NULL_HANDLE && m_allocation != VK_NULL_HANDLE)
-        vmaDestroyBuffer(m_device.getAllocator(), m_buffer, m_allocation);
+    vmaDestroyBuffer(m_device.getAllocator(), m_buffer, m_allocation);
 }
 
 void VulkanBuffer::map() {
@@ -48,7 +47,7 @@ void VulkanBuffer::unmap() {
 }
 
 void VulkanBuffer::copyTo(const void* pData, VkDeviceSize size) {
-    ENGINE_VERIFY(m_mappedData != nullptr, "Buffer must be mapped before copying!");
+    ACIDUM_ASSERT(m_mappedData != nullptr, "Buffer must be mapped before copying!");
     std::memcpy(m_mappedData, pData, static_cast<size_t>(size));
 }
 

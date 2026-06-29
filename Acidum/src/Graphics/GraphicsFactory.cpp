@@ -10,7 +10,7 @@ std::unique_ptr<IGraphicsAPI> GraphicsFactory::createAPI(APIType type, Window* w
         case APIType::Vulkan:
             return std::make_unique<VulkanGraphicsAPI>(window);
         default:
-            ENGINE_VERIFY(false, "Unknown Graphics API Type!");
+            ACIDUM_ASSERT(false, "Unknown Graphics API Type!");
             return nullptr;
     }
 }

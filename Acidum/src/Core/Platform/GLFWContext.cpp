@@ -7,7 +7,7 @@
 namespace Acidum {
 
 void GLFWContext::Init() {
-    ENGINE_VERIFY(glfwInit(), "Failed to initialize GLFW!");
+    ACIDUM_ASSERT(glfwInit(), "Failed to initialize GLFW!");
     glfwSetErrorCallback(errorCallback);
 }
 
@@ -16,7 +16,7 @@ void GLFWContext::Shutdown() {
 }
 
 void GLFWContext::errorCallback(int error, const char* description) {
-    ENGINE_ERROR("GLFW encountered an error ({}): {}", error, description);
+    ACIDUM_ERROR("GLFW encountered an error ({}): {}", error, description);
 }
     
 } // namespace Acidum

@@ -13,44 +13,41 @@ VulkanSyncManager::VulkanSyncManager(const VulkanDevice& device, uint32_t maxFra
     m_inFlightFences.resize(maxFramesInFlight);
     m_imagesInFlight.resize(imageCount, VK_NULL_HANDLE);
 
-    VkSemaphoreCreateInfo semaphoreInfo{};
+    VkSemaphoreCreateInfo semaphoreInfo {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-    VkFenceCreateInfo fenceInfo{};
+    VkFenceCreateInfo fenceInfo {};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     for (size_t i = 0; i < maxFramesInFlight; i++)
-        ENGINE_VERIFY(
+        ACIDUM_ASSERT(
             vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]) == VK_SUCCESS, 
             "Failed to create ImageAvailable semaphore for frame {}!", i
         );
 
     for (size_t i = 0; i < maxFramesInFlight; i++)
-        ENGINE_VERIFY(
+        ACIDUM_ASSERT(
             vkCreateFence(m_device.getLogicalDevice(), &fenceInfo, nullptr, &m_inFlightFences[i]) == VK_SUCCESS, 
             "Failed to create InFlight fence for frame {}!", i
         );
 
     for (size_t i = 0; i < imageCount; i++)
-        ENGINE_VERIFY(
+        ACIDUM_ASSERT(
             vkCreateSemaphore(m_device.getLogicalDevice(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) == VK_SUCCESS, 
             "Failed to create RenderFinished semaphore for image {}!", i
         );
 }
 
 VulkanSyncManager::~VulkanSyncManager() {
+    VkDevice device = m_device.getLogicalDevice();
+
     for (auto semaphore : m_renderFinishedSemaphores)
-        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && semaphore != VK_NULL_HANDLE)
-            vkDestroySemaphore(m_device.getLogicalDevice(), semaphore, nullptr);
-
+        vkDestroySemaphore(device, semaphore, nullptr);
     for (auto semaphore : m_imageAvailableSemaphores)
-        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && semaphore != VK_NULL_HANDLE)
-            vkDestroySemaphore(m_device.getLogicalDevice(), semaphore, nullptr);
-
+        vkDestroySemaphore(device, semaphore, nullptr);
     for (auto fence : m_inFlightFences)
-        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && fence != VK_NULL_HANDLE)
-            vkDestroyFence(m_device.getLogicalDevice(), fence, nullptr);
+        vkDestroyFence(device, fence, nullptr);
 }
 
 void VulkanSyncManager::resizeImagesInFlight(uint32_t newImageCount) {

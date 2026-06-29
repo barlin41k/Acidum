@@ -16,11 +16,8 @@ VulkanImage::VulkanImage(const VulkanDevice& device, uint32_t width, uint32_t he
 }
 
 VulkanImage::~VulkanImage() {
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE && m_imageView != VK_NULL_HANDLE)
-        vkDestroyImageView(m_device.getLogicalDevice(), m_imageView, nullptr);
-    
-    if (m_device.getAllocator() != VK_NULL_HANDLE && m_image != VK_NULL_HANDLE && m_allocation != VK_NULL_HANDLE)
-        vmaDestroyImage(m_device.getAllocator(), m_image, m_allocation);
+    vkDestroyImageView(m_device.getLogicalDevice(), m_imageView, nullptr);
+    vmaDestroyImage(m_device.getAllocator(), m_image, m_allocation);
 }
 
 void VulkanImage::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage) {
@@ -42,7 +39,7 @@ void VulkanImage::createImage(uint32_t width, uint32_t height, VkFormat format, 
     VmaAllocationCreateInfo allocInfo = {};
     allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
-    ENGINE_VERIFY(
+    ACIDUM_ASSERT(
         vmaCreateImage(m_device.getAllocator(), &imageInfo, &allocInfo, &m_image, &m_allocation, nullptr) == VK_SUCCESS, 
         "Failed to create image via VMA!"
     );
@@ -60,7 +57,7 @@ void VulkanImage::createImageView(VkFormat format, VkImageAspectFlags aspectFlag
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    ENGINE_VERIFY(
+    ACIDUM_ASSERT(
         vkCreateImageView(m_device.getLogicalDevice(), &viewInfo, nullptr, &m_imageView) == VK_SUCCESS, 
         "Failed to create image view!"
     );

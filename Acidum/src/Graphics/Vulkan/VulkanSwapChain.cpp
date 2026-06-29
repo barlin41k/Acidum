@@ -48,7 +48,7 @@ void VulkanSwapChain::recreate() {
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
-    ENGINE_VERIFY(!availableFormats.empty(), "No available Swap Surface Formats found!");
+    ACIDUM_ASSERT(!availableFormats.empty(), "No available Swap Surface Formats found!");
 
     bool isFormatSupported = false;
     bool isColorSpaceSupported = false;
@@ -62,21 +62,21 @@ VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<Vk
     }
     
     if (!isFormatSupported && !isColorSpaceSupported)
-        ENGINE_WARN("Swap Surface Format selection failed: neither preferred format ({}) nor color space ({}) are supported by the surface", 
+        ACIDUM_WARN("Swap Surface Format selection failed: neither preferred format ({}) nor color space ({}) are supported by the surface", 
                     static_cast<int>(m_config.preferredFormat), 
                     static_cast<int>(m_config.preferredColorSpace));
     else if (!isFormatSupported)
-        ENGINE_WARN("Swap Surface Format mismatch: preferred format ({}) is not supported (but color space is available)", 
+        ACIDUM_WARN("Swap Surface Format mismatch: preferred format ({}) is not supported (but color space is available)", 
                     static_cast<int>(m_config.preferredFormat));
     else if (!isColorSpaceSupported)
-        ENGINE_WARN("Swap Surface Format mismatch: preferred color space ({}) is not supported (but format is available)", 
+        ACIDUM_WARN("Swap Surface Format mismatch: preferred color space ({}) is not supported (but format is available)", 
                     static_cast<int>(m_config.preferredColorSpace));
     else
-        ENGINE_WARN("Swap Surface Format mismatch: both preferred format ({}) and color space ({}) are supported individually, but not in this combination",
+        ACIDUM_WARN("Swap Surface Format mismatch: both preferred format ({}) and color space ({}) are supported individually, but not in this combination",
                     static_cast<int>(m_config.preferredFormat),
                     static_cast<int>(m_config.preferredColorSpace));
 
-    ENGINE_WARN("Fallback to default Swap Surface Format. Chosen format: {}, color space: {}", 
+    ACIDUM_WARN("Fallback to default Swap Surface Format. Chosen format: {}, color space: {}", 
                 static_cast<int>(availableFormats[0].format), 
                 static_cast<int>(availableFormats[0].colorSpace));
 
@@ -84,14 +84,14 @@ VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<Vk
 }
 
 VkPresentModeKHR VulkanSwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
-    ENGINE_VERIFY(!availablePresentModes.empty(), "No available Swap Present Modes found!");
+    ACIDUM_ASSERT(!availablePresentModes.empty(), "No available Swap Present Modes found!");
 
     for (const auto& availablePresentMode : availablePresentModes) {
         if (availablePresentMode == m_config.preferredPresentMode)
             return availablePresentMode;
     }
 
-    ENGINE_WARN("Swap present mode mismatch: preferred mode ({}) is not supported. Falling back to VK_PRESENT_MODE_FIFO_KHR.",
+    ACIDUM_WARN("Swap present mode mismatch: preferred mode ({}) is not supported. Falling back to VK_PRESENT_MODE_FIFO_KHR.",
         static_cast<int>(m_config.preferredPresentMode));
 
     return VK_PRESENT_MODE_FIFO_KHR;
@@ -155,10 +155,13 @@ void VulkanSwapChain::createSwapChain(VkSwapchainKHR oldSwapChain) {
         createInfo.pQueueFamilyIndices = nullptr;
     }
 
-    ENGINE_VERIFY(vkCreateSwapchainKHR(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChain) == VK_SUCCESS, "Failed to create swap chain!");
+    ACIDUM_ASSERT(
+        vkCreateSwapchainKHR(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChain) == VK_SUCCESS,
+        "Failed to create swap chain!"
+    );
 
     std::string swapChainState = oldSwapChain == VK_NULL_HANDLE ? "created" : "recreated";
-    ENGINE_DEBUG("Vulkan SwapChain {}: {}x{}, Format {}, Present Mode {}",
+    ACIDUM_DEBUG("Vulkan SwapChain {}: {}x{}, Format {}, Present Mode {}",
         swapChainState, extent.width, extent.height,
         string_VkFormat(surfaceFormat.format),
         string_VkPresentModeKHR(presentMode)
@@ -190,7 +193,7 @@ void VulkanSwapChain::createImageViews() {
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        ENGINE_VERIFY(vkCreateImageView(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) == VK_SUCCESS, "Failed to create image views!");
+        ACIDUM_ASSERT(vkCreateImageView(m_device.getLogicalDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) == VK_SUCCESS, "Failed to create image views!");
     }
 }
 

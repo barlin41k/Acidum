@@ -4,7 +4,6 @@
 
 #include <cstdint>
 #include <set>
-#include <vulkan/vulkan_core.h>
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
@@ -23,10 +22,8 @@ VulkanDevice::VulkanDevice(const VulkanInstance& instance, const VulkanSurface& 
 }
 
 VulkanDevice::~VulkanDevice() {
-    if (m_allocator != VK_NULL_HANDLE)
-        vmaDestroyAllocator(m_allocator);
-    if (m_device != VK_NULL_HANDLE)
-        vkDestroyDevice(m_device, nullptr);
+    vmaDestroyAllocator(m_allocator);
+    vkDestroyDevice(m_device, nullptr);
 }
 
 QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) const {
@@ -76,24 +73,25 @@ bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device, const De
 }
 
 SwapChainSupportDetails VulkanDevice::querySwapChainSupport(VkPhysicalDevice device) const {
+    VkSurfaceKHR surface = m_surface.getSurface();
     SwapChainSupportDetails details;
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface.getSurface(), &details.capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
 
     uint32_t formatCount;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface.getSurface(), &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
 
     if (formatCount != 0) {
         details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface.getSurface(), &formatCount, details.formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
     }
 
     uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface.getSurface(), &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
 
     if (presentModeCount != 0) {
         details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface.getSurface(), &presentModeCount, details.presentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
     }
 
     return details;
@@ -126,29 +124,51 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device, const DeviceConfig&
 }
 
 void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
+    VkInstance instance = m_instance.getInstance();
+
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(m_instance.getInstance(), &deviceCount, nullptr);
-    ENGINE_VERIFY(deviceCount > 0, "Failed to find GPUs with Vulkan support!");
-    ENGINE_INFO("Found {} GPUs with Vulkan support", deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+    ACIDUM_ASSERT(deviceCount > 0, "Failed to find GPUs with Vulkan support!");
+    ACIDUM_INFO("Found {} GPUs with Vulkan support", deviceCount);
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(m_instance.getInstance(), &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
-    int highestScore = -1;
+    uint64_t highestScore = 0;
     VkPhysicalDevice bestDevice = VK_NULL_HANDLE;
     VkPhysicalDeviceProperties bestDeviceProperties {};
 
     for (const auto& device : devices) {
-        if (!isDeviceSuitable(device, config)) continue;
-
-        int score = 0;
         VkPhysicalDeviceProperties deviceProperties;
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
-        if (config.preferDiscreteGPU && deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-            score += 1000;
+        uint32_t version = deviceProperties.apiVersion;
+        ACIDUM_DEBUG(
+            "Found GPU: {} (Type: {}, Vulkan API: {}.{}.{})",
+            deviceProperties.deviceName, static_cast<int>(deviceProperties.deviceType),
+            VK_API_VERSION_MAJOR(version), VK_API_VERSION_MINOR(version), VK_API_VERSION_PATCH(version)
+        );
 
-        score += deviceProperties.limits.maxImageDimension2D;
+        if (!isDeviceSuitable(device, config)) {
+            ACIDUM_WARN("{} is not suitable for requirements", deviceProperties.deviceName);
+            continue;
+        }
+
+        uint64_t score = 0;
+
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
+
+        if (config.preferDiscreteGPU && deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+            score += 1'000'000;
+
+        VkDeviceSize vramSize = 0;
+        for (uint32_t i = 0; i < memProperties.memoryHeapCount; i++) {
+            if (memProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+                vramSize = std::max(vramSize, memProperties.memoryHeaps[i].size);
+        }
+        score += static_cast<uint64_t>(vramSize / (1024 * 1024));
 
         if (score > highestScore) {
             highestScore = score;
@@ -157,14 +177,10 @@ void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
         }
     }
     
-    ENGINE_VERIFY(bestDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
+    ACIDUM_ASSERT(bestDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
     m_physicalDevice = bestDevice;
 
-    uint32_t version = bestDeviceProperties.apiVersion;
-    ENGINE_INFO("Selected GPU: {} (Score: {}, Vulkan API: {}.{}.{})",
-        bestDeviceProperties.deviceName, highestScore,
-        VK_VERSION_MAJOR(version), VK_VERSION_MINOR(version), VK_VERSION_PATCH(version)
-    );
+    ACIDUM_INFO("Selected GPU: {} (Score: {})", bestDeviceProperties.deviceName, highestScore);
 }
 
 void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
@@ -204,7 +220,10 @@ void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {
     createInfo.enabledLayerCount = 0;
     createInfo.ppEnabledLayerNames = nullptr;
 
-    ENGINE_VERIFY(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) == VK_SUCCESS, "Failed to create logical device!");
+    ACIDUM_ASSERT(
+        vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) == VK_SUCCESS,
+        "Failed to create logical device!"
+    );
 
     vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
@@ -218,18 +237,22 @@ void VulkanDevice::createVmaAllocator() {
     allocatorInfo.instance = m_instance.getInstance();
     allocatorInfo.vulkanApiVersion = m_instance.getApiVersion();
 
-    ENGINE_VERIFY(vmaCreateAllocator(&allocatorInfo, &m_allocator) == VK_SUCCESS, "Failed to create VMA allocator!");
+    ACIDUM_ASSERT(
+        vmaCreateAllocator(&allocatorInfo, &m_allocator) == VK_SUCCESS,
+        "Failed to create VMA allocator!"
+    );
 }
 
 uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
+    
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
         if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
             return i;
     }
 
-    ENGINE_VERIFY(false, "Failed to find suitable memory type!");
+    ACIDUM_ASSERT(false, "Failed to find suitable memory type!");
     
     return 0;
 }
@@ -245,7 +268,7 @@ VkFormat VulkanDevice::findSupportedFormat(const std::vector<VkFormat>& candidat
             return format;
     }
 
-    ENGINE_VERIFY(false, "Failed to find supported format!");
+    ACIDUM_ASSERT(false, "Failed to find supported format!");
 }
 
 VkFormat VulkanDevice::findDepthFormat() const {

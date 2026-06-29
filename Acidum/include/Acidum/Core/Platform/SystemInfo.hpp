@@ -37,7 +37,7 @@ constexpr const char* GetArchitecture() {
 }
 
 constexpr const char* GetBuildType() {
-#if defined(ACIDUM_DEBUG)
+#ifdef ACIDUM_DEBUG_BUILD
     return "Debug";
 #else
     return "Release";

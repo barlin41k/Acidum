@@ -14,7 +14,7 @@ Application* Application::s_Instance = nullptr;
 Application::Application(const AppConfig& config)
     : m_config(config)
 {
-    ENGINE_VERIFY(!s_Instance, "Application already exists!");
+    ACIDUM_ASSERT(!s_Instance, "Application already exists!");
     s_Instance = this;
 }
 
