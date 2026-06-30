@@ -124,7 +124,7 @@ void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
     if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
         m_renderer->submitMesh(vulkanMesh, modelMatrix);
     else
-        VK_WARN("Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI class!");
+        VK_WARN("Trying to draw non-Vulkan mesh (type: {}) in drawMesh!", typeid(*mesh).name()); 
 }
 
 void VulkanGraphicsAPI::renderFrame() {
