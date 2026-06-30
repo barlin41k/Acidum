@@ -143,10 +143,10 @@ void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
         VkPhysicalDeviceProperties deviceProperties;
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
-        uint32_t version = deviceProperties.apiVersion;
+        [[maybe_unused]] uint32_t version = deviceProperties.apiVersion;
         VK_DEBUG(
             "Found GPU: {} (Type: {}, Vulkan API: {}.{}.{})",
-            deviceProperties.deviceName, static_cast<int>(deviceProperties.deviceType),
+            deviceProperties.deviceName, string_VkPhysicalDeviceType(deviceProperties.deviceType),
             VK_API_VERSION_MAJOR(version), VK_API_VERSION_MINOR(version), VK_API_VERSION_PATCH(version)
         );
 
