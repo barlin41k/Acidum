@@ -14,7 +14,6 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(const VulkanDevice& devic
 
 VulkanCommandBufferManager::~VulkanCommandBufferManager() {
     VkDevice device = m_device.getLogicalDevice();
-    
     vkDestroyCommandPool(device, m_commandPool, nullptr);
 }
 

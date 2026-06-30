@@ -44,8 +44,7 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
 }
 
 VulkanRenderer::~VulkanRenderer() {
-    if (m_device.getLogicalDevice() != VK_NULL_HANDLE)
-        vkDeviceWaitIdle(m_device.getLogicalDevice());
+    vkDeviceWaitIdle(m_device.getLogicalDevice());
 }
 
 void VulkanRenderer::submitMesh(VulkanMesh* mesh, const glm::mat4& modelMatrix) {

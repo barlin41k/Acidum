@@ -41,7 +41,6 @@ VulkanSyncManager::VulkanSyncManager(const VulkanDevice& device, uint32_t maxFra
 
 VulkanSyncManager::~VulkanSyncManager() {
     VkDevice device = m_device.getLogicalDevice();
-
     for (auto semaphore : m_renderFinishedSemaphores)
         vkDestroySemaphore(device, semaphore, nullptr);
     for (auto semaphore : m_imageAvailableSemaphores)

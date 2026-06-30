@@ -28,8 +28,7 @@ VulkanSwapChain::~VulkanSwapChain() {
 
 void VulkanSwapChain::cleanupSwapChainDependencies() {
     for (auto imageView : m_swapChainImageViews)
-        if (m_device.getLogicalDevice() != VK_NULL_HANDLE && imageView != VK_NULL_HANDLE)
-            vkDestroyImageView(m_device.getLogicalDevice(), imageView, nullptr);
+        vkDestroyImageView(m_device.getLogicalDevice(), imageView, nullptr);
     m_swapChainImageViews.clear();
 }
 
