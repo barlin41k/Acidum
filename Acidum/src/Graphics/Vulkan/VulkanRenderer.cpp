@@ -24,7 +24,7 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
       m_window(window),
       m_config(config)
 {
-    VK_INFO("Initializing Vulkan Renderer...");
+    VK_INFO("Initializing renderer...");
 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, m_config.swapChainConfig);
     createDepthResources();
@@ -40,7 +40,7 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
     m_syncManager = std::make_unique<VulkanSyncManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
 
-    VK_INFO("Vulkan Renderer initialized!");
+    VK_INFO("Renderer initialized!");
 }
 
 VulkanRenderer::~VulkanRenderer() {

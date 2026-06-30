@@ -81,17 +81,17 @@ void VulkanGraphicsAPI::waitIdle() const {
 }
 
 void VulkanGraphicsAPI::setProjectionMatrix(const glm::mat4& proj) {
-    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Renderer is not initialized!");
     m_renderer->setProjectionMatrix(CLIP_CORRECTION * proj);
 }
 
 void VulkanGraphicsAPI::setViewMatrix(const glm::mat4& view) {
-    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Renderer is not initialized!");
     m_renderer->setViewMatrix(view);
 }
 
 void VulkanGraphicsAPI::setLightDirection(const glm::vec3& dir) {
-    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Renderer is not initialized!");
     m_renderer->setLightDirection(dir);
 }
 
@@ -108,7 +108,7 @@ void VulkanGraphicsAPI::beginUpload() {
 }
 
 std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
-    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Renderer is not initialized!");
     return std::make_unique<VulkanMesh>(*m_device, m_stagingManager.get(), vertices, indices);
 }
 
@@ -119,7 +119,7 @@ void VulkanGraphicsAPI::endUploadAndWait() {
 
 void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
     if (mesh == nullptr) return;
-    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Renderer is not initialized!");
 
     if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
         m_renderer->submitMesh(vulkanMesh, modelMatrix);
@@ -128,7 +128,7 @@ void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
 }
 
 void VulkanGraphicsAPI::renderFrame() {
-    ACIDUM_ASSERT(m_renderer != nullptr, "Vulkan Renderer is not initialized!");
+    ACIDUM_ASSERT(m_renderer != nullptr, "Renderer is not initialized!");
     m_renderer->drawFrame();
 }
 

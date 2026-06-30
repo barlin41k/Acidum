@@ -160,7 +160,7 @@ void VulkanSwapChain::createSwapChain(VkSwapchainKHR oldSwapChain) {
     );
 
     std::string swapChainState = oldSwapChain == VK_NULL_HANDLE ? "created" : "recreated";
-    VK_DEBUG("Vulkan SwapChain {}: {}x{}, Format {}, Present Mode {}",
+    VK_DEBUG("Swap chain {}: {}x{}, Format {}, Present Mode {}",
         swapChainState, extent.width, extent.height,
         string_VkFormat(surfaceFormat.format),
         string_VkPresentModeKHR(presentMode)
