@@ -22,7 +22,7 @@ std::shared_ptr<Material> MaterialSystem::CreateMaterial(const MeshData& meshDat
     RenderMode mode = meshData.isTransparent ? RenderMode::Transparent : RenderMode::Opaque;
 
     auto it = m_templates.find(mode);
-    ACIDUM_ASSERT(it != m_templates.end(), "MaterialSystem: Template for requested RenderMode not found!");
+    ACIDUM_ASSERT(it != m_templates.end(), "Template for requested RenderMode not found!");
 
     const auto& templ = it->second;
     return std::make_shared<Material>(

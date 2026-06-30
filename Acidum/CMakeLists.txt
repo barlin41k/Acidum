@@ -1,6 +1,7 @@
 set(CORE_SOURCES
     src/Core/Application.cpp
     src/Core/Base/Logger.cpp
+    src/Core/Base/Assert.cpp
     src/Core/EntryPoint.cpp
     src/Core/Platform/GLFWContext.cpp
     src/Core/Platform/Input.cpp

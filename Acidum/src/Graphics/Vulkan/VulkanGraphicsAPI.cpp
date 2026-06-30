@@ -5,8 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vulkan/vulkan.h>
 
-#include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
+#include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 #include "Graphics/Vulkan/VulkanInstance.hpp"
@@ -26,7 +26,7 @@ VulkanGraphicsAPI::~VulkanGraphicsAPI() {
 }
 
 void VulkanGraphicsAPI::initialize() {
-    ACIDUM_INFO("Initializing Vulkan...");
+    VK_INFO("Initializing Vulkan...");
 
     m_window->setResizeCallback([this](int /*width*/, int /*height*/) {
         if (m_renderer) m_renderer->setFramebufferResized(true);
@@ -73,7 +73,7 @@ void VulkanGraphicsAPI::initialize() {
 
     m_renderer = std::make_unique<VulkanRenderer>(*m_device, *m_surface, m_window, rendererConfig);
 
-    ACIDUM_INFO("Vulkan initialized!");
+    VK_INFO("Vulkan initialized!");
 }
 
 void VulkanGraphicsAPI::waitIdle() const {
@@ -124,7 +124,7 @@ void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
     if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
         m_renderer->submitMesh(vulkanMesh, modelMatrix);
     else
-        ACIDUM_WARN("Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI class!");
+        VK_WARN("Trying to draw a non-Vulkan mesh in VulkanGraphicsAPI class!");
 }
 
 void VulkanGraphicsAPI::renderFrame() {

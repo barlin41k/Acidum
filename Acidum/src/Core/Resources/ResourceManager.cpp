@@ -26,7 +26,7 @@ void ResourceManager::initialize() {
 
     s_assetsPath = executeDir / "assets";
 
-    ACIDUM_INFO("ResourceManager initialized with base path: {}", s_assetsPath.string());
+    ACIDUM_INFO("Resource Manager initialized, base path: {}", s_assetsPath.string());
 }
 
 void ResourceManager::shutdown() {
@@ -38,7 +38,7 @@ void ResourceManager::shutdown() {
     
     s_graphicsAPI = nullptr;
 
-    ACIDUM_INFO("ResourceManager shutdown successfully!");
+    ACIDUM_INFO("Resource Manager shutdown successfully!");
 }
 
 std::shared_ptr<ITexture2D> ResourceManager::getMissingTexture() {

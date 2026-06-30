@@ -1,4 +1,5 @@
 #include <chrono>
+#include <filesystem>
 
 #include "Acidum/Core/Base/Consts.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
@@ -28,6 +29,9 @@ void startupLog() {
     ACIDUM_INFO("Compiler   : {}", Acidum::SystemInfo::GetCompiler());
     ACIDUM_INFO("Arch       : {}", Acidum::SystemInfo::GetArchitecture());
     ACIDUM_INFO("Build Type : {}", Acidum::SystemInfo::GetBuildType());
+    ACIDUM_INFO("Build Date : {} {}", __DATE__, __TIME__);
+    ACIDUM_INFO("============================================");
+    ACIDUM_INFO("CWD        : {}", std::filesystem::current_path().string());
     ACIDUM_INFO("============================================");
 }
 
@@ -65,10 +69,10 @@ int main() {
             auto app = Acidum::CreateApplication();
             app->run();
         } catch (const std::exception& error) {
-            Acidum::Logger::PrintCrashBanner("Unhandled Exception", error.what());
+            Acidum::PrintCrashBanner("Unhandled Exception", error.what());
             return EXIT_FAILURE;
         } catch (...) {
-            Acidum::Logger::PrintCrashBanner("Unhandled Exception", "Unknown unhandled exception!");
+            Acidum::PrintCrashBanner("Unhandled Exception", "Unknown unhandled exception!");
             return EXIT_FAILURE;
         }
     }

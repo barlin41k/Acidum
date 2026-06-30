@@ -3,10 +3,9 @@
 #include <vulkan/vk_enum_string_helper.h>
 
 #include <algorithm>
-#include <vulkan/vulkan_core.h>
 
-#include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
+#include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanSurface.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
@@ -62,21 +61,21 @@ VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<Vk
     }
     
     if (!isFormatSupported && !isColorSpaceSupported)
-        ACIDUM_WARN("Swap Surface Format selection failed: neither preferred format ({}) nor color space ({}) are supported by the surface", 
+        VK_WARN("Swap Surface Format selection failed: neither preferred format ({}) nor color space ({}) are supported by the surface", 
                     static_cast<int>(m_config.preferredFormat), 
                     static_cast<int>(m_config.preferredColorSpace));
     else if (!isFormatSupported)
-        ACIDUM_WARN("Swap Surface Format mismatch: preferred format ({}) is not supported (but color space is available)", 
+        VK_WARN("Swap Surface Format mismatch: preferred format ({}) is not supported (but color space is available)", 
                     static_cast<int>(m_config.preferredFormat));
     else if (!isColorSpaceSupported)
-        ACIDUM_WARN("Swap Surface Format mismatch: preferred color space ({}) is not supported (but format is available)", 
+        VK_WARN("Swap Surface Format mismatch: preferred color space ({}) is not supported (but format is available)", 
                     static_cast<int>(m_config.preferredColorSpace));
     else
-        ACIDUM_WARN("Swap Surface Format mismatch: both preferred format ({}) and color space ({}) are supported individually, but not in this combination",
+        VK_WARN("Swap Surface Format mismatch: both preferred format ({}) and color space ({}) are supported individually, but not in this combination",
                     static_cast<int>(m_config.preferredFormat),
                     static_cast<int>(m_config.preferredColorSpace));
 
-    ACIDUM_WARN("Fallback to default Swap Surface Format. Chosen format: {}, color space: {}", 
+    VK_WARN("Fallback to default Swap Surface Format. Chosen format: {}, color space: {}", 
                 static_cast<int>(availableFormats[0].format), 
                 static_cast<int>(availableFormats[0].colorSpace));
 
@@ -91,7 +90,7 @@ VkPresentModeKHR VulkanSwapChain::chooseSwapPresentMode(const std::vector<VkPres
             return availablePresentMode;
     }
 
-    ACIDUM_WARN("Swap present mode mismatch: preferred mode ({}) is not supported. Falling back to VK_PRESENT_MODE_FIFO_KHR.",
+    VK_WARN("Swap present mode mismatch: preferred mode ({}) is not supported. Falling back to VK_PRESENT_MODE_FIFO_KHR.",
         static_cast<int>(m_config.preferredPresentMode));
 
     return VK_PRESENT_MODE_FIFO_KHR;
@@ -161,7 +160,7 @@ void VulkanSwapChain::createSwapChain(VkSwapchainKHR oldSwapChain) {
     );
 
     std::string swapChainState = oldSwapChain == VK_NULL_HANDLE ? "created" : "recreated";
-    ACIDUM_DEBUG("Vulkan SwapChain {}: {}x{}, Format {}, Present Mode {}",
+    VK_DEBUG("Vulkan SwapChain {}: {}x{}, Format {}, Present Mode {}",
         swapChainState, extent.width, extent.height,
         string_VkFormat(surfaceFormat.format),
         string_VkPresentModeKHR(presentMode)

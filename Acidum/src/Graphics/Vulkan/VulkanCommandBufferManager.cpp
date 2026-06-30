@@ -1,9 +1,7 @@
 #include "Graphics/Vulkan/VulkanCommandBufferManager.hpp"
 
-#include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
-#include <cstdint>
-#include <vulkan/vulkan_core.h>
 
 namespace Acidum {
 

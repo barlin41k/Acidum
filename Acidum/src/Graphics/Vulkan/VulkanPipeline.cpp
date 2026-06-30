@@ -3,9 +3,8 @@
 #include <glm/glm.hpp>
 
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
-#include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanTypes.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanMesh.hpp"

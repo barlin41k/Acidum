@@ -4,8 +4,8 @@
 
 #include <cstring>
 
-#include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Base/Consts.hpp"
+#include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 
 namespace Acidum {
@@ -148,13 +148,13 @@ VkBool32 VulkanInstance::debugCallback(
         type = "[UNKNOWN] Vulkan";
 
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-        ACIDUM_ERROR("{}: {}", type, pCallbackData->pMessage);
+        VK_ERROR("{}: {}", type, pCallbackData->pMessage);
     else if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-        ACIDUM_WARN("{}: {}", type, pCallbackData->pMessage);
+        VK_WARN("{}: {}", type, pCallbackData->pMessage);
     else if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
-        ACIDUM_DEBUG("{}: {}", type, pCallbackData->pMessage);
+        VK_DEBUG("{}: {}", type, pCallbackData->pMessage);
     else
-        ACIDUM_TRACE("{}: {}", type, pCallbackData->pMessage); 
+        VK_TRACE("{}: {}", type, pCallbackData->pMessage); 
 
     return VK_FALSE;
 }

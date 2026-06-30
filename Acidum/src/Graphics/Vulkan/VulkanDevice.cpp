@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <set>
 
-#include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanInstance.hpp"
 #include "Graphics/Vulkan/VulkanSurface.hpp"
@@ -130,7 +130,7 @@ void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
     ACIDUM_ASSERT(deviceCount > 0, "Failed to find GPUs with Vulkan support!");
-    ACIDUM_INFO("Found {} GPUs with Vulkan support", deviceCount);
+    VK_INFO("Found {} GPUs with Vulkan support", deviceCount);
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
     vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
@@ -144,14 +144,14 @@ void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
         uint32_t version = deviceProperties.apiVersion;
-        ACIDUM_DEBUG(
+        VK_DEBUG(
             "Found GPU: {} (Type: {}, Vulkan API: {}.{}.{})",
             deviceProperties.deviceName, static_cast<int>(deviceProperties.deviceType),
             VK_API_VERSION_MAJOR(version), VK_API_VERSION_MINOR(version), VK_API_VERSION_PATCH(version)
         );
 
         if (!isDeviceSuitable(device, config)) {
-            ACIDUM_WARN("{} is not suitable for requirements", deviceProperties.deviceName);
+            VK_WARN("{} is not suitable for requirements", deviceProperties.deviceName);
             continue;
         }
 
@@ -180,7 +180,7 @@ void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
     ACIDUM_ASSERT(bestDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU!");
     m_physicalDevice = bestDevice;
 
-    ACIDUM_INFO("Selected GPU: {} (Score: {})", bestDeviceProperties.deviceName, highestScore);
+    VK_INFO("Selected GPU: {} (Score: {})", bestDeviceProperties.deviceName, highestScore);
 }
 
 void VulkanDevice::createLogicalDevice(const DeviceConfig& config) {

@@ -3,9 +3,9 @@
 #include <algorithm>
 
 #include "Acidum/Core/Base/Consts.hpp"
-#include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/Window.hpp"
 #include "Acidum/Core/Resources/ResourceManager.hpp"
+#include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanConfigs.hpp"
 #include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
@@ -24,7 +24,7 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
       m_window(window),
       m_config(config)
 {
-    ACIDUM_INFO("Initializing Vulkan Renderer...");
+    VK_INFO("Initializing Vulkan Renderer...");
 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, m_config.swapChainConfig);
     createDepthResources();
@@ -40,7 +40,7 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
     m_syncManager = std::make_unique<VulkanSyncManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
 
-    ACIDUM_INFO("Vulkan Renderer initialized!");
+    VK_INFO("Vulkan Renderer initialized!");
 }
 
 VulkanRenderer::~VulkanRenderer() {

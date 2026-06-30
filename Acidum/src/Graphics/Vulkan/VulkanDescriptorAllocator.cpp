@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "Acidum/Core/Base/Logger.hpp"
+#include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
 
 namespace Acidum {
