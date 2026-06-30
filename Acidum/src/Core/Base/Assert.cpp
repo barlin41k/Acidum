@@ -20,6 +20,7 @@ void PrintCrashBanner(const char* errorType, const std::string& details) {
 
     logger->critical(banner);
     logger->flush();
+    spdlog::shutdown();
 }
 
 } // namespace Acidum
