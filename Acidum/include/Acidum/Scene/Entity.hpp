@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "Acidum/Core/Base/Logger.hpp"
-#include "Acidum/Core/Base/Types.hpp"
+#include "Acidum/Scene/Model.hpp"
 
 namespace Acidum {
     

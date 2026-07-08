@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include "glm/glm.hpp" // IWYU pragma: keep
 
 #include <string>
+#include <vector>
 
 #include "Acidum/Core/Base/Consts.hpp"
 

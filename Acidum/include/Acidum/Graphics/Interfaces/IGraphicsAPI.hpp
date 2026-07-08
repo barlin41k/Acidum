@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "Acidum/Core/Base/Types.hpp"
+#include "Acidum/Graphics/Vertex.hpp"
 #include "Acidum/Graphics/Interfaces/IMesh.hpp"
 #include "Acidum/Graphics/Interfaces/ITexture2D.hpp"
 

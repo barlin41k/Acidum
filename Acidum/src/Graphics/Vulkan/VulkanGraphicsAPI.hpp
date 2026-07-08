@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include "Acidum/Core/Base/Types.hpp"
 #include "Acidum/Graphics/Interfaces/IGraphicsAPI.hpp"
 #include "Acidum/Graphics/Interfaces/ITexture2D.hpp"
 

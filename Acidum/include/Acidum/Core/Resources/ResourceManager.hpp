@@ -7,6 +7,7 @@
 
 #include "Acidum/Graphics/Interfaces/IGraphicsAPI.hpp"
 #include "Acidum/Graphics/Interfaces/ITexture2D.hpp"
+#include "Acidum/Scene/Model.hpp"
 
 namespace Acidum {
 
