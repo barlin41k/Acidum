@@ -20,19 +20,28 @@ bool VulkanDescriptorAllocator::allocate(VkDescriptorSetLayout layout, VkDescrip
     allocInfo.descriptorSetCount = 1;
     allocInfo.pSetLayouts = &layout;
 
-    for (int attempts = 0; attempts < 2; ++attempts) {
+    while (true) {
         VkResult result = vkAllocateDescriptorSets(m_device.getLogicalDevice(), &allocInfo, set);
 
         if (result == VK_SUCCESS) return true;
 
         if (result == VK_ERROR_OUT_OF_POOL_MEMORY || result == VK_ERROR_FRAGMENTED_POOL) {
             usedPools.push_back(currentPool);
+            
             currentPool = grabPool();
             allocInfo.descriptorPool = currentPool;
-        } else return false;
-    }
+            
+            if (currentPool == VK_NULL_HANDLE) {
+                ACIDUM_FATAL("Failed to grab a new pool!");
+                return false;
+            }
+            
+            continue;
+        }
 
-    return false;
+        ACIDUM_FATAL("Failed to allocate descriptor set!");
+        return false;
+    }
 }
 
 void VulkanDescriptorAllocator::resetPools() {
