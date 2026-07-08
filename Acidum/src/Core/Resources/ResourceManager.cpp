@@ -6,9 +6,9 @@
 
 #include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Platform/PlatformUtils.hpp"
-#include "Acidum/Core/Resources/MaterialSystem.hpp"
 #include "Acidum/Core/Resources/ImageLoader.hpp"
 #include "Acidum/Core/Resources/ModelLoader.hpp"
+#include "Acidum/Graphics/MaterialSystem.hpp"
 
 namespace Acidum {
 

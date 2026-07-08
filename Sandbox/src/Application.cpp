@@ -7,7 +7,7 @@
 
 #include "Acidum/Core/Application.hpp"
 #include "Acidum/Core/Platform/Input.hpp"
-#include "Acidum/Core/Resources/MaterialSystem.hpp"
+#include "Acidum/Graphics/MaterialSystem.hpp"
 #include "Acidum/Core/Resources/ResourceManager.hpp"
 
 #include "Sandbox/Core/Base/Consts.hpp"

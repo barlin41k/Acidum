@@ -7,13 +7,13 @@ set(CORE_SOURCES
     src/Core/Platform/Input.cpp
     src/Core/Platform/Window.cpp
     src/Core/Resources/ResourceManager.cpp
-    src/Core/Resources/MaterialSystem.cpp
     src/Core/Resources/STBImage.cpp
     src/Core/Resources/ImageLoader.cpp
     src/Core/Resources/ModelLoader.cpp
 
     src/Graphics/GraphicsFactory.cpp
     src/Graphics/VertexLayout.cpp
+    src/Graphics/MaterialSystem.cpp
     src/Graphics/Vulkan/VulkanBuffer.cpp
     src/Graphics/Vulkan/VulkanCommandBufferManager.cpp
     src/Graphics/Vulkan/VulkanDescriptorManager.cpp

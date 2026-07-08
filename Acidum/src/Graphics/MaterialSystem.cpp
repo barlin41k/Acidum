@@ -1,4 +1,4 @@
-#include "Acidum/Core/Resources/MaterialSystem.hpp"
+#include "Acidum/Graphics/MaterialSystem.hpp"
 
 #include "Acidum/Core/Resources/ResourceManager.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
