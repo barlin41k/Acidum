@@ -119,8 +119,11 @@ void VulkanGraphicsAPI::endUploadAndWait() {
 }
 
 void VulkanGraphicsAPI::drawMesh(IMesh* mesh, const glm::mat4& modelMatrix) {
-    if (mesh == nullptr) return;
     ACIDUM_ASSERT(m_renderer != nullptr, "Renderer is not initialized!");
+    if (mesh == nullptr) {
+        VK_WARN("Mesh can not be empty!");
+        return;
+    }
 
     if (auto* vulkanMesh = dynamic_cast<VulkanMesh*>(mesh))
         m_renderer->submitMesh(vulkanMesh, modelMatrix);

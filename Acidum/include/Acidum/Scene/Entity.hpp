@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "Acidum/Core/Base/Logger.hpp"
 #include "Acidum/Core/Base/Types.hpp"
 
 namespace Acidum {
@@ -30,7 +31,10 @@ struct Entity {
     }
 
     void initPose() {
-        if (!model) return;
+        if (!model) {
+            ACIDUM_WARN("Trying to initialize entity pose with empty model!");
+            return;
+        }
         nodeOverrides.assign(model->nodes.size(), glm::mat4(1.0f));
     }
 };
