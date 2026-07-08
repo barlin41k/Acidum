@@ -1,5 +1,6 @@
 #include "Graphics/Vulkan/VulkanDescriptorManager.hpp"
 
+#include "Acidum/Core/Resources/ResourceManager.hpp"
 #include "Graphics/Vulkan/VulkanLogger.hpp"
 #include "Graphics/Vulkan/VulkanBuffer.hpp"
 #include "Graphics/Vulkan/VulkanDevice.hpp"
@@ -123,8 +124,6 @@ void VulkanDescriptorManager::createGlobalDescriptorSets() {
 }
 
 VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* material) {
-    if (!material || !material->albedoTexture || !material->metallicRoughnessTexture || !material->normalTexture) return VK_NULL_HANDLE;
-
     VkDescriptorSet matSet;
     ACIDUM_ASSERT(
         m_descriptorAllocator.allocate(m_materialDescriptorSetLayout, &matSet),
@@ -179,7 +178,14 @@ VkDescriptorSet VulkanDescriptorManager::buildMaterialDescriptor(Material* mater
 }
 
 VkDescriptorSet VulkanDescriptorManager::getOrCreateMaterialDescriptor(Material* material) {
-    if (!material || !material->albedoTexture) return VK_NULL_HANDLE;
+    if (!material) {
+        VK_WARN("Failed to build Material Descriptor: material not found!");
+        return VK_NULL_HANDLE;
+    }
+
+    if (!material->albedoTexture) material->albedoTexture = ResourceManager::getMissingTexture();
+    if (!material->metallicRoughnessTexture) material->metallicRoughnessTexture = ResourceManager::getMissingTexture();
+    if (!material->normalTexture) material->normalTexture = ResourceManager::getMissingNormalTexture();
 
     auto item = m_materialCache.find(material);
     if (item != m_materialCache.end())

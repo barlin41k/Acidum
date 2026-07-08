@@ -42,6 +42,9 @@ void Application::OnInit() {
 
     GetGraphicsAPI()->beginUpload();
 
+    Acidum::ResourceManager::getMissingTexture();
+    Acidum::ResourceManager::getMissingNormalTexture();
+
     Acidum::MaterialSystem::RegisterTemplate(
         Acidum::RenderMode::Opaque,
         "shaders/spirv/pbr.vert.spv",

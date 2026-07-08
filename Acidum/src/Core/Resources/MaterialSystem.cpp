@@ -1,5 +1,6 @@
 #include "Acidum/Core/Resources/MaterialSystem.hpp"
 
+#include "Acidum/Core/Resources/ResourceManager.hpp"
 #include "Acidum/Core/Base/Logger.hpp"
 
 namespace Acidum {
@@ -33,6 +34,9 @@ std::shared_ptr<Material> MaterialSystem::CreateMaterial(const MeshData& meshDat
     return std::make_shared<Material>(Material{
         .vertShaderPath = templ.vertShaderPath,
         .fragShaderPath = templ.fragShaderPath,
+        .albedoTexture = ResourceManager::getMissingTexture(),
+        .metallicRoughnessTexture = ResourceManager::getMissingTexture(),
+        .normalTexture = ResourceManager::getMissingNormalTexture(),
         .baseColor = meshData.baseColorFactor,
         .roughness = meshData.roughness,
         .metallic = meshData.metallic,
@@ -64,6 +68,9 @@ std::shared_ptr<Material> MaterialSystem::CreateCustomMaterial(const std::string
     return std::make_shared<Material>(Material{
         .vertShaderPath = templ.vertShaderPath,
         .fragShaderPath = templ.fragShaderPath,
+        .albedoTexture = ResourceManager::getMissingTexture(),
+        .metallicRoughnessTexture = ResourceManager::getMissingTexture(),
+        .normalTexture = ResourceManager::getMissingNormalTexture(),
         .enableBlending = templ.enableBlending,
         .depthWrite = templ.depthWrite
     });
