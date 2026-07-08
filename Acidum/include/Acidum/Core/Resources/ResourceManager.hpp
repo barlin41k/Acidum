@@ -23,6 +23,9 @@ public:
     static std::shared_ptr<Model> loadModel(const std::string& relativePath);
 
     static void setGraphicsAPI(IGraphicsAPI* api) { s_graphicsAPI = api; };
+
+    static std::shared_ptr<ITexture2D> getMissingTexture();
+    static std::shared_ptr<ITexture2D> getMissingNormalTexture();
 private:
     static IGraphicsAPI* s_graphicsAPI;
     static std::filesystem::path s_assetsPath;
@@ -32,9 +35,6 @@ private:
 
     static std::shared_ptr<ITexture2D> s_missingTexture;
     static std::shared_ptr<ITexture2D> s_missingNormalTexture;
-
-    static std::shared_ptr<ITexture2D> getMissingTexture();
-    static std::shared_ptr<ITexture2D> getMissingNormalTexture();
 };
 
 } // namespace Acidum
