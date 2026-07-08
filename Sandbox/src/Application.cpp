@@ -64,8 +64,6 @@ void Application::OnInit() {
     ak74.initPose();
     m_entities.push_back(ak74);
 
-    m_akMagIndex = ak74Model->findNodeIndex("magazine");
-
     GetGraphicsAPI()->endUploadAndWait();
 }
 
@@ -82,10 +80,6 @@ void Application::OnUpdate(float deltaTime) {
         0.0f
     );
     GetGraphicsAPI()->setLightDirection(movingSun);
-
-    if (m_akMagIndex >= 0 && !m_entities.empty()) {
-        m_entities[0].nodeOverrides[m_akMagIndex] = glm::rotate(glm::mat4(1.0f), m_totalTime * 3.0f, glm::vec3(1, 0, 0));
-    }
 }
 
 void Application::OnRender() {

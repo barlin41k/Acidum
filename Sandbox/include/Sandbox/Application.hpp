@@ -27,8 +27,6 @@ private:
     CameraController m_cameraController;
 
     std::vector<Acidum::Entity> m_entities;
-
-    int m_akMagIndex;
     
     void updateWindowTitle(float deltaTime);
     void updateViewProjMatrices();
