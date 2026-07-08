@@ -7,8 +7,8 @@ set(SANDBOX_SOURCES
 )
 
 set(SHADER_SOURCES
-    assets/shaders/shader.vert
-    assets/shaders/shader.frag
+    assets/shaders/pbr.vert
+    assets/shaders/pbr.frag
 )
 
 set(SPV_TARGETS "")

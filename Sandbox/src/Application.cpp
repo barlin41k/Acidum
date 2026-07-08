@@ -44,14 +44,14 @@ void Application::OnInit() {
 
     Acidum::MaterialSystem::RegisterTemplate(
         Acidum::RenderMode::Opaque,
-        "shaders/spirv/shader.vert.spv",
-        "shaders/spirv/shader.frag.spv"
+        "shaders/spirv/pbr.vert.spv",
+        "shaders/spirv/pbr.frag.spv"
     );
 
     Acidum::MaterialSystem::RegisterTemplate(
         Acidum::RenderMode::Transparent,
-        "shaders/spirv/shader.vert.spv",
-        "shaders/spirv/shader.frag.spv",
+        "shaders/spirv/pbr.vert.spv",
+        "shaders/spirv/pbr.frag.spv",
         true, false
     );
 
