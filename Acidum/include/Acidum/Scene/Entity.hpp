@@ -35,6 +35,7 @@ struct Entity {
             ACIDUM_WARN("Trying to initialize entity pose with empty model!");
             return;
         }
+        
         nodeOverrides.assign(model->nodes.size(), glm::mat4(1.0f));
     }
 };
