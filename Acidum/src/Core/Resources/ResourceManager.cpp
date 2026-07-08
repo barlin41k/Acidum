@@ -119,8 +119,6 @@ std::shared_ptr<Model> ResourceManager::loadModel(const std::string& relativePat
         auto mesh = s_graphicsAPI->createMesh(data.vertices, data.indices);
         auto material = MaterialSystem::CreateMaterial(data);
 
-        
-
         if (!data.embeddedImage.empty())
             material->albedoTexture = loadTextureFromMemory(data.embeddedImage);
         else if (!data.textureName.empty()) {
