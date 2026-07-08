@@ -130,6 +130,9 @@ void VulkanRenderer::recreateSwapChain() {
 
     vkDeviceWaitIdle(m_device.getLogicalDevice());
 
+    for (const auto& commandBuffer : m_commandBufferManager->getCommandBuffers())
+        vkResetCommandBuffer(commandBuffer, 0);
+
     m_swapChain->recreate();
     createDepthResources();
     
