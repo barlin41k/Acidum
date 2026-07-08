@@ -9,8 +9,8 @@
 namespace Acidum {
     
 struct Material {
-    const std::string vertShaderPath;
-    const std::string fragShaderPath;
+    std::string vertShaderPath;
+    std::string fragShaderPath;
 
     std::shared_ptr<ITexture2D> albedoTexture = nullptr;
     std::shared_ptr<ITexture2D> metallicRoughnessTexture = nullptr;
@@ -22,21 +22,6 @@ struct Material {
 
     bool enableBlending = false;
     bool depthWrite = true;
-
-    Material(
-        const std::string& vert, const std::string& frag,
-        const glm::vec4& inBaseColor,
-        float inRoughness, float inMetallic,
-        bool inEnableBlending,
-        bool inDepthWrite
-    )
-        : vertShaderPath(vert),
-          fragShaderPath(frag),
-          baseColor(inBaseColor),
-          roughness(inRoughness),
-          metallic(inMetallic),
-          enableBlending(inEnableBlending),
-          depthWrite(inDepthWrite) {}
 };
 
 } // namespace Acidum

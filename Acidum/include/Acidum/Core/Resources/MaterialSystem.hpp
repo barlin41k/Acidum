@@ -24,8 +24,10 @@ constexpr std::string_view RenderModeToString(RenderMode mode) {
 class MaterialSystem {
 public:
     static void RegisterTemplate(RenderMode mode, const std::string& vertPath, const std::string& fragPath, bool blend=false, bool depthWrite=true);
+    static void RegisterCustomTemplate(const std::string& name, const std::string& vertPath, const std::string& fragPath, bool blend=false, bool depthWrite=true);
 
     static std::shared_ptr<Material> CreateMaterial(const MeshData& meshData);
+    static std::shared_ptr<Material> CreateCustomMaterial(const std::string& templateName);
 private:
     struct TemplateData {
         std::string vertShaderPath;
@@ -35,7 +37,8 @@ private:
         bool depthWrite = true;
     };
 
-    static std::unordered_map<RenderMode, TemplateData> m_templates;
+    static std::unordered_map<RenderMode, TemplateData> s_templates;
+    static std::unordered_map<std::string, TemplateData> s_customTemplates;
 };
 
 } // namespace Acidum

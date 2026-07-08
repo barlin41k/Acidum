@@ -8,6 +8,8 @@
 
 namespace Acidum {
 
+static constexpr size_t InvalidIndex = static_cast<size_t>(-1);
+
 struct Version {
     uint32_t major;
     uint32_t minor;
@@ -35,12 +37,21 @@ struct MeshNode {
 struct Model {
     std::vector<MeshNode> nodes;
 
-    int findNodeIndex(const std::string& name) const {
+    size_t findNodeIndex(const std::string& name) const {
         for (size_t i = 0; i < nodes.size(); ++i) {
             if (nodes[i].name == name)
-                return static_cast<int>(i);
+                return i;
         }
-        return -1;
+        return InvalidIndex;
+    }
+
+    bool setMaterialForNode(const std::string& name, std::shared_ptr<Material> material) {
+        size_t index = findNodeIndex(name);
+        if (index != InvalidIndex && nodes[index].mesh) {
+            nodes[index].mesh->setMaterial(material);
+            return true;
+        }
+        return false;
     }
 };
 
