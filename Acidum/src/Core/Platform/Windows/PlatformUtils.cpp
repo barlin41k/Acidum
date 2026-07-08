@@ -9,7 +9,7 @@ namespace Acidum::Platform {
 std::filesystem::path GetExecutableDir() {
     char result[MAX_PATH];
     if (GetModuleFileNameA(NULL, result, MAX_PATH) != 0)
-        return = std::filesystem::path(result).parent_path();
+        return std::filesystem::path(result).parent_path();
     return {};
 }
 
