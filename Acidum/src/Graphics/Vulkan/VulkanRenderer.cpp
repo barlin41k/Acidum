@@ -238,7 +238,7 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     ubo.lightDir = m_lightDirection;
     updateUniformBuffer(m_currentFrame, ubo);
 
-    std::sort(m_renderQueue.begin(), m_renderQueue.end(), [](const RenderCommand& a, const RenderCommand& b) {
+    std::sort(m_renderQueue.begin(), m_renderQueue.end(), [this](const RenderCommand& a, const RenderCommand& b) {
         auto matA = a.mesh ? a.mesh->getMaterial() : nullptr;
         auto matB = b.mesh ? b.mesh->getMaterial() : nullptr;
 
@@ -248,8 +248,16 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
         bool blendB = matB->enableBlending;
 
         if (blendA != blendB) return blendA < blendB;
-        
-        return matA < matB;
+
+        glm::vec3 posA = glm::vec3(a.modelMatrix[3]);
+        glm::vec3 posB = glm::vec3(b.modelMatrix[3]);
+        float distanceSquareA = glm::dot(posA - m_cameraPosition, posA - m_cameraPosition);
+        float distanceSquareB = glm::dot(posB - m_cameraPosition, posB - m_cameraPosition);
+
+        if (blendA && blendB) return distanceSquareA > distanceSquareB;
+
+        if (matA != matB) return matA < matB;
+        return distanceSquareA < distanceSquareB;
     });
 
     VulkanPipeline* currentPipeline = nullptr;
