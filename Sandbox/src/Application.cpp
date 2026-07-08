@@ -55,7 +55,20 @@ void Application::OnInit() {
         true, false
     );
 
+    Acidum::MaterialSystem::RegisterCustomTemplate(
+        "Hologram",
+        "shaders/spirv/holo.vert.spv",
+        "shaders/spirv/holo.frag.spv",
+        true, false
+    );
+
+    auto holoMat = Acidum::MaterialSystem::CreateCustomMaterial("Hologram");
+
     auto ak74Model = Acidum::ResourceManager::loadModel("models/ak74/ak74_acidum.glb");
+
+    GetGraphicsAPI()->endUploadAndWait();
+
+    ak74Model->setMaterialForNode("magazine", holoMat);
 
     Acidum::Entity ak74;
     ak74.model = ak74Model;
@@ -63,8 +76,6 @@ void Application::OnInit() {
     ak74.scale = glm::vec3(0.35f);
     ak74.initPose();
     m_entities.push_back(ak74);
-
-    GetGraphicsAPI()->endUploadAndWait();
 }
 
 void Application::OnUpdate(float deltaTime) {

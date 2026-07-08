@@ -9,6 +9,9 @@ set(SANDBOX_SOURCES
 set(SHADER_SOURCES
     assets/shaders/pbr.vert
     assets/shaders/pbr.frag
+
+    assets/shaders/holo.vert
+    assets/shaders/holo.frag
 )
 
 set(SPV_TARGETS "")
@@ -24,7 +27,7 @@ foreach(SHADER IN LISTS SHADER_SOURCES)
         COMMAND ${GLSLC_COMPILER} ${ABSOLUTE_SHADER} -MD -MF ${DEP_FILE} -o ${SPV_FILE}
         DEPENDS ${ABSOLUTE_SHADER}
         DEPFILE ${DEP_FILE}
-        COMMENT "Compiling Vulkan shader: ${FILE_NAME}"
+        COMMENT "Compiling shader: ${FILE_NAME}"
     )
     list(APPEND SPV_TARGETS ${SPV_FILE})
 endforeach()
