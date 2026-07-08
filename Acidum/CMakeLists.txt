@@ -13,6 +13,7 @@ set(CORE_SOURCES
     src/Core/Resources/ModelLoader.cpp
 
     src/Graphics/GraphicsFactory.cpp
+    src/Graphics/VertexLayout.cpp
     src/Graphics/Vulkan/VulkanBuffer.cpp
     src/Graphics/Vulkan/VulkanCommandBufferManager.cpp
     src/Graphics/Vulkan/VulkanDescriptorManager.cpp

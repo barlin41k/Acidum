@@ -1,7 +1,5 @@
 #include "Graphics/Vulkan/VulkanMesh.hpp"
 
-#include "Acidum/Core/Base/Types.hpp"
-
 namespace Acidum {
 
 void VulkanMesh::bind(VkCommandBuffer commandBuffer) const {
@@ -36,46 +34,29 @@ void VulkanMesh::createIndexBuffer(const VulkanDevice& device, VulkanStagingMana
     stagingManager->stageCopy(std::move(stagingBuffer), m_indexBuffer->getBuffer(), bufferSize);
 }
 
-VkVertexInputBindingDescription VulkanMesh::getBindingDescription() {
+VkVertexInputBindingDescription VulkanMesh::getBindingDescription(const VertexLayout& layout) {
     VkVertexInputBindingDescription bindingDescription {};
     bindingDescription.binding = 0;
-    bindingDescription.stride = sizeof(Vertex);
+    bindingDescription.stride = layout.getStride();
     bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
     return bindingDescription;
 }
 
-std::array<VkVertexInputAttributeDescription, 5> VulkanMesh::getAttributeDescriptions() {
-    std::array<VkVertexInputAttributeDescription, 5> attributeDescriptions{};
-    
-    // Position
-    attributeDescriptions[0].binding = 0;
-    attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, pos);
+std::vector<VkVertexInputAttributeDescription> VulkanMesh::getAttributeDescriptions(const VertexLayout& layout) {
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+    const auto& elements = layout.getElements();
 
-    // Color
-    attributeDescriptions[1].binding = 0;
-    attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[1].offset = offsetof(Vertex, color);
+    for (uint32_t i = 0; i < elements.size(); i++) {
+        const auto& element = elements[i];
 
-    // UV
-    attributeDescriptions[2].binding = 0;
-    attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+        VkVertexInputAttributeDescription attribute {};
+        attribute.binding = 0;
+        attribute.location = i;
+        attribute.format = ShaderDataTypeToVulkanFormat(element.type);
+        attribute.offset = element.offset;
 
-    // Normal
-    attributeDescriptions[3].binding = 0;
-    attributeDescriptions[3].location = 3;
-    attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[3].offset = offsetof(Vertex, normal);
-
-    // Tangent
-    attributeDescriptions[4].binding = 0;
-    attributeDescriptions[4].location = 4;
-    attributeDescriptions[4].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-    attributeDescriptions[4].offset = offsetof(Vertex, tangent);
+        attributeDescriptions.push_back(attribute);
+    }
 
     return attributeDescriptions;
 }

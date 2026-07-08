@@ -40,8 +40,9 @@ void VulkanGraphicsAPI::initialize() {
     auto appVersion = m_window->getVersion(); 
     uint32_t version = VK_MAKE_VERSION(appVersion.major, appVersion.minor, appVersion.patch);
 
-    auto bindingDesc = VulkanMesh::getBindingDescription();
-    auto attrDesc = VulkanMesh::getAttributeDescriptions();
+    const auto& defaultVertexLayout = VertexLayout::GetDefaultPBRLayout();
+    auto bindingDescription = VulkanMesh::getBindingDescription(defaultVertexLayout);
+    auto attributeDescription = VulkanMesh::getAttributeDescriptions(defaultVertexLayout);
 
     
     InstanceConfig instanceConfig;
@@ -55,8 +56,8 @@ void VulkanGraphicsAPI::initialize() {
     SwapChainConfig swapChainConfig;
 
     PipelineConfig pipelineConfig;
-    pipelineConfig.vertexBindingDescriptions = { bindingDesc };
-    pipelineConfig.vertexAttributeDescriptions = { attrDesc.begin(), attrDesc.end() };
+    pipelineConfig.vertexBindingDescriptions = { bindingDescription };
+    pipelineConfig.vertexAttributeDescriptions = { attributeDescription };
 
     RendererConfig rendererConfig;
     rendererConfig.swapChainConfig = swapChainConfig;
@@ -107,9 +108,9 @@ void VulkanGraphicsAPI::beginUpload() {
     m_stagingManager->begin();
 }
 
-std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
+std::unique_ptr<IMesh> VulkanGraphicsAPI::createMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const VertexLayout& layout) {
     ACIDUM_ASSERT(m_renderer != nullptr, "Renderer is not initialized!");
-    return std::make_unique<VulkanMesh>(*m_device, m_stagingManager.get(), vertices, indices);
+    return std::make_unique<VulkanMesh>(*m_device, m_stagingManager.get(), vertices, indices, layout);
 }
 
 void VulkanGraphicsAPI::endUploadAndWait() {
