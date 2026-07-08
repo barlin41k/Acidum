@@ -7,7 +7,7 @@
 #include "Acidum/Core/Base/Types.hpp"
 
 // forward-declaration
-struct GLFWwindow; // (in global because GLFW require it)
+struct GLFWwindow; // in global because GLFW require it
 
 namespace Acidum {
 
