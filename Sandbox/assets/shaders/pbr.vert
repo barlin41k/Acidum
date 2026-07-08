@@ -20,19 +20,19 @@ layout(location = 2) in vec2 inTexCoord;
 layout(location = 3) in vec3 inNormal;
 layout(location = 4) in vec4 inTangent;
 
-layout(location = 0) out vec3 fragColor;
-layout(location = 1) out vec2 fragTexCoord;
-layout(location = 2) out vec3 fragNormal;
-layout(location = 3) out vec3 fragPos;
+layout(location = 0) out vec3 fragPos;
+layout(location = 1) out vec3 fragColor;
+layout(location = 2) out vec2 fragTexCoord;
+layout(location = 3) out vec3 fragNormal;
 layout(location = 4) out vec4 fragTangent;
 
 void main() {
     vec4 vertexPos = vec4(inPosition, 1.0);
     gl_Position = ubo.proj * ubo.view * pc.model * vertexPos;
     
+    fragPos = vec3(pc.model * vertexPos);
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-    fragNormal = mat3(pc.model) * inNormal;
-    fragPos = vec3(pc.model * vertexPos);
-    fragTangent = vec4(mat3(pc.model) * inTangent.xyz, inTangent.w);
+    fragNormal = normalize(mat3(pc.model) * inNormal);
+    fragTangent = vec4(normalize(mat3(pc.model) * inTangent.xyz), inTangent.w);
 }
