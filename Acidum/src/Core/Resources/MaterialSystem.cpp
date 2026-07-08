@@ -7,7 +7,10 @@ namespace Acidum {
 std::unordered_map<RenderMode, MaterialSystem::TemplateData> MaterialSystem::m_templates;
 
 void MaterialSystem::RegisterTemplate(RenderMode mode, const std::string& vertPath, const std::string& fragPath, bool enableBlending, bool depthWrite) {
-    if (m_templates.contains(mode)) return;
+    if (m_templates.contains(mode)) {
+        ACIDUM_WARN("Template for RenderMode ({}) already exists! Skipping ({}, {})", RenderModeToString(mode), vertPath, fragPath);
+        return;
+    }
 
     TemplateData templateData;
     templateData.vertShaderPath = vertPath;

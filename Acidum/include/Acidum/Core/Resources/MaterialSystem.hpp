@@ -13,6 +13,14 @@ enum class RenderMode {
     Transparent
 };
 
+constexpr std::string_view RenderModeToString(RenderMode mode) {
+    switch (mode) {
+        case RenderMode::Opaque: return "Opaque";
+        case RenderMode::Transparent: return "Transparent";
+        default: return "Unknown";
+    }
+}
+
 class MaterialSystem {
 public:
     static void RegisterTemplate(RenderMode mode, const std::string& vertPath, const std::string& fragPath, bool blend=false, bool depthWrite=true);
