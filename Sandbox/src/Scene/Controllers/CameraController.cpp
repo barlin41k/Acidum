@@ -28,7 +28,7 @@ void CameraController::onUpdate(float deltaTime) {
     if (m_pitch > 89.0f) m_pitch = 89.0f;
     if (m_pitch < -89.0f) m_pitch = -89.0f;
 
-    float cameraSpeed = Consts::CAMERA_SPEED * deltaTime;
+    float cameraSpeed = Consts::RENDERER::CAMERA::SPEED * deltaTime;
     if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::W))
         m_cameraPos += m_camera.getFront() * cameraSpeed;
     if (Acidum::Input::IsKeyPressed(Acidum::KeyCode::S))
