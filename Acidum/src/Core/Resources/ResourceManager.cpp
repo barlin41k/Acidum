@@ -26,7 +26,7 @@ void ResourceManager::initialize() {
 
     s_assetsPath = executeDir / "assets";
 
-    ACIDUM_INFO("Resource Manager initialized, base path: {}", s_assetsPath.string());
+    ACIDUM_INFO("Resource Manager initialized with base path: {}", s_assetsPath.string());
 }
 
 void ResourceManager::shutdown() {

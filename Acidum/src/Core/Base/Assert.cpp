@@ -7,18 +7,11 @@ namespace Acidum {
 void PrintCrashBanner(const char* errorType, const std::string& details) {
     auto logger = Logger::Get();
     
-    std::string banner = fmt::format(
-        "\n"
-        "========================================================\n"
-        "                 ACIDUM ENGINE CRASHED!                 \n"
-        "========================================================\n"
-        "Type    : {}\n"
-        "Details : {}\n"
-        "========================================================",
-        errorType, details
-    );
+    logger->critical("--------------------------------------------------");
+    logger->critical("Acidum Engine crash: [{}]", errorType);
+    logger->critical("Details: {}", details);
+    logger->critical("--------------------------------------------------");
 
-    logger->critical(banner);
     logger->flush();
     spdlog::shutdown();
 }

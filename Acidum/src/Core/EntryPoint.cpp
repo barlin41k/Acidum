@@ -22,17 +22,13 @@ void startupLog() {
         Acidum::Consts::ENGINE::VERSION.minor,
         Acidum::Consts::ENGINE::VERSION.patch);
 
-    ACIDUM_INFO("============================================");
-    ACIDUM_INFO("           Acidum Engine {}", version);
-    ACIDUM_INFO("============================================");
-    ACIDUM_INFO("OS         : {}", Acidum::SystemInfo::GetOS());
-    ACIDUM_INFO("Compiler   : {}", Acidum::SystemInfo::GetCompiler());
-    ACIDUM_INFO("Arch       : {}", Acidum::SystemInfo::GetArchitecture());
-    ACIDUM_INFO("Build Type : {}", Acidum::SystemInfo::GetBuildType());
-    ACIDUM_INFO("Build Date : {} {}", __DATE__, __TIME__);
-    ACIDUM_INFO("============================================");
-    ACIDUM_INFO("CWD        : {}", std::filesystem::current_path().string());
-    ACIDUM_INFO("============================================");
+    ACIDUM_INFO("--- Acidum Engine {} ---", version);
+    ACIDUM_INFO("  - Arch       : {}", Acidum::SystemInfo::GetArchitecture());
+    ACIDUM_INFO("  - OS         : {}", Acidum::SystemInfo::GetOS());
+    ACIDUM_INFO("  - Compiler   : {}", Acidum::SystemInfo::GetCompiler());
+    ACIDUM_INFO("  - Build Type : {}", Acidum::SystemInfo::GetBuildType());
+    ACIDUM_INFO("  - Build Date : {} {}", __DATE__, __TIME__);
+    ACIDUM_INFO("  - CWD        : {}", std::filesystem::current_path().string());
 }
 
 void shutdownLog(Clock::time_point startTime, Clock::time_point endTime) {
@@ -49,11 +45,11 @@ void shutdownLog(Clock::time_point startTime, Clock::time_point endTime) {
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed - seconds);
 
     if (hours.count() > 0)
-        ACIDUM_INFO("Acidum Engine shutdown successfully! Total runtime: {}h {}m {}s", hours.count(), minutes.count(), seconds.count());
+        ACIDUM_INFO("--- Acidum Engine shutdown successfully! Total runtime: {}h {}m {}s ---", hours.count(), minutes.count(), seconds.count());
     else if (minutes.count() > 0)
-        ACIDUM_INFO("Acidum Engine shutdown successfully! Total runtime: {}m {}.{}s", minutes.count(), seconds.count(), milliseconds.count());
+        ACIDUM_INFO("--- Acidum Engine shutdown successfully! Total runtime: {}m {}.{}s ---", minutes.count(), seconds.count(), milliseconds.count());
     else
-        ACIDUM_INFO("Acidum Engine shutdown successfully! Total runtime: {}.{}s", seconds.count(), milliseconds.count());
+        ACIDUM_INFO("--- Acidum Engine shutdown successfully! Total runtime: {}.{}s ---", seconds.count(), milliseconds.count());
 }
 
 } // anonymous namespace
