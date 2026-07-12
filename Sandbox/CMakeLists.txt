@@ -32,7 +32,7 @@ foreach(SHADER IN LISTS SHADER_SOURCES)
     list(APPEND SPV_TARGETS ${SPV_FILE})
 endforeach()
 
-add_custom_target(CompileShaders ALL DEPENDS ${SPV_TARGETS})
+add_custom_target(CompileShaders DEPENDS ${SPV_TARGETS})
 
 add_executable(Sandbox ${SANDBOX_SOURCES})
 add_dependencies(Sandbox CompileShaders)

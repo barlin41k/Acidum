@@ -7,10 +7,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type (Debug/Release/RelWithDebInfo)" FORCE)
-    message(STATUS "Build type not specified, defaulting to Debug")
+    message(STATUS "[Acidum] Build type not specified, defaulting to Debug")
 endif()
 
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "[Acidum] Configuration Summary:")      
+message(STATUS "  - Build Type:   ${CMAKE_BUILD_TYPE}")     
+message(STATUS "  - CXX Standard: C++${CMAKE_CXX_STANDARD}")
+message(STATUS "  - Compiler:     ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(ACIDUM_DEBUG_BUILD)
@@ -20,9 +23,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 
-message(STATUS "===========================================")
-message(STATUS "Starting to load external libraries by FetchContent...")
-message(STATUS "===========================================")
+message(STATUS "[Acidum] Starting to load external libraries by FetchContent...")
 
 set(GLFW_VERSION 3.4)
 set(GLM_VERSION 1.0.3)
@@ -40,21 +41,18 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/glfw/glfw.git
     GIT_TAG        ${GLFW_VERSION}
 )
-FetchContent_MakeAvailable(glfw)
 
 FetchContent_Declare(
     glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
     GIT_TAG        ${GLM_VERSION}
 )
-FetchContent_MakeAvailable(glm)
 
 FetchContent_Declare(
     stb
     GIT_REPOSITORY https://github.com/nothings/stb.git
     GIT_TAG        ${STB_VERSION}
 )
-FetchContent_MakeAvailable(stb)
 
 set(TINYGLTF_HEADER_ONLY ON CACHE BOOL "" FORCE)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
@@ -65,7 +63,6 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/syoyo/tinygltf
     GIT_TAG        ${TINYGLTF_VERSION}
 )
-FetchContent_MakeAvailable(tinygltf)
 
 set(SPDLOG_INSTALL OFF CACHE INTERNAL "")
 FetchContent_Declare(
@@ -73,18 +70,33 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
     GIT_TAG        ${SPDLOG_VERSION}
 )
-FetchContent_MakeAvailable(spdlog)
 
 FetchContent_Declare(
     VulkanMemoryAllocator
     GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
     GIT_TAG        ${VMA_VERSION}
 )
-FetchContent_MakeAvailable(VulkanMemoryAllocator)
 
-message(STATUS "===========================================")
-message(STATUS "Dependencies loaded successfully!")
-message(STATUS "===========================================")
+
+set(OLD_LOG_LEVEL ${CMAKE_MESSAGE_LOG_LEVEL})
+set(CMAKE_MESSAGE_LOG_LEVEL WARNING)
+
+FetchContent_MakeAvailable(
+    glfw 
+    glm 
+    stb     
+    tinygltf
+    spdlog
+    VulkanMemoryAllocator
+) 
+
+if(OLD_LOG_LEVEL)
+    set(CMAKE_MESSAGE_LOG_LEVEL ${OLD_LOG_LEVEL})
+else()
+    unset(CMAKE_MESSAGE_LOG_LEVEL)
+endif()
+
+message(STATUS "[Acidum] All dependencies ready!")
 
 find_package(Vulkan REQUIRED)
 
