@@ -13,11 +13,12 @@ namespace Acidum {
 struct AppConfig {
     Version version = { 1, 0, 0 };
 
-    std::string title = Consts::ENGINE_NAME;
-    uint32_t width = Consts::ENGINE_DEFAULT_WIDTH;
-    uint32_t height = Consts::ENGINE_DEFAULT_HEIGHT;
+    std::string title = Consts::ENGINE::NAME;
+    uint32_t width = Consts::WINDOW::DEFAULT_WIDTH;
+    uint32_t height = Consts::WINDOW::DEFAULT_HEIGHT;
 
-    APIType apiType = Consts::ENGINE_DEFAULT_API;
+    APIType apiType = Consts::RENDERER::DEFAULT_API_TYPE;
+    
     GraphicsConfig config {};
 };
 

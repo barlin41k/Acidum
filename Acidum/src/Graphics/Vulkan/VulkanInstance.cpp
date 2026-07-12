@@ -32,11 +32,11 @@ void VulkanInstance::createInstance(const InstanceConfig& config) {
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = config.appName.c_str();
     appInfo.applicationVersion = config.appVersion;
-    appInfo.pEngineName = Consts::ENGINE_NAME;
+    appInfo.pEngineName = Consts::ENGINE::NAME;
     appInfo.engineVersion = VK_MAKE_VERSION(
-        Consts::ENGINE_VERSION.major, 
-        Consts::ENGINE_VERSION.minor,
-        Consts::ENGINE_VERSION.patch
+        Consts::ENGINE::VERSION.major, 
+        Consts::ENGINE::VERSION.minor,
+        Consts::ENGINE::VERSION.patch
     );
     appInfo.apiVersion = config.apiVersion;
 

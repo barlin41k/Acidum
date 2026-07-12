@@ -29,16 +29,16 @@ VulkanRenderer::VulkanRenderer(const VulkanDevice& device, const VulkanSurface& 
     m_swapChain = std::make_unique<VulkanSwapChain>(m_device, m_surface, m_window, m_config.swapChainConfig);
     createDepthResources();
 
-    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT);
+    m_descriptorManager = std::make_unique<VulkanDescriptorManager>(m_device, Consts::RENDERER::MAX_FRAMES_IN_FLIGHT);
     std::vector<VkDescriptorSetLayout> layouts = {
         m_descriptorManager->getGlobalDescriptorSetLayout(),
         m_descriptorManager->getMaterialDescriptorSetLayout()
     };
 
-    m_commandBufferManager = std::make_unique<VulkanCommandBufferManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT);
+    m_commandBufferManager = std::make_unique<VulkanCommandBufferManager>(m_device, Consts::RENDERER::MAX_FRAMES_IN_FLIGHT);
 
     uint32_t imageCount = static_cast<uint32_t>(m_swapChain->getImageViews().size());
-    m_syncManager = std::make_unique<VulkanSyncManager>(m_device, Consts::MAX_FRAMES_IN_FLIGHT, imageCount);
+    m_syncManager = std::make_unique<VulkanSyncManager>(m_device, Consts::RENDERER::MAX_FRAMES_IN_FLIGHT, imageCount);
 
     VK_INFO("Renderer initialized!");
 }
@@ -133,7 +133,7 @@ void VulkanRenderer::drawFrame() {
         recreateSwapChain();
     } else ACIDUM_ASSERT(result == VK_SUCCESS, "Failed to present swap chain image!");
 
-    m_currentFrame = (m_currentFrame + 1) % Consts::MAX_FRAMES_IN_FLIGHT;
+    m_currentFrame = (m_currentFrame + 1) % Consts::RENDERER::MAX_FRAMES_IN_FLIGHT;
     
     m_renderQueue.clear();
 }

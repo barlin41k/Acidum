@@ -11,7 +11,7 @@
 namespace Acidum {
 
 struct InstanceConfig {
-    std::string appName = Consts::ENGINE_NAME;
+    std::string appName = Consts::ENGINE::NAME;
     uint32_t appVersion = VK_MAKE_VERSION(1, 0, 0);
     uint32_t apiVersion = VK_API_VERSION_1_3;
 

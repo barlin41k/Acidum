@@ -18,9 +18,9 @@ using Clock = std::chrono::high_resolution_clock;
 
 void startupLog() {
     std::string version = std::format("v{}.{}.{}",
-        Acidum::Consts::ENGINE_VERSION.major,
-        Acidum::Consts::ENGINE_VERSION.minor,
-        Acidum::Consts::ENGINE_VERSION.patch);
+        Acidum::Consts::ENGINE::VERSION.major,
+        Acidum::Consts::ENGINE::VERSION.minor,
+        Acidum::Consts::ENGINE::VERSION.patch);
 
     ACIDUM_INFO("============================================");
     ACIDUM_INFO("           Acidum Engine {}", version);

@@ -15,7 +15,7 @@
 namespace Acidum {
 
 std::unique_ptr<Acidum::Application> CreateApplication() {
-    return std::make_unique<Sandbox::Application>(Consts::ENGINE_DEFAULT_API);
+    return std::make_unique<Sandbox::Application>(Consts::RENDERER::DEFAULT_API_TYPE);
 }
 
 } // namespace Acidum
@@ -25,10 +25,10 @@ namespace Sandbox {
 
 Application::Application(Acidum::APIType apiType) 
     : Acidum::Application(Acidum::AppConfig {
-        .version = Consts::APPLICATION_VERSION,
-        .title = Consts::WINDOW_TITLE,
-        .width = Consts::WINDOW_WIDTH, 
-        .height = Consts::WINDOW_HEIGHT,
+        .version = Consts::APPLICATION::VERSION,
+        .title = Consts::WINDOW::TITLE,
+        .width = Consts::WINDOW::WIDTH, 
+        .height = Consts::WINDOW::HEIGHT,
         .apiType = apiType,
         .config = {
             .enableVSync = false,
@@ -37,9 +37,9 @@ Application::Application(Acidum::APIType apiType)
         }
     }),
       m_camera(
-        Consts::CAMERA_FOV,
-        static_cast<float>(Consts::WINDOW_WIDTH) / static_cast<float>(Consts::WINDOW_HEIGHT),
-        Consts::CAMERA_NEAR_CLIP, Consts::CAMERA_FAR_CLIP
+        Consts::RENDERER::CAMERA::FOV,
+        static_cast<float>(Consts::WINDOW::WIDTH) / static_cast<float>(Consts::WINDOW::HEIGHT),
+        Consts::RENDERER::CAMERA::NEAR_CLIP, Consts::RENDERER::CAMERA::FAR_CLIP
     ),
       m_cameraController(m_camera) {}
 
