@@ -87,23 +87,13 @@ void Application::OnInit() {
 
     ak74Model->setMaterialForNode("magazine", holoMat);
 
-    m_entities.reserve(5040);
-
-    int gridSizeX = 70;
-    int gridSizeZ = 72;
-    float spacing = 1.5f;
-
-    for (int x = -gridSizeX / 2; x < gridSizeX / 2; ++x) {
-        for (int z = -gridSizeZ / 2; z < gridSizeZ / 2; ++z) {
-            Acidum::Entity ak74;
-            ak74.model = ak74Model;
-            ak74.position = glm::vec3(x * spacing, 0.0f, z * spacing);
-            ak74.scale = glm::vec3(0.35f);
-            ak74.initPose();
-            
-            m_entities.push_back(ak74);
-        }
-    }
+    Acidum::Entity ak74;
+    ak74.model = ak74Model;
+    ak74.position = glm::vec3(0.0f);
+    ak74.scale = glm::vec3(0.35f);
+    ak74.initPose();
+    
+    m_entities.push_back(ak74);
 }
 
 void Application::OnUpdate(float deltaTime) {
