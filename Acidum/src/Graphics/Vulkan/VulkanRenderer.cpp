@@ -244,8 +244,8 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
         if (!matA || !matB) return matA < matB;
 
-        bool blendA = matA->enableBlending;
-        bool blendB = matB->enableBlending;
+        bool blendA = matA->config.enableBlending;
+        bool blendB = matB->config.enableBlending;
 
         if (blendA != blendB) return blendA < blendB;
 
@@ -353,19 +353,20 @@ void VulkanRenderer::updateUniformBuffer(uint32_t currentFrame, const UniformBuf
 }
 
 VulkanPipeline* VulkanRenderer::getOrCreatePipeline(Material* material) {
-    std::string pipelineKey = material->vertShaderPath + "|" + material->fragShaderPath + "|" + std::to_string(material->enableBlending);
+    std::string pipelineKey = material->config.vertShaderPath
+        + "|" + material->config.fragShaderPath
+        + "|" + std::to_string(material->config.enableBlending);
 
-    if (m_pipelineCache.find(pipelineKey) != m_pipelineCache.end())
-        return m_pipelineCache[pipelineKey].get();
+    if (m_pipelineCache.find(pipelineKey) != m_pipelineCache.end()) return m_pipelineCache[pipelineKey].get();
 
-    auto vertShaderCode = ResourceManager::loadBinaryFile(material->vertShaderPath);
-    auto fragShaderCode = ResourceManager::loadBinaryFile(material->fragShaderPath);
+    auto vertShaderCode = ResourceManager::loadBinaryFile(material->config.vertShaderPath);
+    auto fragShaderCode = ResourceManager::loadBinaryFile(material->config.fragShaderPath);
 
     PipelineConfig config = m_config.pipelineConfig;
     config.vertexShaderBytecode = vertShaderCode;
     config.fragmentShaderBytecode = fragShaderCode;
-    config.enableAlphaBlending = material->enableBlending;
-    config.enableDepthWrite = material->depthWrite;
+    config.enableAlphaBlending = material->config.enableBlending;
+    config.enableDepthWrite = material->config.enableDepthWrite;
     config.colorFormat = m_swapChain->getFormat();
     config.depthFormat = m_depthFormat;
 

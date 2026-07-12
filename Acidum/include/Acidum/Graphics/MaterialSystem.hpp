@@ -13,32 +13,26 @@ enum class RenderMode {
     Transparent
 };
 
-constexpr std::string_view RenderModeToString(RenderMode mode) {
-    switch (mode) {
-        case RenderMode::Opaque: return "Opaque";
-        case RenderMode::Transparent: return "Transparent";
-        default: return "Unknown";
+struct RenderModeHelper {
+    static constexpr std::string_view RenderModeToString(RenderMode mode) {
+        switch (mode) {
+            case RenderMode::Opaque: return "Opaque";
+            case RenderMode::Transparent: return "Transparent";
+            default: return "Unknown";
+        }
     }
-}
+};
 
 class MaterialSystem {
 public:
-    static void RegisterTemplate(RenderMode mode, const std::string& vertPath, const std::string& fragPath, bool blend=false, bool depthWrite=true);
-    static void RegisterCustomTemplate(const std::string& name, const std::string& vertPath, const std::string& fragPath, bool blend=false, bool depthWrite=true);
+    static void RegisterTemplate(RenderMode mode, const MaterialConfig& config);
+    static void RegisterCustomTemplate(const std::string& name, const MaterialConfig& config);
 
     static std::shared_ptr<Material> CreateMaterial(const MeshData& meshData);
     static std::shared_ptr<Material> CreateCustomMaterial(const std::string& templateName);
 private:
-    struct TemplateData {
-        std::string vertShaderPath;
-        std::string fragShaderPath;
-        
-        bool enableBlending = false;
-        bool depthWrite = true;
-    };
-
-    static std::unordered_map<RenderMode, TemplateData> s_templates;
-    static std::unordered_map<std::string, TemplateData> s_customTemplates;
+    static std::unordered_map<RenderMode, MaterialConfig> s_templates;
+    static std::unordered_map<std::string, MaterialConfig> s_customTemplates;
 };
 
 } // namespace Acidum

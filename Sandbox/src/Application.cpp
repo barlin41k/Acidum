@@ -47,22 +47,30 @@ void Application::OnInit() {
 
     Acidum::MaterialSystem::RegisterTemplate(
         Acidum::RenderMode::Opaque,
-        "shaders/spirv/pbr.vert.spv",
-        "shaders/spirv/pbr.frag.spv"
+        {
+            .vertShaderPath = "shaders/spirv/pbr.vert.spv",
+            .fragShaderPath = "shaders/spirv/pbr.frag.spv",
+        }
     );
 
     Acidum::MaterialSystem::RegisterTemplate(
         Acidum::RenderMode::Transparent,
-        "shaders/spirv/pbr.vert.spv",
-        "shaders/spirv/pbr.frag.spv",
-        true, false
+        {
+            .vertShaderPath = "shaders/spirv/pbr.vert.spv",
+            .fragShaderPath = "shaders/spirv/pbr.frag.spv",
+            .enableBlending = true,
+            .enableDepthWrite = false
+        }
     );
 
     Acidum::MaterialSystem::RegisterCustomTemplate(
         "Hologram",
-        "shaders/spirv/holo.vert.spv",
-        "shaders/spirv/holo.frag.spv",
-        true, false
+        {
+            .vertShaderPath = "shaders/spirv/holo.vert.spv",
+            .fragShaderPath = "shaders/spirv/holo.frag.spv",
+            .enableBlending = true,
+            .enableDepthWrite = false
+        }
     );
 
     auto holoMat = Acidum::MaterialSystem::CreateCustomMaterial("Hologram");
