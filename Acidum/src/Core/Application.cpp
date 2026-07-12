@@ -47,7 +47,7 @@ void Application::initWindow() {
 
 void Application::initGraphicsAPI() {
     m_graphicsAPI = GraphicsFactory::createAPI(m_config.apiType, m_window.get());
-    m_graphicsAPI->initialize();
+    m_graphicsAPI->initialize(m_config.config);
 }
 
 void Application::mainLoop() {  

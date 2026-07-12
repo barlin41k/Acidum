@@ -24,11 +24,17 @@ std::unique_ptr<Acidum::Application> CreateApplication() {
 namespace Sandbox {
 
 Application::Application(Acidum::APIType apiType) 
-    : Acidum::Application({
-        Consts::APPLICATION_VERSION,
-        Consts::WINDOW_TITLE,
-        Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT,
-        apiType
+    : Acidum::Application(Acidum::AppConfig {
+        .version = Consts::APPLICATION_VERSION,
+        .title = Consts::WINDOW_TITLE,
+        .width = Consts::WINDOW_WIDTH, 
+        .height = Consts::WINDOW_HEIGHT,
+        .apiType = apiType,
+        .config = {
+            .enableVSync = false,
+            .gpuPreference = Acidum::GPUPreference::HighPerformance,
+            .supportWireframe = true
+        }
     }),
       m_camera(
         Consts::CAMERA_FOV,
@@ -81,12 +87,23 @@ void Application::OnInit() {
 
     ak74Model->setMaterialForNode("magazine", holoMat);
 
-    Acidum::Entity ak74;
-    ak74.model = ak74Model;
-    ak74.position = glm::vec3(0.0f, 0.0f, 1.0f);
-    ak74.scale = glm::vec3(0.35f);
-    ak74.initPose();
-    m_entities.push_back(ak74);
+    m_entities.reserve(5040);
+
+    int gridSizeX = 70;
+    int gridSizeZ = 72;
+    float spacing = 1.5f;
+
+    for (int x = -gridSizeX / 2; x < gridSizeX / 2; ++x) {
+        for (int z = -gridSizeZ / 2; z < gridSizeZ / 2; ++z) {
+            Acidum::Entity ak74;
+            ak74.model = ak74Model;
+            ak74.position = glm::vec3(x * spacing, 0.0f, z * spacing);
+            ak74.scale = glm::vec3(0.35f);
+            ak74.initPose();
+            
+            m_entities.push_back(ak74);
+        }
+    }
 }
 
 void Application::OnUpdate(float deltaTime) {

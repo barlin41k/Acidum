@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "Acidum/Graphics/GraphicsConfig.hpp"
 #include "Acidum/Graphics/Vertex.hpp"
 #include "Acidum/Graphics/Interfaces/IMesh.hpp"
 #include "Acidum/Graphics/Interfaces/ITexture2D.hpp"
@@ -12,7 +13,8 @@ class IGraphicsAPI {
 public:
     virtual ~IGraphicsAPI() = default;
 
-    virtual void initialize() = 0;
+    virtual void initialize(const GraphicsConfig& config) = 0;
+    virtual std::vector<GPUAdapterInfo> enumerateAvailableAdapters() = 0;
     
     virtual std::shared_ptr<ITexture2D> createTexture2D(const void* data, uint32_t width, uint32_t height, bool isSRGB=true) = 0;
     

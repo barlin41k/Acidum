@@ -157,16 +157,24 @@ void VulkanDevice::pickPhysicalDevice(const DeviceConfig& config) {
 
         uint64_t score = 0;
 
-        VkPhysicalDeviceMemoryProperties memProperties;
-        vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
-
-        if (config.preferDiscreteGPU && deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        if (config.gpuPreference == GPUPreference::Manual && !config.preferredDeviceName.empty()) {
+            if (config.preferredDeviceName != deviceProperties.deviceName) {
+                VK_DEBUG("Skipping GPU {} (does not match preferred manual GPU {})", deviceProperties.deviceName, config.preferredDeviceName);
+                continue;
+            }
+            score += 100'000'000;
+        } else if (config.gpuPreference == GPUPreference::HighPerformance && deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+            score += 1'000'000;
+        else if (config.gpuPreference == GPUPreference::LowPower && deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
             score += 1'000'000;
 
+        VkPhysicalDeviceMemoryProperties memoryProperties;
+        vkGetPhysicalDeviceMemoryProperties(device, &memoryProperties);
+
         VkDeviceSize vramSize = 0;
-        for (uint32_t i = 0; i < memProperties.memoryHeapCount; i++) {
-            if (memProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
-                vramSize = std::max(vramSize, memProperties.memoryHeaps[i].size);
+        for (uint32_t i = 0; i < memoryProperties.memoryHeapCount; i++) {
+            if (memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+                vramSize = std::max(vramSize, memoryProperties.memoryHeaps[i].size);
         }
         score += static_cast<uint64_t>(vramSize / (1024 * 1024));
 

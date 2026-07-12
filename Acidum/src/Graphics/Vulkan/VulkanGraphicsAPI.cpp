@@ -25,7 +25,7 @@ VulkanGraphicsAPI::~VulkanGraphicsAPI() {
     waitIdle();
 }
 
-void VulkanGraphicsAPI::initialize() {
+void VulkanGraphicsAPI::initialize(const GraphicsConfig& config) {
     VK_INFO("Initializing Vulkan...");
 
     m_window->setResizeCallback([this](int /*width*/, int /*height*/) {
@@ -51,9 +51,12 @@ void VulkanGraphicsAPI::initialize() {
     instanceConfig.windowExtensions = windowExtensions;
 
     DeviceConfig deviceConfig;
-    deviceConfig.requiredFeatures.fillModeNonSolid = VK_TRUE;
+    deviceConfig.requiredFeatures.fillModeNonSolid = config.supportWireframe ? VK_TRUE : VK_FALSE;
+    deviceConfig.gpuPreference = config.gpuPreference;
+    deviceConfig.preferredDeviceName = config.preferredDeviceName;
 
     SwapChainConfig swapChainConfig;
+    swapChainConfig.preferredPresentMode = config.enableVSync ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
 
     PipelineConfig pipelineConfig;
     pipelineConfig.vertexBindingDescriptions = { bindingDescription };
@@ -62,6 +65,7 @@ void VulkanGraphicsAPI::initialize() {
     RendererConfig rendererConfig;
     rendererConfig.swapChainConfig = swapChainConfig;
     rendererConfig.pipelineConfig = pipelineConfig;
+    rendererConfig.clearColor = config.clearColor;
     
 
     m_instance = std::make_unique<VulkanInstance>(instanceConfig);
@@ -77,8 +81,45 @@ void VulkanGraphicsAPI::initialize() {
     VK_INFO("Vulkan initialized!");
 }
 
+std::vector<GPUAdapterInfo> VulkanGraphicsAPI::enumerateAvailableAdapters() {
+    VkInstance instance = m_instance->getInstance();
+
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+    std::vector<GPUAdapterInfo> result;
+    result.reserve(deviceCount);
+
+    for (uint32_t i = 0; i < deviceCount; ++i) {
+        VkPhysicalDeviceProperties properties;
+        vkGetPhysicalDeviceProperties(devices[i], &properties);
+
+        VkPhysicalDeviceMemoryProperties memoryProperties;
+        vkGetPhysicalDeviceMemoryProperties(devices[i], &memoryProperties);
+
+        VkDeviceSize vramSize = 0;
+        for (uint32_t j = 0; j < memoryProperties.memoryHeapCount; j++) {
+            if (memoryProperties.memoryHeaps[j].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+                vramSize = std::max(vramSize, memoryProperties.memoryHeaps[j].size);
+        }
+
+        result.push_back({
+            .id = i,
+            .name = properties.deviceName,
+            .vramSizeMB = static_cast<uint64_t>(vramSize / (1024 * 1024)),
+            .isDiscrete = (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        });
+    }
+
+    return result;
+}
+
 void VulkanGraphicsAPI::waitIdle() const {
-    if (m_device) vkDeviceWaitIdle(m_device->getLogicalDevice());
+    VkDevice device = m_device->getLogicalDevice();
+    if (device != VK_NULL_HANDLE) vkDeviceWaitIdle(device);
 }
 
 void VulkanGraphicsAPI::setProjectionMatrix(const glm::mat4& proj) {

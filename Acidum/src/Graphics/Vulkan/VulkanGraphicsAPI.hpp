@@ -21,7 +21,8 @@ public:
     VulkanGraphicsAPI(Window* window);
     ~VulkanGraphicsAPI() override;
 
-    void initialize() override;
+    void initialize(const GraphicsConfig& config) override;
+    std::vector<GPUAdapterInfo> enumerateAvailableAdapters() override;
 
     std::shared_ptr<ITexture2D> createTexture2D(const void* data, uint32_t width, uint32_t height, bool isSRGB=true) override;
 

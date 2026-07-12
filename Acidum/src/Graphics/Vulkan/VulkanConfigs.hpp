@@ -1,11 +1,11 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
-#include "glm/glm.hpp" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
 
+#include "Acidum/Graphics/GraphicsConfig.hpp"
 #include "Acidum/Core/Base/Consts.hpp"
 
 namespace Acidum {
@@ -59,14 +59,14 @@ struct DeviceConfig {
     std::vector<const char*> deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
-
-    VkPhysicalDeviceFeatures requiredFeatures{};
+    VkPhysicalDeviceFeatures requiredFeatures {};
     
-    bool preferDiscreteGPU = true;
+    GPUPreference gpuPreference = GPUPreference::HighPerformance;
+    std::string preferredDeviceName = "";
 };
 
 struct RendererConfig {
-    glm::vec4 clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+    glm::vec4 clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
     SwapChainConfig swapChainConfig;
     PipelineConfig pipelineConfig;
 };
