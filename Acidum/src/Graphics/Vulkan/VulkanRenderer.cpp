@@ -48,7 +48,25 @@ VulkanRenderer::~VulkanRenderer() {
 }
 
 void VulkanRenderer::submitMesh(VulkanMesh* mesh, const glm::mat4& modelMatrix) {
-    if (mesh) m_renderQueue.push_back({mesh, modelMatrix});
+    if (!mesh) {
+        VK_WARN("Cannot submit empty mesh!");
+        return;
+    }
+
+    auto material = mesh->getMaterial();
+    bool blend = material ? material->config.enableBlending : false;
+
+    uint64_t matId = reinterpret_cast<uint64_t>(material) & 0xFFFF;
+
+    glm::vec3 pos = glm::vec3(modelMatrix[3]);
+    float distanceSquare = glm::dot(pos - m_cameraPosition, pos - m_cameraPosition);
+
+    uint32_t depthInt = static_cast<uint32_t>(std::min(distanceSquare, 100000.0f) * 100.0f);
+    if (blend) depthInt = 0xFFFFFF - depthInt;
+
+    uint64_t key = (static_cast<uint64_t>(blend) << 63) | (matId << 32) | depthInt;
+
+    m_renderQueue.push_back({ mesh, modelMatrix, key });
 }
 
 void VulkanRenderer::drawFrame() {
@@ -238,26 +256,8 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     ubo.lightDir = m_lightDirection;
     updateUniformBuffer(m_currentFrame, ubo);
 
-    std::sort(m_renderQueue.begin(), m_renderQueue.end(), [this](const RenderCommand& a, const RenderCommand& b) {
-        auto matA = a.mesh ? a.mesh->getMaterial() : nullptr;
-        auto matB = b.mesh ? b.mesh->getMaterial() : nullptr;
-
-        if (!matA || !matB) return matA < matB;
-
-        bool blendA = matA->config.enableBlending;
-        bool blendB = matB->config.enableBlending;
-
-        if (blendA != blendB) return blendA < blendB;
-
-        glm::vec3 posA = glm::vec3(a.modelMatrix[3]);
-        glm::vec3 posB = glm::vec3(b.modelMatrix[3]);
-        float distanceSquareA = glm::dot(posA - m_cameraPosition, posA - m_cameraPosition);
-        float distanceSquareB = glm::dot(posB - m_cameraPosition, posB - m_cameraPosition);
-
-        if (blendA && blendB) return distanceSquareA > distanceSquareB;
-
-        if (matA != matB) return matA < matB;
-        return distanceSquareA < distanceSquareB;
+    std::sort(m_renderQueue.begin(), m_renderQueue.end(), [](const RenderCommand& a, const RenderCommand& b) {
+        return a.sortKey < b.sortKey;
     });
 
     VulkanPipeline* currentPipeline = nullptr;

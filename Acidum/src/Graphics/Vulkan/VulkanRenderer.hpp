@@ -27,6 +27,7 @@ class VulkanDescriptorManager;
 struct RenderCommand {
     VulkanMesh* mesh;
     glm::mat4 modelMatrix;
+    uint64_t sortKey = 0;
 };
 
 class VulkanRenderer {
